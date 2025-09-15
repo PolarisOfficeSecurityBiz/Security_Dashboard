@@ -40,9 +40,9 @@ public class HomeController {
         return "admin/overview";
     }
 
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard";
+    @GetMapping("/admin/customers")
+    public String adminCustomers() {
+        return "admin/customers";
     }
 
     @GetMapping("/customer/dashboard")
