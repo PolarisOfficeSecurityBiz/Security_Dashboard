@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <title>Admin Overview</title>
+</head>
+<body>
+  <!-- ✅ 레이아웃의 layout:fragment="content" 를 채움 -->
+  <div layout:fragment="content">
+    <h1>관리자 Overview</h1>
+    <p th:text="'안녕하세요, ' + ${#authentication.principal.username} + '님'"></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${title} ?: 'Admin'">Admin</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/admin_nav.css}">
+</head>
+<body class="admin-body">
+
+  <!-- ✅ 네비 fragment 포함 -->
+  <div th:replace="fragments/admin_nav :: nav"></div>
+
+  <!-- 페이지별 본문 -->
+  <main class="admin-main" layout:fragment="content">
+    <!-- 자식 템플릿이 이 영역을 채웁니다 -->
+  </main>
+</body>
+</html>
