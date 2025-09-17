@@ -9,6 +9,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+
 
 @Configuration
 @EnableWebSecurity
@@ -52,7 +58,17 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        String idForEncode = "bcrypt";
+        Map<String, PasswordEncoder> encoders = new HashMap<>();
+        encoders.put("bcrypt", new BCryptPasswordEncoder());
+        encoders.put("noop", NoOpPasswordEncoder.getInstance()); // 혹시 테스트용 평문 계정 쓰면
+
+        DelegatingPasswordEncoder delegating =
+                new DelegatingPasswordEncoder(idForEncode, encoders);
+
+        // ★ 핵심: DB에 {id} 접두사가 없는 레거시 해시를 BCrypt로 매칭 허용
+        delegating.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
+        return delegating;
     }
 
     @Bean

@@ -40,10 +40,6 @@ public class HomeController {
         return "admin/overview";
     }
 
-    @GetMapping("/admin/customers")
-    public String adminCustomers() {
-        return "admin/customers";
-    }
 
     @GetMapping("/customer/dashboard")
     public String customerDashboard() {
