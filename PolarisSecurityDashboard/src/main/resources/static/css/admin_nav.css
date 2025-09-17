@@ -1,0 +1,42 @@
+/* 네비게이션 컨테이너 */
+.admin-nav {
+  background:#0f172a;
+  color:#fff;
+  padding:20px;
+  height:100vh;
+  position:sticky;
+  top:0;
+  display:flex;
+  flex-direction:column;
+}
+
+/* 브랜드 */
+.admin-nav .brand {
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:24px;
+  color:#fff;
+  letter-spacing:.3px;
+}
+
+/* 메뉴 리스트 */
+.admin-nav ul {
+  list-style:none; padding:0; margin:0;
+}
+.admin-nav ul + ul { margin-top:auto; } /* 하단 영역(로그아웃) */
+
+/* 항목 */
+.admin-nav li { margin-bottom:10px; }
+
+/* 링크 */
+.admin-nav a {
+  display:block;
+  padding:10px 12px;
+  border-radius:10px;
+  color:#e2e8f0;
+  text-decoration:none;
+  font-weight:600;
+  transition:background .2s, color .2s;
+}
+.admin-nav a:hover { background:rgba(255,255,255,.08); color:#fff; }
+.admin-nav a.active { background:#2563eb; color:#fff; }
