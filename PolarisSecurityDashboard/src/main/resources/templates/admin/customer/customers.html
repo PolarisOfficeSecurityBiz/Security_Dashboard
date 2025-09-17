@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>고객사 관리</title>
+
+  <!-- 페이지 전용 CSS -->
+  <link rel="stylesheet" th:href="@{/css/customers.css}" href="/css/customers.css"/>
+</head>
+<body class="admin-body">
+
+  <!-- 고정 네비게이션 (좌측) -->
+  <nav class="admin-nav" th:replace="fragments/admin_nav :: nav"></nav>
+
+  <!-- 오른쪽 콘텐츠 -->
+  <main class="admin-main">
+    <div class="customers-toolbar">
+      <h2>고객사 목록</h2>
+      <button id="btnOpenCreateModal" type="button" class="btn-primary">고객사 추가</button>
+    </div>
+
+    <section class="card">
+      <table class="customers-table">
+        <thead>
+        <tr>
+          <th style="width: 28%">고객사ID</th>
+          <th style="width: 28%">고객사명</th>
+          <th style="width: 24%">연결사</th>
+          <th style="width: 20%">생성일</th>
+        </tr>
+        </thead>
+		<tbody>
+		  <tr class="row-link"
+		      th:each="c : ${customers}"
+		      th:attr="data-href=@{|/admin/customers/${c.customerId}|}">
+		    <td th:text="${c.customerId}">CID</td>
+		    <td th:text="${c.customerName}">이름</td>
+		    <td th:text="${c.connectedCompany}">연결사</td>
+		    <td th:text="${c.createAt}">2025-01-01</td>
+		  </tr>
+		
+		  <tr th:if="${#lists.isEmpty(customers)}">
+		    <td colspan="4" class="empty">등록된 고객사가 없습니다.</td>
+		  </tr>
+		</tbody>
+
+      </table>
+    </section>
+  </main>
+
+  <!-- 추가 모달 -->
+  <div id="createCustomerModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="createCustomerTitle">
+      <div class="modal-header">
+        <h3 id="createCustomerTitle">고객사 추가</h3>
+        <button type="button" id="btnCloseCreateModal" class="icon-btn" aria-label="닫기">✕</button>
+      </div>
+
+      <form th:action="@{/admin/customers}" method="post" class="modal-body">
+        <!-- CSRF (CSRF 사용 시에만 렌더) -->
+        <input type="hidden" name="_csrf" th:value="${_csrf?.token}" th:if="${_csrf != null}"/>
+
+        <div class="form-row">
+          <label for="customerName">고객사명 <span class="req">*</span></label>
+          <input id="customerName" name="customerName" type="text" required placeholder="예) 폴라리스 오피스"/>
+        </div>
+
+        <div class="form-row">
+          <label for="connectedCompany">연결사(선택)</label>
+          <select id="connectedCompany" name="connectedCompany">
+            <option value="">-- 선택 없음 --</option>
+            <option th:each="cc : ${connectedCompanies}"
+                    th:value="${cc.customerId}"
+                    th:text="${cc.customerName}">
+              리셀러A
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" id="btnCancelCreate">취소</button>
+          <button type="submit" class="btn-primary">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 페이지 전용 JS -->
+  <script defer th:src="@{/js/customers.js}" src="/js/customers.js"></script>
+</body>
+</html>
