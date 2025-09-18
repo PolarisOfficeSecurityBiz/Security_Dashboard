@@ -1,0 +1,123 @@
+/* 페이지 컨테이너 */
+.directad {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+/* 헤더 */
+.directad .page-header .title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.directad .page-header .muted {
+  color: #667085;
+  font-size: 13px;
+}
+
+/* 툴바 */
+.directad .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+}
+.directad .toolbar .left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.directad .toolbar input[type="search"] {
+  width: 280px;
+  padding: 8px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+}
+.directad .toolbar select,
+.directad .toolbar button {
+  padding: 8px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.directad .toolbar #refreshBtn {
+  background: #0ea5e9;
+  color: #fff;
+  border-color: #0ea5e9;
+}
+
+/* 테이블 */
+.directad .ad-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.directad .ad-table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: #6b7280;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.directad .ad-table tbody td {
+  padding: 10px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.directad .ad-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* 컬러 표시 */
+.directad .color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.directad .color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+}
+
+/* 이미지 썸네일 */
+.directad .thumb {
+  width: 54px;          /* 작게 */
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  object-fit: cover;
+  background: #f3f4f6;
+  display: block;
+}
+
+/* 상태 표시 */
+.directad .loading,
+.directad .empty,
+.directad .error {
+  margin: 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+.directad .error { color: #ef4444; }
+
+/* 링크 공통 */
+.directad .link,
+.directad .img-link {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+.directad .link:hover,
+.directad .img-link:hover {
+  text-decoration: underline;
+}
