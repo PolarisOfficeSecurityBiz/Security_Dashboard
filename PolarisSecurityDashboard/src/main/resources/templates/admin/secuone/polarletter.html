@@ -53,6 +53,68 @@
       <div id="error" class="error" hidden>불러오기 실패 — 콘솔을 확인하세요.</div>
       <div id="loading" class="loading" hidden>불러오는 중…</div>
     </section>
+
+    <!-- === Modal === -->
+    <div id="letter-modal-wrap" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal">
+        <header>
+          <div class="title">레터 상세</div>
+          <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.75 6.75l10.5 10.5M17.25 6.75L6.75 17.25"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+        <form id="letter-form">
+          <div class="body">
+            <div class="row">
+              <label for="f-id">ID</label>
+              <input id="f-id" type="text" readonly>
+            </div>
+            <div class="row">
+              <label for="f-title">제목</label>
+              <input id="f-title" type="text">
+            </div>
+            <div class="row">
+              <label for="f-author">작성자</label>
+              <input id="f-author" type="text">
+            </div>
+            <div class="row">
+              <label for="f-date">게시일</label>
+              <input id="f-date" type="text" placeholder="YYYY-MM-DD">
+            </div>
+            <div class="row">
+              <label for="f-url">URL</label>
+              <input id="f-url" type="url">
+            </div>
+            <div class="row">
+              <label for="f-thumbnail">썸네일</label>
+              <div class="thumb-wrap">
+                <img id="f-thumb-preview" alt="">
+                <input id="f-thumbnail" type="url" placeholder="https://...">
+              </div>
+            </div>
+            <div class="row">
+              <label for="f-content">본문</label>
+              <textarea id="f-content"></textarea>
+            </div>
+          </div>
+          <footer>
+            <div>
+              <button type="button" class="btn danger" id="deleteBtn">삭제</button>
+            </div>
+            <div>
+              <button type="button" class="btn" id="editBtn">수정</button>
+              <button type="submit" class="btn primary hidden" id="saveBtn">저장</button>
+              <button type="button" class="btn ghost hidden" id="cancelBtn">취소</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </div>
+    <!-- /Modal -->
+
   </main>
 </div>
 </body>

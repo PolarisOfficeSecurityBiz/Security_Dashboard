@@ -18,7 +18,7 @@ public class PolarLetterDao {
     private final Firestore firestore;
     private static final String COL = "polarLetter";
 
-    /** ApiFuture 공통 대기 래퍼 */
+    /** ApiFuture 공통 대기 */
     private static <T> T await(ApiFuture<T> f) {
         try {
             return f.get();
@@ -37,7 +37,7 @@ public class PolarLetterDao {
         return n;
     }
 
-    /** 목록 – create_time DESC (모든 문서에 있는 필드로 정렬) */
+    /** 목록 – create_time DESC */
     public List<PolarLetter> findAll(int size, String q) {
         Query query = firestore.collection(COL)
                 .orderBy("create_time", Query.Direction.DESCENDING);
@@ -46,7 +46,7 @@ public class PolarLetterDao {
         List<QueryDocumentSnapshot> docs = await(query.get()).getDocuments();
         List<PolarLetter> rows = docs.stream().map(this::map).toList();
 
-        // 간단한 서버측 필터(제목/작성자/URL/본문 포함검색, 대소문자 무시)
+        // 서버측 필터
         if (q != null && !q.isBlank()) {
             String needle = q.toLowerCase();
             return rows.stream().filter(n ->
@@ -65,31 +65,41 @@ public class PolarLetterDao {
         return snap.exists() ? Optional.of(map(snap)) : Optional.empty();
     }
 
-    /** (옵션) 생성/수정/삭제 – 필요 시 사용 */
-    public String create(PolarLetter n) {
+    /** 생성 */
+    public PolarLetter create(PolarLetter n) {
         if (n.getUpdatedAt() == null) n.setUpdatedAt(Instant.now().toString());
         DocumentReference ref = firestore.collection(COL).document();
+        n.setId(ref.getId());
         await(ref.set(n));
-        return ref.getId();
+        return n;
     }
 
+    /** 수정 */
     public PolarLetter update(String id, PolarLetter patch) {
         DocumentReference ref = firestore.collection(COL).document(id);
         PolarLetter cur = findById(id).orElseThrow(() -> new IllegalArgumentException("PolarLetter not found: " + id));
 
-        if (patch.getTitle() != null)     cur.setTitle(patch.getTitle());
-        if (patch.getAuthor() != null)    cur.setAuthor(patch.getAuthor());
-        if (patch.getContent() != null)   cur.setContent(patch.getContent());
-        if (patch.getThumbnail() != null) cur.setThumbnail(patch.getThumbnail());
-        if (patch.getUrl() != null)       cur.setUrl(patch.getUrl());
-        if (patch.getCreateTime() != null)cur.setCreateTime(patch.getCreateTime());
+        if (patch.getTitle() != null)      cur.setTitle(patch.getTitle());
+        if (patch.getAuthor() != null)     cur.setAuthor(patch.getAuthor());
+        if (patch.getContent() != null)    cur.setContent(patch.getContent());
+        if (patch.getThumbnail() != null)  cur.setThumbnail(patch.getThumbnail());
+        if (patch.getUrl() != null)        cur.setUrl(patch.getUrl());
+        if (patch.getCreateTime() != null) cur.setCreateTime(patch.getCreateTime());
         cur.setUpdatedAt(Instant.now().toString());
 
         await(ref.set(cur, SetOptions.merge()));
         return cur;
     }
 
+    /** 삭제 */
     public void delete(String id) {
         await(firestore.collection(COL).document(id).delete());
+    }
+
+    /** 전체 개수 */
+    public int count() {
+        CollectionReference col = firestore.collection(COL);
+        List<QueryDocumentSnapshot> docs = await(col.get()).getDocuments();
+        return docs.size();
     }
 }
