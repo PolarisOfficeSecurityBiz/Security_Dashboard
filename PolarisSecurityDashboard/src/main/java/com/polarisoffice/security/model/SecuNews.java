@@ -13,4 +13,5 @@ public class SecuNews {
 	private String thumbnail;
 	private String date;
 	private String updateAt;
+	
 }

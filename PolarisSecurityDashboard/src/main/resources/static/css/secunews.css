@@ -1,0 +1,34 @@
+.news-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.news-table th, .news-table td {
+  border-bottom: 1px solid #eef0f3;
+  padding: 10px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.news-table thead th {
+  background: #f7f9fb;
+  color: #556;
+  font-weight: 600;
+}
+
+.thumb {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.title-cell {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.link a { color: #2563eb; text-decoration: none; }
+.link a:hover { text-decoration: underline; }
