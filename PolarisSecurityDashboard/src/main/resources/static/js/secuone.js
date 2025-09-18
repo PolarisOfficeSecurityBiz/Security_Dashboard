@@ -1,5 +1,4 @@
 (function () {
-  // 오늘 날짜 텍스트 세팅
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
@@ -10,8 +9,9 @@
   // KPI 업데이트 헬퍼
   function setText(id, val) {
     const el = document.getElementById(id);
-    if (el) el.textContent = val;
+    if (el) el.textContent = val; // count 값을 여기서 설정
   }
+
   function setDelta(id, val) {
     const el = document.getElementById(id);
     if (el) el.textContent = val >= 0 ? `+${val} 신규` : `${val} 감소`;
@@ -36,38 +36,40 @@
     });
   }
 
-  // ===== 데모 데이터 (API 연동 전 자리표시) =====
-  const demoKpis = { notice: 18, letter: 9, news: 27, ad: 6 };
-  setText("noticeCount", demoKpis.notice);
-  setText("letterCount", demoKpis.letter);
-  setText("newsCount", demoKpis.news);
-  setText("adCount", demoKpis.ad);
-  setDelta("noticeDelta", 2);
-  setDelta("letterDelta", 1);
-  setDelta("newsDelta", 4);
-  setDelta("adDelta", 0);
+  // API에서 실제 데이터 가져오기
+  async function fetchOverviewData() {
+    try {
+      const response = await fetch('/api/v1/overview');
+      const data = await response.json();
 
-  renderList("noticeList", [
-    { title: "시스템 점검 안내", subtitle: "2025-09-15 · 운영팀", href: "/notice" },
-    { title: "정책 변경 안내", subtitle: "2025-09-13 · 운영팀", href: "/notice" },
-  ]);
-  renderList("letterList", [
-    { title: "보안 이슈 브리핑", subtitle: "2025-09-12 · 콘텐츠팀", href: "/polarletter" },
-  ]);
-  renderList("newsList", [
-    { title: "취약점 패치 릴리스", subtitle: "2025-09-10 · 외부", href: "/secunews" },
-  ]);
-  renderList("adList", [
-    { title: "BANNER · Polaris Office", subtitle: "2025-09-14 · 조회 123 · 클릭 12", href: "/directad" },
-  ]);
+      // 응답 데이터 출력하여 확인
+      console.log("API Response:", data); // 응답 데이터 확인
 
-  // ===== 실제 연동 시 예시 =====
-  // fetch('/api/v1/overview')
-  //   .then(r => r.json())
-  //   .then(data => {
-  //     setText('noticeCount', data.notice.count);
-  //     setDelta('noticeDelta', data.notice.delta);
-  //     renderList('noticeList', data.notice.items);
-  //     // ... 나머지 섹션 동일
-  //   });
+      // KPI 값 세팅
+      setText("noticeCount", data.notice.count);  // count 값이 잘 들어오는지 확인
+      setText("letterCount", data.letter.count);
+      setText("newsCount", data.news.count);
+      setText("adCount", data.ad.count);
+
+      // delta 값 세팅
+      setDelta("noticeDelta", data.notice.delta);
+      setDelta("letterDelta", data.letter.delta);
+      setDelta("newsDelta", data.news.delta);
+      setDelta("adDelta", data.ad.delta);
+
+      // 리스트 렌더링
+      renderList("noticeList", data.notice.items);
+      renderList("letterList", data.letter.items);
+      renderList("newsList", data.news.items);
+      renderList("adList", data.ad.items);
+
+    } catch (error) {
+      console.error('Error fetching overview data:', error);
+    }
+  }
+
+
+  // 페이지 로드 시 API 데이터 불러오기
+  fetchOverviewData();
+
 })();
