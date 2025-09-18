@@ -1,22 +1,20 @@
+/* === Table === */
 .news-table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
 }
-
 .news-table th, .news-table td {
   border-bottom: 1px solid #eef0f3;
   padding: 10px 12px;
   font-size: 14px;
   vertical-align: middle;
 }
-
 .news-table thead th {
   background: #f7f9fb;
   color: #556;
   font-weight: 600;
 }
-
 .thumb {
   width: 64px;
   height: 40px;
@@ -24,11 +22,159 @@
   border-radius: 6px;
   border: 1px solid #e5e7eb;
 }
-
 .title-cell {
   font-weight: 600;
   color: #1f2937;
 }
-
 .link a { color: #2563eb; text-decoration: none; }
 .link a:hover { text-decoration: underline; }
+
+/* === 공통 버튼/유틸 === */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: #2563eb; border-color: #1d4ed8; color: #fff; }
+.btn.danger { background: #ef4444; border-color: #dc2626; color: #fff; }
+.btn.ghost { background: #f9fafb; }
+.hidden { display: none !important; }
+
+/* === 상태 === */
+.empty, .error, .loading { padding: 16px; color: #444; }
+.error { color: #b91c1c; }
+
+/* === Modal === */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  width: 640px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.modal header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 16px;
+}
+.modal header .title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+.modal .body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal .row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr); /* ← 핵심 */
+  align-items: center;
+  gap: 12px;
+}
+/* 2) 두 번째 셀 자체도 최소폭 0으로 */
+.modal .row > :nth-child(2) {
+  min-width: 0; /* ← 오버플로 방지 */
+}
+
+.modal .row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-align: right;
+}
+
+/* 인풋/텍스트영역 */
+.modal input[type="text"],
+.modal input[type="url"],
+.modal input[type="date"],
+.modal textarea {
+  box-sizing: border-box;  /* 패딩 포함 폭 계산 */
+  min-width: 0;            /* grid/flex에서 줄어들도록 */
+  overflow-x: auto;        /* 긴 텍스트는 가로 스크롤 */
+  white-space: nowrap;     /* 한 줄 유지 (원하면 제거 가능) */
+}
+/* (선택) WebKit에서 긴 텍스트와 clear 버튼 겹침 방지 */
+.modal input[type="text"],
+.modal input[type="url"] {
+  padding-right: 12px;     /* 필요시 28px 정도로 늘려도 됨 */
+}
+/* 썸네일 */
+.modal .thumb-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal .thumb-wrap img {
+  width: 96px;
+  height: 60px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+.modal .thumb-wrap input[type="url"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* footer */
+.modal footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+.modal footer .btn {
+  min-width: 70px;
+  justify-content: center;
+}
+
+/* 버튼 강조 */
+.btn.danger {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+}
+.btn.primary {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+/* 닫기 아이콘 버튼 */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.icon-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}

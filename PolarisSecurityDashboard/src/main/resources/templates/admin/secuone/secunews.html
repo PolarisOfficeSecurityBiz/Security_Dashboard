@@ -17,17 +17,16 @@
     <header class="page-head">
       <div>
         <div class="title">시큐뉴스 관리</div>
-        <div class="muted">Firestore(secuNews)에서 뉴스를 조회합니다.</div>
       </div>
       <nav class="quick">
-        <a class="btn" th:href="@{/admin/secuone}">개요로</a>
+        <a class="btn" th:href="@{/admin/secuone}">뒤로가기</a>
       </nav>
     </header>
 
     <section class="toolbar">
       <div class="left">
         <input id="q" type="search" placeholder="제목/카테고리 검색…">
-        <button id="refreshBtn" type="button">새로고침</button>
+        <button id="refreshBtn" type="button" class="btn">새로고침</button>
       </div>
       <div class="right">
         <span id="countText">0건</span>
@@ -54,6 +53,79 @@
       <div id="error" class="error" hidden>불러오기 실패 — 콘솔을 확인하세요.</div>
       <div id="loading" class="loading" hidden>불러오는 중…</div>
     </section>
+
+    <!-- === Modal === -->
+    <div id="news-modal-wrap" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="news-modal-title">
+      <div class="modal" id="news-modal">
+        <header>
+          <div class="title" id="news-modal-title">뉴스 상세</div>
+          <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="닫기">
+		  <!-- X 아이콘 (SVG) -->
+		  <svg viewBox="0 0 24 24" aria-hidden="true">
+		    <path d="M6.75 6.75l10.5 10.5M17.25 6.75L6.75 17.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+		  </svg>
+		</button>
+        </header>
+
+        <form id="news-form">
+          <div class="body">
+            <div class="row">
+              <label for="f-id">ID</label>
+              <input id="f-id" type="text" readonly />
+            </div>
+
+            <div class="row">
+              <label for="f-title">제목</label>
+              <input id="f-title" type="text" placeholder="제목" />
+            </div>
+
+            <div class="row">
+              <label for="f-category">카테고리</label>
+              <input id="f-category" type="text" placeholder="카테고리" />
+            </div>
+
+            <div class="row">
+              <label for="f-date">게시일</label>
+              <input id="f-date" type="text" placeholder="YYYY-MM-DD 또는 ISO" />
+            </div>
+
+            <div class="row">
+              <label for="f-url">링크(URL)</label>
+              <input id="f-url" type="url" placeholder="https://..." />
+            </div>
+
+            <div class="row">
+              <label for="f-thumbnail">썸네일</label>
+              <div class="thumb-wrap">
+                <img id="f-thumb-preview" alt="thumb preview" />
+                <input id="f-thumbnail" type="url" placeholder="https://.../thumb.jpg" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label for="f-updated">수정일</label>
+              <div>
+                <input id="f-updated" type="text" readonly />
+                <div class="readonly-note">서버에서 관리됩니다.</div>
+              </div>
+            </div>
+          </div>
+
+          <footer>
+            <div>
+              <button type="button" class="btn danger" id="deleteBtn">삭제</button>
+            </div>
+            <div>
+              <button type="button" class="btn" id="editBtn">수정</button>
+              <button type="submit" class="btn primary hidden" id="saveBtn">저장</button>
+              <button type="button" class="btn ghost hidden" id="cancelBtn">취소</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </div>
+    <!-- /Modal -->
+
   </main>
 </div>
 </body>

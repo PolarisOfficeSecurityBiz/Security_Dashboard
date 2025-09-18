@@ -1,13 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/admin_layout}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin_layout}">
 <head>
   <meta charset="UTF-8" />
   <title>직광고 관리 · SecuONE</title>
 
-  <!-- 정적 리소스 경로는 환경에 맞게 조정 -->
   <link rel="stylesheet" href="/css/directad.css" th:href="@{/css/directad.css}">
   <script defer src="/js/directad.js" th:src="@{/js/directad.js}"></script>
 </head>
@@ -40,18 +36,18 @@
     <section class="table-wrap" aria-label="직광고 목록">
       <table class="ad-table">
         <thead>
-        <tr>
-          <th style="width: 90px;">ID</th>
-          <th style="width: 110px;">유형</th>
-          <th>광고주</th>
-          <th style="width: 110px;">배경</th>
-          <th>이미지</th>
-          <th>링크</th>
-          <th style="width: 90px;">노출</th>
-          <th style="width: 90px;">클릭</th>
-          <th style="width: 160px;">게시일</th>
-          <th style="width: 160px;">수정일</th>
-        </tr>
+          <tr>
+            <th style="width:90px;">ID</th>
+            <th style="width:110px;">유형</th>
+            <th>광고주</th>
+            <th style="width:110px;">배경</th>
+            <th>이미지</th>
+            <th>링크</th>
+            <th style="width:90px;">노출</th>
+            <th style="width:90px;">클릭</th>
+            <th style="width:160px;">게시일</th>
+            <th style="width:160px;">수정일</th>
+          </tr>
         </thead>
         <tbody id="ad-tbody"><!-- JS가 채움 --></tbody>
       </table>
@@ -61,6 +57,37 @@
       <div id="loading" class="loading" hidden>불러오는 중…</div>
     </section>
   </main>
+</div>
+
+<!-- 광고 수정/조회 모달 -->
+<div id="adModal" class="modal" aria-modal="true" role="dialog" aria-labelledby="adModalTitle" hidden>
+  <div class="modal-content" tabindex="-1" id="modalContent">
+    <button class="close-btn" id="closeModal" aria-label="닫기">×</button>
+    <h2 id="adModalTitle">광고 조회 및 수정</h2>
+
+    <form id="adEditForm">
+      <label for="adType">유형:</label>
+      <input type="text" id="adType" name="adType" disabled required /><br>
+
+      <label for="advertiserName">광고주:</label>
+      <input type="text" id="advertiserName" name="advertiserName" disabled required /><br>
+
+      <label for="backgroundColor">배경:</label>
+      <input type="text" id="backgroundColor" name="backgroundColor" disabled required /><br>
+
+      <label for="imageUrl">이미지 URL:</label>
+      <input type="url" id="imageUrl" name="imageUrl" disabled /><br>
+
+      <label for="targetUrl">타겟 URL:</label>
+      <input type="url" id="targetUrl" name="targetUrl" disabled /><br>
+
+      <div class="modal-buttons">
+        <button type="submit" id="saveBtn" hidden>저장</button>
+        <button type="button" id="editBtn">수정</button>
+        <button type="button" id="cancelBtn">취소</button>
+      </div>
+    </form>
+  </div>
 </div>
 </body>
 </html>
