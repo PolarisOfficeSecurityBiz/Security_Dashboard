@@ -14,15 +14,20 @@
 <body>
 <div layout:fragment="content">
   <main class="secuone" role="main">
+    <!-- ✅ 헤더 -->
     <header class="page-head">
-      <div>
-        <div class="title">폴라레터 관리</div>
+      <div class="left">
+        <button type="button" class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+          <img src="/images/back.png" alt="뒤로가기" />
+        </button>
+        <h1 class="title">폴라레터 관리</h1>
       </div>
-      <nav class="quick">
-        <a class="btn" th:href="@{/admin/secuone}">뒤로가기</a>
-      </nav>
+      <div class="actions">
+        <button id="createNewBtn" type="button" class="btn primary pill">+ 새 레터</button>
+      </div>
     </header>
 
+    <!-- 툴바 -->
     <section class="toolbar row">
       <div class="left">
         <input id="q" type="search" placeholder="제목/작성자/URL/본문 검색…" />
@@ -33,6 +38,7 @@
       </div>
     </section>
 
+    <!-- 목록 -->
     <section class="table-wrap">
       <table class="letter-table">
         <thead>
@@ -57,7 +63,7 @@
     <div id="letter-modal-wrap" class="modal-backdrop hidden" role="dialog" aria-modal="true">
       <div class="modal">
         <header>
-          <div class="title">레터 상세</div>
+          <div class="title" id="modalTitle">레터 상세</div>
           <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="닫기">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6.75 6.75l10.5 10.5M17.25 6.75L6.75 17.25"
@@ -65,28 +71,14 @@
             </svg>
           </button>
         </header>
+
         <form id="letter-form">
           <div class="body">
-            <div class="row">
-              <label for="f-id">ID</label>
-              <input id="f-id" type="text" readonly>
-            </div>
-            <div class="row">
-              <label for="f-title">제목</label>
-              <input id="f-title" type="text">
-            </div>
-            <div class="row">
-              <label for="f-author">작성자</label>
-              <input id="f-author" type="text">
-            </div>
-            <div class="row">
-              <label for="f-date">게시일</label>
-              <input id="f-date" type="text" placeholder="YYYY-MM-DD">
-            </div>
-            <div class="row">
-              <label for="f-url">URL</label>
-              <input id="f-url" type="url">
-            </div>
+            <div class="row"><label for="f-id">ID</label><input id="f-id" type="text" readonly></div>
+            <div class="row"><label for="f-title">제목</label><input id="f-title" type="text" required></div>
+            <div class="row"><label for="f-author">작성자</label><input id="f-author" type="text"></div>
+            <div class="row"><label for="f-date">게시일</label><input id="f-date" type="text" placeholder="YYYY-MM-DD"></div>
+            <div class="row"><label for="f-url">URL</label><input id="f-url" type="url" placeholder="https://..."></div>
             <div class="row">
               <label for="f-thumbnail">썸네일</label>
               <div class="thumb-wrap">
@@ -94,15 +86,11 @@
                 <input id="f-thumbnail" type="url" placeholder="https://...">
               </div>
             </div>
-            <div class="row">
-              <label for="f-content">본문</label>
-              <textarea id="f-content"></textarea>
-            </div>
+            <div class="row"><label for="f-content">본문</label><textarea id="f-content" placeholder="내용을 입력하세요."></textarea></div>
           </div>
+
           <footer>
-            <div>
-              <button type="button" class="btn danger" id="deleteBtn">삭제</button>
-            </div>
+            <div><button type="button" class="btn danger" id="deleteBtn">삭제</button></div>
             <div>
               <button type="button" class="btn" id="editBtn">수정</button>
               <button type="submit" class="btn primary hidden" id="saveBtn">저장</button>
