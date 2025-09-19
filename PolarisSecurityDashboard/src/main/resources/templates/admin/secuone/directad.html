@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin_layout}">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
 <head>
   <meta charset="UTF-8" />
   <title>직광고 관리 · SecuONE</title>
@@ -12,7 +15,6 @@
   <main class="directad" role="main">
     <header class="page-header">
       <div class="title">직광고 관리</div>
-      <div class="muted">시큐원 페이지에 노출되는 직광고를 조회합니다.</div>
     </header>
 
     <!-- 툴바 -->
@@ -57,36 +59,60 @@
       <div id="loading" class="loading" hidden>불러오는 중…</div>
     </section>
   </main>
-</div>
 
-<!-- 광고 수정/조회 모달 -->
-<div id="adModal" class="modal" aria-modal="true" role="dialog" aria-labelledby="adModalTitle" hidden>
-  <div class="modal-content" tabindex="-1" id="modalContent">
-    <button class="close-btn" id="closeModal" aria-label="닫기">×</button>
-    <h2 id="adModalTitle">광고 조회 및 수정</h2>
+  <!-- 모달 -->
+  <div id="adModal" class="modal" aria-modal="true" role="dialog" aria-labelledby="adModalTitle" hidden>
+    <div class="modal-content" tabindex="-1" id="modalContent">
+      <button class="close-btn" id="closeModal" aria-label="닫기">×</button>
 
-    <form id="adEditForm">
-      <label for="adType">유형:</label>
-      <input type="text" id="adType" name="adType" disabled required /><br>
+      <header class="modal-header">
+        <h2 id="adModalTitle">광고 조회 및 수정</h2>
+        <p class="subtitle">필드는 “수정”을 눌러 편집할 수 있어요.</p>
+      </header>
 
-      <label for="advertiserName">광고주:</label>
-      <input type="text" id="advertiserName" name="advertiserName" disabled required /><br>
+      <form id="adEditForm" class="form">
+        <div class="form-grid">
+          <label for="adId">ID</label>
+          <input type="text" id="adId" name="adId" disabled />
 
-      <label for="backgroundColor">배경:</label>
-      <input type="text" id="backgroundColor" name="backgroundColor" disabled required /><br>
+          <label for="adType">유형</label>
+          <input type="text" id="adType" name="adType" disabled required />
 
-      <label for="imageUrl">이미지 URL:</label>
-      <input type="url" id="imageUrl" name="imageUrl" disabled /><br>
+          <label for="advertiserName">광고주</label>
+          <input type="text" id="advertiserName" name="advertiserName" disabled required />
 
-      <label for="targetUrl">타겟 URL:</label>
-      <input type="url" id="targetUrl" name="targetUrl" disabled /><br>
+          <label for="backgroundColor">배경</label>
+          <div class="color-field">
+            <span id="bgDot" class="color-dot lg"></span>
+            <input type="text" id="backgroundColor" name="backgroundColor" disabled required />
+          </div>
 
-      <div class="modal-buttons">
-        <button type="submit" id="saveBtn" hidden>저장</button>
-        <button type="button" id="editBtn">수정</button>
-        <button type="button" id="cancelBtn">취소</button>
-      </div>
-    </form>
+          <label for="imageUrl">이미지 URL</label>
+          <div class="with-action">
+            <input type="url" id="imageUrl" name="imageUrl" disabled />
+            <a class="btn ghost sm" id="openImg" target="_blank" rel="noopener">열기</a>
+          </div>
+
+          <label for="targetUrl">타겟 URL</label>
+          <div class="with-action">
+            <input type="url" id="targetUrl" name="targetUrl" disabled />
+            <a class="btn ghost sm" id="openLink" target="_blank" rel="noopener">열기</a>
+          </div>
+        </div>
+
+        <div class="preview">
+          <img id="imgPreview" alt="이미지 미리보기" />
+        </div>
+
+        <div class="modal-buttons right">
+          <button type="button" id="deleteBtn" class="btn danger">삭제</button>
+          <span class="flex-1"></span>
+          <button type="submit" id="saveBtn" class="btn primary" hidden>저장</button>
+          <button type="button" id="editBtn" class="btn">수정</button>
+          <button type="button" id="cancelBtn" class="btn ghost">취소</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 </body>

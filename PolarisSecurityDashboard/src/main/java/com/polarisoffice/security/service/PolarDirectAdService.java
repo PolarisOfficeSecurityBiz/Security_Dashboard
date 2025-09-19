@@ -30,10 +30,10 @@ public class PolarDirectAdService {
         return Optional.ofNullable(dao.findById(id));
     }
 
-    /** 생성 (동기) */
+    /** 생성 */
     public PolarDirectAd create(PolarDirectAdCreateRequest req) {
         PolarDirectAd ad = PolarDirectAd.builder()
-                .adType(req.getAdType())                 
+                .adType(req.getAdType())   // ← 변환 없이 그대로
                 .advertiserName(req.getAdvertiserName())
                 .backgroundColor(req.getBackgroundColor())
                 .imageUrl(req.getImageUrl())
@@ -41,27 +41,24 @@ public class PolarDirectAdService {
                 .clickCount(0L)
                 .viewCount(0L)
                 .publishedDate(Timestamp.now())
-                .updateAt(Timestamp.now())
+                .updatedAt(Timestamp.now())
                 .build();
 
-        String id = dao.create(ad);  // 저장 후 생성된 문서 ID 반환
+        String id = dao.create(ad);
         ad.setId(id);
         return ad;
     }
 
-    /** 부분 수정 (동기) */
+    /** 부분 수정 */
     public PolarDirectAd update(String id, PolarDirectAdUpdateRequest req) {
-        // patch 객체 생성
-        PolarDirectAd patch = PolarDirectAd.builder()
-                .adType(req.getAdType())
-                .advertiserName(req.getAdvertiserName())
-                .backgroundColor(req.getBackgroundColor())
-                .imageUrl(req.getImageUrl())
-                .targetUrl(req.getTargetUrl())
-                .clickCount(req.getClickCount())
-                .viewCount(req.getViewCount())
-                .build();
-
+        PolarDirectAd patch = new PolarDirectAd();
+        if (req.getAdType() != null)         patch.setAdType(req.getAdType()); // ← 그대로
+        if (req.getAdvertiserName() != null) patch.setAdvertiserName(req.getAdvertiserName());
+        if (req.getBackgroundColor() != null)patch.setBackgroundColor(req.getBackgroundColor());
+        if (req.getImageUrl() != null)       patch.setImageUrl(req.getImageUrl());
+        if (req.getTargetUrl() != null)      patch.setTargetUrl(req.getTargetUrl());
+        if (req.getClickCount() != null)     patch.setClickCount(req.getClickCount());
+        if (req.getViewCount() != null)      patch.setViewCount(req.getViewCount());
         return dao.update(id, patch);
     }
 
@@ -109,5 +106,6 @@ public class PolarDirectAdService {
             throw new RuntimeException("Failed to fetch direct ad delta", e);  // 예외를 던져서 호출자에게 알리기
         }
     }
+
 
 }

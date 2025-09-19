@@ -33,36 +33,75 @@
 .directad .link, .directad .img-link { color: #0ea5e9; text-decoration: none; }
 .directad .link:hover, .directad .img-link:hover { text-decoration: underline; }
 
-/* ── 모달 ── */
+/* ── Modal polish ───────────────────────────────────────────── */
 .modal {
-  display: none !important;          /* 기본은 숨김 (강조) */
-  position: fixed;
-  inset: 0;
-  z-index: 2147483646;               /* 최상단층 */
-  background: rgba(0,0,0,.5);
+  display:none !important; position:fixed; inset:0; z-index:2147483646;
+  background:rgba(15,23,42,.45); backdrop-filter:saturate(120%) blur(2px);
 }
-.modal.open { display: block !important; }  /* 클래스 붙이면 무조건 보이게 */
+.modal.open { display:block !important; }
 
 .modal .modal-content {
-  position: relative;
-  background: #fff;
-  margin: 8% auto;
-  padding: 20px;
-  width: 360px;
-  max-width: calc(100% - 32px);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.2);
-  z-index: 2147483647;               /* 오버레이보다 위 */
-}
+  position:relative; background:#fff; margin:6% auto; padding:20px 20px 16px;
+  width:min(560px, calc(100% - 24px));
+  border-radius:16px; box-shadow:0 20px 60px rgba(2,6,23,.25);
+  animation:pop .16s ease-out;
 
-.close-btn {
-  position: absolute; top: 8px; right: 10px;
-  border: 0; background: transparent;
-  font-size: 24px; line-height: 1; cursor: pointer;
+  /* ⛑ 넘침 방지 */
+  max-height:88vh;
+  display:flex; flex-direction:column;
+  overflow:hidden;
 }
+@keyframes pop { from { transform:translateY(6px) scale(.98); opacity:.6;} to{ transform:none; opacity:1;} }
 
-.modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
-.modal-buttons button { padding: 8px 12px; background: #4CAF50; color: #fff; border: 0; border-radius: 8px; cursor: pointer; }
-.modal-buttons #editBtn { background: #0ea5e9; }
-.modal-buttons #cancelBtn { background: #64748b; }
-.modal-buttons button:hover { filter: brightness(0.95); }
+.close-btn { position:absolute; top:10px; right:10px; border:0; background:transparent;
+  font-size:22px; line-height:1; cursor:pointer; color:#64748b; }
+.close-btn:hover { color:#0ea5e9; }
+
+/* Header */
+.modal-header { margin-bottom:10px; }
+.modal-header h2 { margin:0; font-size:18px; font-weight:700; }
+.modal-header .subtitle { margin:4px 0 0; color:#6b7280; font-size:12px; }
+
+/* Form (scrollable area) */
+.form { margin-top:8px; flex:1; overflow:auto; }
+.form-grid {
+  display:grid; grid-template-columns:120px 1fr; gap:10px 12px; align-items:center;
+  min-width:0; /* grid 내부 줄바꿈 허용 */
+}
+.form-grid label { font-size:12px; color:#475569; }
+.form-grid input {
+  width:100%; padding:9px 10px; border:1px solid #d0d5dd; border-radius:10px;
+  font-size:14px; background:#f8fafc; min-width:0;
+}
+.form-grid input:focus { outline:none; border-color:#0ea5e9; background:#fff; box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+.form-grid input:disabled { color:#334155; opacity:1; background:#f8fafc; }
+
+/* inline addons */
+.with-action { display:flex; gap:8px; align-items:center; min-width:0; }
+.with-action input { flex:1; min-width:0; }           /* ✅ 길-URL 대응 */
+.btn { padding:9px 12px; border-radius:10px; border:1px solid #e2e8f0; background:#fff; cursor:pointer; white-space:nowrap; }
+.btn:hover { filter:brightness(.98); }
+.btn.primary { background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
+.btn.danger  { background:#ef4444; color:#fff; border-color:#ef4444; }
+.btn.ghost   { background:#f1f5f9; color:#0f172a; border-color:#e2e8f0; }
+.btn.sm { padding:7px 10px; font-size:12px; }
+
+/* bottom buttons */
+.modal-buttons { display:flex; gap:8px; margin-top:14px; }
+.modal-buttons.right { justify-content:flex-end; }
+.flex-1 { flex:1; }
+
+/* color field + dot */
+.color-field { display:flex; align-items:center; gap:8px; min-width:0; }
+.color-dot { width:14px; height:14px; border-radius:999px; border:1px solid #e5e7eb; }
+.color-dot.lg { width:18px; height:18px; }
+
+/* preview */
+.preview { margin-top:12px; padding:10px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:12px; }
+.preview img { display:block; width:100%; max-height:180px; object-fit:contain; }
+
+/* small screens */
+@media (max-width: 480px){
+  .form-grid { grid-template-columns:1fr; }
+  .form-grid label { margin-top:6px; }
+}

@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin_layout}">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
 <head>
   <meta charset="UTF-8" />
   <title>공지사항 관리</title>
@@ -22,7 +25,7 @@
 
     <section class="toolbar">
       <div class="left">
-        <input id="q" type="search" placeholder="제목/작성자/URL/본문 검색…" />
+        <input id="q" type="search" placeholder="제목/작성자/본문/카테고리 검색…" />
         <button id="refreshBtn" type="button">새로고침</button>
       </div>
       <div class="right">
@@ -33,14 +36,14 @@
     <section class="table-wrap">
       <table class="letter-table">
         <thead>
-          <tr>
-            <th style="width: 120px;">ID</th>
-            <th style="width: 88px;">썸네일</th>
-            <th>제목</th>
-            <th style="width: 120px;">작성자</th>
-            <th style="width: 110px;">게시일</th>
-            <th style="width: 70px;">카테고리</th>
-          </tr>
+        <tr>
+          <th style="width: 120px;">ID</th>
+          <th style="width: 88px;">썸네일</th>
+          <th>제목</th>
+          <th style="width: 120px;">작성자</th>
+          <th style="width: 110px;">게시일</th>
+          <th style="width: 120px;">카테고리</th>
+        </tr>
         </thead>
         <tbody id="letter-tbody"></tbody>
       </table>
@@ -49,6 +52,81 @@
       <div id="error" class="error" hidden>불러오기 실패 — 콘솔을 확인하세요.</div>
       <div id="loading" class="loading" hidden>불러오는 중…</div>
     </section>
+
+    <!-- === Modal === -->
+    <div id="notice-modal-wrap" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="notice-modal-title">
+      <div class="modal">
+        <header>
+          <div class="title" id="notice-modal-title">공지 상세</div>
+          <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.75 6.75l10.5 10.5M17.25 6.75L6.75 17.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <form id="notice-form">
+          <div class="body">
+            <div class="row">
+              <label for="f-id">ID</label>
+              <input id="f-id" type="text" readonly>
+            </div>
+
+            <div class="row">
+              <label for="f-title">제목</label>
+              <input id="f-title" type="text">
+            </div>
+
+            <div class="row">
+              <label for="f-author">작성자</label>
+              <input id="f-author" type="text">
+            </div>
+
+            <div class="row">
+              <label for="f-date">게시일</label>
+              <input id="f-date" type="text" placeholder="YYYY-MM-DD">
+            </div>
+
+            <div class="row">
+              <label for="f-category">카테고리</label>
+              <select id="f-category">
+                <option value="">-</option>
+                <option value="EMERGENCY">보안</option>
+                <option value="EVENT">이벤트</option>
+                <option value="SERVICE_GUIDE">안내</option>
+                <option value="UPDATE">업데이트</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="f-image">썸네일 URL</label>
+              <div class="thumb-wrap">
+                <img id="f-thumb-preview" alt="">
+                <input id="f-image" type="url" placeholder="https://.../thumb.jpg">
+              </div>
+            </div>
+
+            <div class="row">
+              <label for="f-content">본문</label>
+              <textarea id="f-content"></textarea>
+            </div>
+          </div>
+
+          <footer>
+            <div>
+              <button type="button" class="btn danger" id="deleteBtn">삭제</button>
+            </div>
+            <div>
+              <button type="button" class="btn" id="editBtn">수정</button>
+              <button type="submit" class="btn primary hidden" id="saveBtn">저장</button>
+              <button type="button" class="btn ghost hidden" id="cancelBtn">취소</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </div>
+    <!-- /Modal -->
+
   </main>
 </div>
 </body>

@@ -1,128 +1,215 @@
 (() => {
-  const API = '/api/v1/polar-notices';  // API 경로 설정
+  const API = '/api/v1/polar-notices';
 
-  // HTML 요소들
-  const $q = document.getElementById('q');
-  const $btn = document.getElementById('refreshBtn');
-  const $tbody = document.getElementById('letter-tbody');
-  const $count = document.getElementById('countText');
-  const $empty = document.getElementById('empty');
-  const $error = document.getElementById('error');
-  const $loading = document.getElementById('loading');
+  const els = {
+    q: document.getElementById('q'),
+    btn: document.getElementById('refreshBtn'),
+    tbody: document.getElementById('letter-tbody'),
+    count: document.getElementById('countText'),
+    empty: document.getElementById('empty'),
+    error: document.getElementById('error'),
+    loading: document.getElementById('loading'),
+    // modal
+    modalWrap: document.getElementById('notice-modal-wrap'),
+    modalClose: document.getElementById('modalCloseBtn'),
+    form: document.getElementById('notice-form'),
+    id: document.getElementById('f-id'),
+    title: document.getElementById('f-title'),
+    author: document.getElementById('f-author'),
+    date: document.getElementById('f-date'),
+    category: document.getElementById('f-category'),
+    image: document.getElementById('f-image'),
+    thumbPrev: document.getElementById('f-thumb-preview'),
+    content: document.getElementById('f-content'),
+    edit: document.getElementById('editBtn'),
+    save: document.getElementById('saveBtn'),
+    cancel: document.getElementById('cancelBtn'),
+    del: document.getElementById('deleteBtn'),
+  };
 
-  // 공백 제거 후 검색어 포맷팅
+  let current = null;
+
   const esc = s => (s ?? '').replace(/[&<>"']/g, m => (
     { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]
   ));
 
-  // 카테고리명을 한글로 변환하는 함수
-  const convertCategory = category => {
+  const labelOf = (category) => {
     switch (category) {
-      case 'EMERGENCY':
-        return '보안';
-      case 'EVENT':
-        return '이벤트';
-      case 'SERVICE_GUIDE':
-        return '안내';
-      case 'UPDATE':
-        return '업데이트';
-      default:
-        return category;
+      case 'EMERGENCY': return '보안';
+      case 'EVENT': return '이벤트';
+      case 'SERVICE_GUIDE': return '안내';
+      case 'UPDATE': return '업데이트';
+      default: return category || '-';
     }
   };
 
-  // 카테고리에 맞는 스타일 클래스 반환
-  const getCategoryClass = category => {
-    switch (category) {
-      case 'EMERGENCY':
-        return 'category--emergency';
-      case 'EVENT':
-        return 'category--event';
-      case 'SERVICE_GUIDE':
-        return 'category--service-guide';
-      case 'UPDATE':
-        return 'category--update';
-      default:
-        return '';
-    }
-  };
-
-  // API에서 공지사항을 가져오는 함수
-  async function fetchNotices() {
+  async function fetchList(q) {
     const params = new URLSearchParams();
-    const q = $q.value.trim();
     if (q) params.set('q', q);
-
-    const url = `${API}?${params.toString()}`;  // API 요청 URL
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const res = await fetch(`${API}?${params.toString()}`, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();  // 받은 데이터를 JSON으로 파싱
+    return res.json();
+  }
+  async function fetchById(id) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
   }
 
-  // 테이블에 데이터를 렌더링하는 함수
   function render(rows) {
-    $tbody.innerHTML = '';  // 기존 테이블 내용 초기화
+    els.tbody.innerHTML = '';
     if (!rows || rows.length === 0) {
-      $empty.hidden = false;
-      $error.hidden = true;
-      $count.textContent = '0건';
-      return;
+      els.empty.hidden = false; els.error.hidden = true; els.count.textContent = '0건'; return;
     }
-    $empty.hidden = true;
-    $error.hidden = true;
+    els.empty.hidden = true; els.error.hidden = true;
 
-    const frag = document.createDocumentFragment();  // 테이블 행들을 담을 fragment 생성
-
+    const frag = document.createDocumentFragment();
     rows.forEach(n => {
-      const tr = document.createElement('tr');  // 새로운 테이블 행 생성
-
-      // 카테고리 변환
-      const categoryLabel = convertCategory(n.category);
-
+      const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><span class="row-muted" title="${esc(n.id)}">${esc(n.id)}</span></td>
-        <td>
-          ${n.imageURL ? `<img class="letter-thumb" src="${esc(n.imageURL)}" alt="">`
-                        : `<div class="letter-thumb"></div>`}
-        </td>
-        <td>
-          <div>${esc(n.title || '')}</div>
-          ${n.content ? `<div class="row-muted">${esc(n.content.slice(0, 80))}${n.content.length > 80 ? '…' : ''}</div>` : ''}
-        </td>
+        <td>${n.imageURL ? `<img src="${esc(n.imageURL)}" alt="" />` : `<div style="width:50px;height:50px;border-radius:6px;background:#eef2f7;"></div>`}</td>
+        <td><div>${esc(n.title || '')}</div>${n.content ? `<div class="row-muted">${esc(n.content.slice(0, 80))}${n.content.length > 80 ? '…' : ''}</div>` : ''}</td>
         <td>${esc(n.author || '-')}</td>
         <td>${esc(n.date || '-')}</td>
-        <td class="category">${categoryLabel}</td>  <!-- 카테고리 텍스트로 변환 -->
+        <td class="category">${esc(labelOf(n.category))}</td>
       `;
-      frag.appendChild(tr);  // 생성한 행을 fragment에 추가
+      tr.addEventListener('click', async () => {
+        try {
+          const fresh = await fetchById(n.id);
+          fillForm(fresh);
+          openModal();
+        } catch (e) {
+          console.error('[polar-notice] fetch by id failed', e);
+          alert('항목을 불러오지 못했습니다.');
+        }
+      });
+      frag.appendChild(tr);
     });
-
-    $tbody.appendChild(frag);  // fragment를 tbody에 추가
-    $count.textContent = `${rows.length}건`;  // 결과 건수 표시
+    els.tbody.appendChild(frag);
+    els.count.textContent = `${rows.length}건`;
   }
 
-  // 공지사항을 불러오는 함수
-  async function load() {
-    $loading.hidden = false;
-    $empty.hidden = true;
-    $error.hidden = true;
+  function fillForm(d) {
+    current = d;
+    els.id.value = d.id || '';
+    els.title.value = d.title || '';
+    els.author.value = d.author || '';
+    els.date.value = d.date || '';
+    els.category.value = d.category || '';
+    els.image.value = d.imageURL || '';
+    els.thumbPrev.src = d.imageURL || '';
+    els.content.value = d.content || '';
+  }
 
+  function toPatchPayload() {
+    const body = {};
+    if ((current.title ?? '')     !== els.title.value)    body.title = els.title.value;
+    if ((current.author ?? '')    !== els.author.value)   body.author = els.author.value;
+    if ((current.date ?? '')      !== els.date.value)     body.date = els.date.value;
+    if ((current.category ?? '')  !== els.category.value) body.category = els.category.value || null;
+    if ((current.imageURL ?? '')  !== els.image.value)    body.imageURL = els.image.value || null;
+    if ((current.content ?? '')   !== els.content.value)  body.content = els.content.value;
+    return body;
+  }
+
+  function setEditing(on) {
+    [els.title, els.author, els.date, els.category, els.image, els.content].forEach(i => i.disabled = !on);
+    els.edit.classList.toggle('hidden', on);
+    els.save.classList.toggle('hidden', !on);
+    els.cancel.classList.toggle('hidden', !on);
+  }
+
+  function openModal() {
+    els.modalWrap.classList.remove('hidden');
+    setEditing(false);
+  }
+  function closeModal() {
+    els.modalWrap.classList.add('hidden');
+    current = null;
+  }
+
+  async function load() {
+    els.loading.hidden = false; els.empty.hidden = true; els.error.hidden = true;
     try {
-      const rows = await fetchNotices();  // API 호출
-      render(rows);  // 데이터를 테이블에 렌더링
+      const rows = await fetchList(els.q.value.trim());
+      render(rows);
     } catch (e) {
-      console.error('[polar-notices] fetch error:', e);  // 에러 출력
-      $error.hidden = false;  // 오류 메시지 표시
+      console.error('[polar-notice] load error', e);
+      els.error.hidden = false;
     } finally {
-      $loading.hidden = true;  // 로딩 메시지 숨김
+      els.loading.hidden = true;
     }
   }
 
-  // 새로고침 버튼 클릭 시 데이터 로드
-  $btn.addEventListener('click', load);
+  /* === 이벤트 === */
+  els.btn.addEventListener('click', load);
+  els.q.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
 
-  // 검색창에서 Enter 키를 눌렀을 때 데이터 로드
-  $q.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+  els.modalClose.addEventListener('click', closeModal);
+  els.modalWrap.addEventListener('click', e => { if (e.target === els.modalWrap) closeModal(); });
 
-  // 페이지 로드 시 자동으로 데이터 로드
+  els.image.addEventListener('input', () => { els.thumbPrev.src = els.image.value || ''; });
+
+  els.edit.addEventListener('click', () => { if (current) setEditing(true); });
+
+  els.cancel.addEventListener('click', () => {
+    if (!current) return;
+    fillForm(current);
+    setEditing(false);
+  });
+
+  els.form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!current) return;
+
+    const payload = toPatchPayload();
+    if (Object.keys(payload).length === 0) {
+      alert('변경된 내용이 없습니다.');
+      setEditing(false);
+      return;
+    }
+    try {
+      els.save.disabled = true;
+      const res = await fetch(`${API}/${encodeURIComponent(current.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const updated = await res.json();
+      fillForm(updated);
+      setEditing(false);
+      await load();
+      alert('저장되었습니다.');
+    } catch (err) {
+      console.error('[polar-notice] patch failed:', err);
+      alert('저장에 실패했습니다.');
+    } finally {
+      els.save.disabled = false;
+    }
+  });
+
+  els.del.addEventListener('click', async () => {
+    if (!current) return;
+    const yes = confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+    if (!yes) return;
+
+    try {
+      els.del.disabled = true;
+      const res = await fetch(`${API}/${encodeURIComponent(current.id)}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
+      closeModal();
+      await load();
+      alert('삭제되었습니다.');
+    } catch (err) {
+      console.error('[polar-notice] delete failed:', err);
+      alert('삭제에 실패했습니다.');
+    } finally {
+      els.del.disabled = false;
+    }
+  });
+
+  /* 초기 로딩 */
   document.addEventListener('DOMContentLoaded', load);
 })();

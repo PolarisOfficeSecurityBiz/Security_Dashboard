@@ -1,45 +1,97 @@
 package com.polarisoffice.security.dao;
 
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
-import com.polarisoffice.security.controller.AdminCustomerController;
-import com.polarisoffice.security.model.PolarLetter;
 import com.polarisoffice.security.model.PolarNotice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Repository
 @RequiredArgsConstructor
 public class PolarNoticeDao {
 
     private final Firestore firestore;
-    private static final String COL = "polarNotice";  // Firestore collection 이름
+    private static final String COL = "polarNotice";  // Firestore collection
 
-    // PolarNotice 객체로 변환하는 메서드 (DocumentSnapshot -> PolarNotice)
-    private PolarNotice map(DocumentSnapshot document) {
-        PolarNotice notice = document.toObject(PolarNotice.class);  // Firestore 문서를 PolarNotice 객체로 변환
-        if (notice != null) {
-            notice.setId(document.getId());  // Firestore에서 자동으로 생성된 ID 설정
+    /* ===== 공통 유틸 ===== */
+    private static <T> T await(ApiFuture<T> f) {
+        try {
+            return f.get();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while calling Firestore", ie);
+        } catch (ExecutionException ee) {
+            Throwable cause = ee.getCause() != null ? ee.getCause() : ee;
+            throw new IllegalStateException("Firestore call failed", cause);
         }
-        return notice;
     }
 
-    // 모든 공지사항 가져오는 메서드
-    public List<PolarNotice> findAll() throws Exception {
-        // Firestore에서 모든 문서를 가져오는 쿼리
+    private PolarNotice map(DocumentSnapshot d) {
+        PolarNotice n = d.toObject(PolarNotice.class);
+        if (n != null) n.setId(d.getId());
+        return n;
+    }
+
+    /* ===== 목록 조회 (date DESC) ===== */
+    public List<PolarNotice> findAll(int size, String q) {
         Query query = firestore.collection(COL)
-            .orderBy("date", Query.Direction.DESCENDING); // 날짜순 정렬
+                .orderBy("date", Query.Direction.DESCENDING);
+        if (size > 0) query = query.limit(size);
 
-        // Firestore에서 문서 가져오기
-        List<QueryDocumentSnapshot> docs = query.get().get().getDocuments();
+        List<QueryDocumentSnapshot> docs = await(query.get()).getDocuments();
+        List<PolarNotice> rows = docs.stream().map(this::map).toList();
 
-        // 문서에서 PolarNotice 객체로 변환
-        List<PolarNotice> rows = docs.stream()
-            .map(this::map)  // map() 메서드를 통해 PolarNotice 객체로 변환
-            .collect(Collectors.toList());
+        if (q != null && !q.isBlank()) {
+            String needle = q.toLowerCase();
+            return rows.stream().filter(n ->
+                    (n.getTitle() != null && n.getTitle().toLowerCase().contains(needle)) ||
+                    (n.getAuthor() != null && n.getAuthor().toLowerCase().contains(needle)) ||
+                    (n.getContent() != null && n.getContent().toLowerCase().contains(needle)) ||
+                    (n.getCategory() != null && n.getCategory().toLowerCase().contains(needle))
+            ).toList();
+        }
+        return rows;
+    }
 
-        return rows;  // 모든 공지사항 반환
+    /* ===== 단건 조회 ===== */
+    public Optional<PolarNotice> findById(String id) {
+        DocumentSnapshot snap = await(firestore.collection(COL).document(id).get());
+        return snap.exists() ? Optional.of(map(snap)) : Optional.empty();
+    }
+
+    /* ===== 생성 ===== */
+    public PolarNotice create(PolarNotice n) {
+        if (n.getDate() == null) n.setDate(Instant.now().toString());
+        DocumentReference ref = firestore.collection(COL).document();
+        n.setId(ref.getId());
+        await(ref.set(n));
+        return n;
+    }
+
+    /* ===== 수정 (부분 병합) ===== */
+    public PolarNotice update(String id, PolarNotice patch) {
+        DocumentReference ref = firestore.collection(COL).document(id);
+        PolarNotice cur = findById(id).orElseThrow(() -> new IllegalArgumentException("PolarNotice not found: " + id));
+
+        if (patch.getTitle() != null)     cur.setTitle(patch.getTitle());
+        if (patch.getAuthor() != null)    cur.setAuthor(patch.getAuthor());
+        if (patch.getDate() != null)      cur.setDate(patch.getDate());
+        if (patch.getCategory() != null)  cur.setCategory(patch.getCategory());
+        if (patch.getImageURL() != null)  cur.setImageURL(patch.getImageURL());
+        if (patch.getContent() != null)   cur.setContent(patch.getContent());
+        cur.setDate(Instant.now().toString());
+
+        await(ref.set(cur, SetOptions.merge()));
+        return cur;
+    }
+
+    /* ===== 삭제 ===== */
+    public void delete(String id) {
+        await(firestore.collection(COL).document(id).delete());
     }
 }

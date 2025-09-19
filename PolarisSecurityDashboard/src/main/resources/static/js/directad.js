@@ -1,5 +1,6 @@
-// directad.js
 (function () {
+  const API = '/api/v1/direct-ads';
+
   // === helpers ===
   const esc = (s) =>
     String(s ?? '')
@@ -13,129 +14,96 @@
   const cssColor = (s) => String(s ?? '').replace(/[^#(),.%\-\s\w]/g, '');
   const $ = (sel) => document.querySelector(sel);
 
-  const state = { raw: [], filtered: [] };
+  const state = { raw: [], filtered: [], current: null, editing: false };
 
-  function show(id, visible) {
-    const el = document.getElementById(id);
-    if (el) el.hidden = !visible;
+  function show(id, visible) { const el = document.getElementById(id); if (el) el.hidden = !visible; }
+
+  function setFormEditable(editable) {
+    ['adType','advertiserName','backgroundColor','imageUrl','targetUrl']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !editable; });
+    const saveBtn  = document.getElementById('saveBtn');
+    const editBtn  = document.getElementById('editBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    if (saveBtn)  saveBtn.hidden  = !editable;
+    if (editBtn)  editBtn.hidden  =  !!editable;
+    if (cancelBtn) cancelBtn.hidden = !editable;
+    state.editing = editable;
   }
 
-  // === init ===
-  document.addEventListener('DOMContentLoaded', () => {
-    // 검색/필터/새로고침
-    $('#refreshBtn')?.addEventListener('click', load);
-    $('#q')?.addEventListener('input', applyFilter);
-    $('#type')?.addEventListener('change', applyFilter);
-
-    // 모달 관련 참조
+  function openModal() {
     const modal = document.getElementById('adModal');
+    if (!modal || !state.current) return;
+
+    fillForm(state.current);
+
+    modal.removeAttribute('hidden');
+    modal.classList.add('open');
+    modal.style.setProperty('display', 'block', 'important');
+
     const modalContent = document.getElementById('modalContent');
-    const closeBtn = document.getElementById('closeModal');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const editBtn = document.getElementById('editBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const form = document.getElementById('adEditForm');
+    if (modalContent) setTimeout(() => modalContent.focus(), 0);
 
-    // 행 클릭 → 모달 열기
-    document.getElementById('ad-tbody')?.addEventListener('click', (event) => {
-      const row = event.target.closest('tr');
-      if (!row) return;
+    document.addEventListener('keydown', onEsc);
+  }
 
-      // 데이터 채우기
-      const ds = row.dataset;
-      setVal('adType', ds.type);
-      setVal('advertiserName', ds.advertiser);
-      setVal('backgroundColor', ds.bg);
-      setVal('imageUrl', ds.img);
-      setVal('targetUrl', ds.url);
+  function closeModal() {
+    const modal = $('#adModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.setAttribute('hidden', '');
+    document.removeEventListener('keydown', onEsc);
+    state.current = null;
+    setFormEditable(false);
+  }
+  function onEsc(e) { if (e.key === 'Escape') closeModal(); }
+  $('#adModal')?.addEventListener('click', (e) => { if (e.target === $('#adModal')) closeModal(); });
 
-      setFormEditable(false);
-      openModal();
+  // === API ===
+  async function fetchAll() {
+    const res = await fetch(API, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function fetchById(id) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function patch(id, payload) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
 
-    function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v ?? ''; }
-    function setFormEditable(editable) {
-      ['adType','advertiserName','backgroundColor','imageUrl','targetUrl']
-        .forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !editable; });
-      if (saveBtn) saveBtn.hidden = !editable;
-    }
+  async function destroy(id) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
+  }
 
-    // ── 모달 강제 오픈/클로즈(충돌 무력화) ──
-    function openModal() {
-      if (!modal) return;
-      // 숨김 속성 제거 + 클래스/스타일 강제
-      modal.removeAttribute('hidden');
-      modal.classList.add('open');
-      modal.style.setProperty('display', 'block', 'important');
-      modal.style.zIndex = '2147483646';
-      // 컨텐츠도 최상단
-      if (modalContent) {
-        modalContent.style.zIndex = '2147483647';
-        // 포커스
-        setTimeout(() => modalContent.focus(), 0);
-      }
-      // ESC로 닫기
-      document.addEventListener('keydown', onEsc);
-    }
-    function closeModal() {
-      if (!modal) return;
-      modal.classList.remove('open');
-      modal.style.setProperty('display', 'none', 'important');
-      document.removeEventListener('keydown', onEsc);
-    }
-    function onEsc(e){ if (e.key === 'Escape') closeModal(); }
-
-    // 오버레이 클릭 시 닫기 (컨텐츠 바깥만)
-    modal?.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    closeBtn?.addEventListener('click', closeModal);
-    cancelBtn?.addEventListener('click', closeModal);
-    editBtn?.addEventListener('click', () => setFormEditable(true));
-
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const payload = {
-        adType: $('#adType')?.value ?? '',
-        advertiserName: $('#advertiserName')?.value ?? '',
-        backgroundColor: $('#backgroundColor')?.value ?? '',
-        imageUrl: $('#imageUrl')?.value ?? '',
-        targetUrl: $('#targetUrl')?.value ?? '',
-      };
-      console.log('[directad] save payload:', payload);
-      setFormEditable(false);
-      closeModal();
-    });
-
-    // 최초 로드
-    load();
-  });
-
-  // === data load ===
+  // === list/filter/render ===
   async function load() {
-    show('error', false);
-    show('empty', false);
-    show('loading', true);
-
+    show('error', false); show('empty', false); show('loading', true);
     try {
-      const res = await fetch('/api/v1/direct-ads', { headers: { Accept: 'application/json' } });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await fetchAll();
       state.raw = Array.isArray(data) ? data : [];
       applyFilter();
     } catch (e) {
       console.error('[directad] load error:', e);
       $('#countText') && ($('#countText').textContent = '0건');
-      const tbody = document.getElementById('ad-tbody');
-      if (tbody) tbody.innerHTML = '';
+      const tbody = $('#ad-tbody'); if (tbody) tbody.innerHTML = '';
       show('error', true);
     } finally {
       show('loading', false);
     }
   }
 
-  // === filter/sort ===
   function applyFilter() {
     const q = ($('#q')?.value || '').trim().toLowerCase();
     const type = ($('#type')?.value || '').toUpperCase();
@@ -155,11 +123,8 @@
     render();
   }
 
-  // === render ===
   function render() {
-    const tbody = document.getElementById('ad-tbody');
-    if (!tbody) return;
-
+    const tbody = $('#ad-tbody'); if (!tbody) return;
     tbody.innerHTML = '';
 
     if (!state.filtered.length) {
@@ -170,17 +135,9 @@
     show('empty', false);
 
     const frag = document.createDocumentFragment();
-
     state.filtered.forEach(ad => {
       const tr = document.createElement('tr');
-
-      // dataset(모달 채우기용)
       tr.dataset.id = ad.id ?? '';
-      tr.dataset.type = ad.adType ?? '';
-      tr.dataset.advertiser = ad.advertiserName ?? '';
-      tr.dataset.bg = ad.backgroundColor ?? '';
-      tr.dataset.img = ad.imageUrl ?? '';
-      tr.dataset.url = ad.targetUrl ?? '';
 
       tr.innerHTML = `
         <td>${esc(short(ad.id))}</td>
@@ -201,12 +158,45 @@
         <td>${fmt(ad.publishedDate)}</td>
         <td>${fmt(ad.updatedAt ?? ad.updateAt)}</td>
       `;
+
+      tr.addEventListener('click', async () => {
+        const id = tr.dataset.id;
+        if (!id) return;
+        try {
+          const fresh = await fetchById(id);
+          state.current = fresh;
+          fillForm(fresh);
+          openModal();
+          setFormEditable(false);
+        } catch (e) {
+          console.error('[directad] open failed:', e);
+          alert('항목을 불러오지 못했습니다.');
+        }
+      });
+
       frag.appendChild(tr);
     });
 
     tbody.appendChild(frag);
     $('#countText') && ($('#countText').textContent = `${state.filtered.length}건`);
   }
+
+  // === form helpers ===
+  function fillForm(ad) {
+    setVal('adId', ad.id);
+    setVal('adType', ad.adType);
+    setVal('advertiserName', ad.advertiserName);
+    setVal('backgroundColor', ad.backgroundColor);
+    setVal('imageUrl', ad.imageUrl);
+    setVal('targetUrl', ad.targetUrl);
+
+    document.getElementById('bgDot')?.style.setProperty('background', ad.backgroundColor || '#eee');
+    document.getElementById('openImg')?.setAttribute('href', ad.imageUrl || '#');
+    document.getElementById('openLink')?.setAttribute('href', ad.targetUrl || '#');
+    const pv = document.getElementById('imgPreview');
+    if (pv) { pv.src = ad.imageUrl || ''; pv.alt = ad.imageUrl ? '이미지 미리보기' : '이미지 없음'; }
+  }
+  function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v ?? ''; }
 
   // === utils ===
   function renderThumb(u) {
@@ -217,7 +207,6 @@
         <img class="thumb" src="${safe}" alt="이미지 미리보기" loading="lazy" referrerpolicy="no-referrer">
       </a>`;
   }
-
   function num(v) { const n = Number(v ?? 0); return isFinite(n) ? n.toLocaleString() : '0'; }
   function short(v) { if (!v) return ''; v = String(v); return v.length > 10 ? v.slice(0,10) + '…' : v; }
   function fmt(v) { const ms = toMs(v); if (!ms) return ''; const d = new Date(ms);
@@ -235,4 +224,72 @@
     }
     return 0;
   }
+
+  function diffPayload(orig) {
+    const cur = {
+      adType: $('#adType')?.value,
+      advertiserName: $('#advertiserName')?.value,
+      backgroundColor: $('#backgroundColor')?.value,
+      imageUrl: $('#imageUrl')?.value,
+      targetUrl: $('#targetUrl')?.value,
+    };
+    const out = {};
+    Object.keys(cur).forEach(k => { if ((orig?.[k] ?? '') !== (cur?.[k] ?? '')) out[k] = cur[k]; });
+    return out;
+  }
+
+  // === wire up ===
+  document.addEventListener('DOMContentLoaded', () => {
+    $('#refreshBtn')?.addEventListener('click', load);
+    $('#q')?.addEventListener('input', applyFilter);
+    $('#type')?.addEventListener('change', applyFilter);
+
+    $('#closeModal')?.addEventListener('click', closeModal);
+    $('#cancelBtn')?.addEventListener('click', closeModal);
+    $('#editBtn')?.addEventListener('click', () => setFormEditable(true));
+
+    $('#adEditForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.current) return;
+      const payload = diffPayload(state.current);
+      if (Object.keys(payload).length === 0) {
+        alert('변경된 내용이 없습니다.');
+        setFormEditable(false);
+        return;
+      }
+      try {
+        $('#saveBtn').disabled = true;
+        const updated = await patch(state.current.id, payload);
+        state.current = updated; fillForm(updated);
+        setFormEditable(false);
+        await load();
+        alert('저장되었습니다.');
+      } catch (err) {
+        console.error('[directad] patch failed:', err);
+        alert('저장에 실패했습니다.');
+      } finally {
+        $('#saveBtn').disabled = false;
+      }
+    });
+
+    $('#deleteBtn')?.addEventListener('click', async () => {
+      if (!state.current) return;
+      const yes = confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+      if (!yes) return;
+      try {
+        $('#deleteBtn').disabled = true;
+        await destroy(state.current.id);
+        closeModal();
+        await load();
+        alert('삭제되었습니다.');
+      } catch (err) {
+        console.error('[directad] delete failed:', err);
+        alert('삭제에 실패했습니다.');
+      } finally {
+        $('#deleteBtn').disabled = false;
+      }
+    });
+
+    load();
+  });
 })();

@@ -22,8 +22,11 @@ public class PolarDirectAdDao {
     try {
       ApiFuture<QuerySnapshot> fut = firestore.collection(COL).get();
       return fut.get().getDocuments().stream()
-          .map(d -> d.toObject(PolarDirectAd.class))
-          .collect(Collectors.toList());
+    		    .map(d -> {
+    		        PolarDirectAd ad = d.toObject(PolarDirectAd.class);
+    		        if (ad != null) ad.setId(d.getId());   // 반드시 문서 ID 주입
+    		        return ad;
+    		    }).collect(Collectors.toList());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new RuntimeException("Interrupted while fetching all ads", e);
@@ -35,6 +38,9 @@ public class PolarDirectAdDao {
   public PolarDirectAd findById(String id) {
     try {
       DocumentSnapshot snap = firestore.collection(COL).document(id).get().get();
+      PolarDirectAd ad = snap.toObject(PolarDirectAd.class);
+      if (ad != null) ad.setId(snap.getId());
+     
       return snap.exists() ? snap.toObject(PolarDirectAd.class) : null;
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
@@ -45,13 +51,13 @@ public class PolarDirectAdDao {
   }
 
   public String create(PolarDirectAd ad) {
-    try {
-      ad.setPublishedDate(Timestamp.now());
-      ad.setUpdateAt(Timestamp.now());
-      DocumentReference ref = firestore.collection(COL).document(); // auto ID
-      ref.set(ad).get();
-      return ref.getId();
-    } catch (InterruptedException e) {
+	  try {
+		    ad.setPublishedDate(Timestamp.now());
+		    ad.setUpdatedAt(Timestamp.now());     // ← 통일
+		    DocumentReference ref = firestore.collection(COL).document();
+		    ref.set(ad).get();
+		    return ref.getId();
+		  } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new RuntimeException("Interrupted while creating ad", e);
     } catch (ExecutionException e) {
@@ -60,25 +66,27 @@ public class PolarDirectAdDao {
   }
 
   public PolarDirectAd update(String id, PolarDirectAd patch) {
-    try {
-      DocumentReference ref = firestore.collection(COL).document(id);
-      DocumentSnapshot snap = ref.get().get();
-      if (!snap.exists()) throw new IllegalArgumentException("Ad not found: " + id);
+	  try {
+	    DocumentReference ref = firestore.collection(COL).document(id);
+	    DocumentSnapshot snap = ref.get().get();
+	    if (!snap.exists()) throw new IllegalArgumentException("Ad not found: " + id);
 
-      PolarDirectAd cur = snap.toObject(PolarDirectAd.class);
+	    PolarDirectAd cur = snap.toObject(PolarDirectAd.class);
+	    if (cur == null) throw new IllegalStateException("Mapping failed: " + id);
 
-      if (patch.getAdType() != null) cur.setAdType(patch.getAdType());
-      if (patch.getAdvertiserName() != null) cur.setAdvertiserName(patch.getAdvertiserName());
-      if (patch.getBackgroundColor() != null) cur.setBackgroundColor(patch.getBackgroundColor());
-      if (patch.getImageUrl() != null) cur.setImageUrl(patch.getImageUrl());
-      if (patch.getTargetUrl() != null) cur.setTargetUrl(patch.getTargetUrl());
-      if (patch.getClickCount() != null) cur.setClickCount(patch.getClickCount());
-      if (patch.getViewCount() != null) cur.setViewCount(patch.getViewCount());
-      cur.setUpdateAt(Timestamp.now());
+	    if (patch.getAdType() != null) cur.setAdType(patch.getAdType());
+	    if (patch.getAdvertiserName() != null) cur.setAdvertiserName(patch.getAdvertiserName());
+	    if (patch.getBackgroundColor() != null) cur.setBackgroundColor(patch.getBackgroundColor());
+	    if (patch.getImageUrl() != null) cur.setImageUrl(patch.getImageUrl());
+	    if (patch.getTargetUrl() != null) cur.setTargetUrl(patch.getTargetUrl());
+	    if (patch.getClickCount() != null) cur.setClickCount(patch.getClickCount());
+	    if (patch.getViewCount() != null) cur.setViewCount(patch.getViewCount());
 
-      ref.set(cur, SetOptions.merge()).get();
-      return cur;
-    } catch (InterruptedException e) {
+	    cur.setUpdatedAt(Timestamp.now());   // ← 통일
+
+	    ref.set(cur, SetOptions.merge()).get();
+	    return cur;
+	  }  catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new RuntimeException("Interrupted while updating ad: " + id, e);
     } catch (ExecutionException e) {
