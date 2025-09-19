@@ -1,215 +1,231 @@
-(() => {
+(function () {
   const API = '/api/v1/polar-notices';
+  const $ = (s) => document.querySelector(s);
 
-  const els = {
-    q: document.getElementById('q'),
-    btn: document.getElementById('refreshBtn'),
-    tbody: document.getElementById('letter-tbody'),
-    count: document.getElementById('countText'),
-    empty: document.getElementById('empty'),
-    error: document.getElementById('error'),
-    loading: document.getElementById('loading'),
-    // modal
-    modalWrap: document.getElementById('notice-modal-wrap'),
-    modalClose: document.getElementById('modalCloseBtn'),
-    form: document.getElementById('notice-form'),
-    id: document.getElementById('f-id'),
-    title: document.getElementById('f-title'),
-    author: document.getElementById('f-author'),
-    date: document.getElementById('f-date'),
-    category: document.getElementById('f-category'),
-    image: document.getElementById('f-image'),
-    thumbPrev: document.getElementById('f-thumb-preview'),
-    content: document.getElementById('f-content'),
-    edit: document.getElementById('editBtn'),
-    save: document.getElementById('saveBtn'),
-    cancel: document.getElementById('cancelBtn'),
-    del: document.getElementById('deleteBtn'),
+  const state = { raw: [], filtered: [], current: null, mode: 'create' }; // mode: 'create' | 'edit'
+
+  // ====== helpers ======
+  const esc = (s) => String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  const toMs = (v) => {
+    if (!v) return 0;
+    const n = Date.parse(v);
+    return isNaN(n) ? 0 : n;
   };
 
-  let current = null;
+  function show(id, visible) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = visible ? 'block' : 'none';
+  }
 
-  const esc = s => (s ?? '').replace(/[&<>"']/g, m => (
-    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]
-  ));
+  function setModal(open) {
+    const wrap = $('#noticeModal');
+    if (!wrap) return;
+    wrap.classList.toggle('hidden', !open);
+    if (open) setTimeout(() => $('#modalContent')?.focus(), 0);
+  }
 
-  const labelOf = (category) => {
-    switch (category) {
-      case 'EMERGENCY': return '보안';
-      case 'EVENT': return '이벤트';
-      case 'SERVICE_GUIDE': return '안내';
-      case 'UPDATE': return '업데이트';
-      default: return category || '-';
-    }
-  };
+  function fillForm(n) {
+    $('#id').value = n?.id ?? '';
+    $('#title').value = n?.title ?? '';
+    $('#category').value = n?.category ?? '';
+    $('#author').value = n?.author ?? '';
+    $('#date').value = n?.date ?? '';
+    $('#imageURL').value = n?.imageURL ?? '';
+    $('#imgThumb').src = n?.imageURL || '';
+    $('#content').value = n?.content ?? '';
+  }
 
-  async function fetchList(q) {
+  function readForm() {
+    return {
+      // id는 서버 생성(POST) 또는 path 변수(PATCH)
+      title: $('#title').value?.trim(),
+      category: $('#category').value?.trim(),
+      author: $('#author').value?.trim(),
+      date: $('#date').value?.trim(),
+      imageURL: $('#imageURL').value?.trim(),
+      content: $('#content').value?.trim(),
+    };
+  }
+
+  // ====== API ======
+  async function list(size, q) {
     const params = new URLSearchParams();
+    if (size) params.set('size', size);
     if (q) params.set('q', q);
-    const res = await fetch(`${API}?${params.toString()}`, { headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-  async function fetchById(id) {
-    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { headers: { 'Accept': 'application/json' } });
+    const res = await fetch(`${API}?${params.toString()}`, { headers: { Accept: 'application/json'}});
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }
 
-  function render(rows) {
-    els.tbody.innerHTML = '';
-    if (!rows || rows.length === 0) {
-      els.empty.hidden = false; els.error.hidden = true; els.count.textContent = '0건'; return;
+  async function getById(id) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { headers: { Accept: 'application/json'}});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function create(body) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function patch(id, body) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function destroy(id) {
+    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
+  }
+
+  // ====== list & render ======
+  async function load() {
+    show('loading', true); show('error', false); show('empty', false);
+    try {
+      const size = Number($('#size')?.value || 100);
+      const q = $('#q')?.value?.trim();
+      const data = await list(size, q);
+      state.raw = Array.isArray(data) ? data : [];
+
+      // 간단 정렬: 최신 작성일/수정일 우선(모델은 date만 있으므로 date 기준)
+      state.raw.sort((a, b) => toMs(b?.date) - toMs(a?.date));
+      state.filtered = state.raw;
+
+      render();
+    } catch (e) {
+      console.error('[notice] load failed', e);
+      $('#notice-tbody').innerHTML = '';
+      show('error', true);
+    } finally {
+      show('loading', false);
     }
-    els.empty.hidden = true; els.error.hidden = true;
+  }
+
+  function render() {
+    const tb = $('#notice-tbody');
+    if (!tb) return;
+    tb.innerHTML = '';
+
+    if (!state.filtered.length) {
+      show('empty', true);
+      $('#countText').textContent = '0건';
+      return;
+    }
+    show('empty', false);
 
     const frag = document.createDocumentFragment();
-    rows.forEach(n => {
+    state.filtered.forEach(n => {
       const tr = document.createElement('tr');
+      tr.dataset.id = n.id ?? '';
+
       tr.innerHTML = `
-        <td><span class="row-muted" title="${esc(n.id)}">${esc(n.id)}</span></td>
-        <td>${n.imageURL ? `<img src="${esc(n.imageURL)}" alt="" />` : `<div style="width:50px;height:50px;border-radius:6px;background:#eef2f7;"></div>`}</td>
-        <td><div>${esc(n.title || '')}</div>${n.content ? `<div class="row-muted">${esc(n.content.slice(0, 80))}${n.content.length > 80 ? '…' : ''}</div>` : ''}</td>
-        <td>${esc(n.author || '-')}</td>
-        <td>${esc(n.date || '-')}</td>
-        <td class="category">${esc(labelOf(n.category))}</td>
+        <td>${esc(n.date || '')}</td>
+        <td>${esc(n.title || '')}</td>
+        <td>${esc(n.category || '')}</td>
+        <td>${esc(n.author || '')}</td>
+        <td>${n.imageURL ? `<img src="${esc(n.imageURL)}" alt="" style="width:50px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb">` : '—'}</td>
       `;
+
       tr.addEventListener('click', async () => {
+        const id = tr.dataset.id;
+        if (!id) return;
         try {
-          const fresh = await fetchById(n.id);
+          const fresh = await getById(id);
+          state.current = fresh;
+          state.mode = 'edit';
+          $('#noticeModalTitle').textContent = '공지 수정';
+          $('#deleteBtn').classList.remove('hidden');
           fillForm(fresh);
-          openModal();
-        } catch (e) {
-          console.error('[polar-notice] fetch by id failed', e);
+          setModal(true);
+        } catch (err) {
+          console.error('[notice] open failed', err);
           alert('항목을 불러오지 못했습니다.');
         }
       });
+
       frag.appendChild(tr);
     });
-    els.tbody.appendChild(frag);
-    els.count.textContent = `${rows.length}건`;
+
+    tb.appendChild(frag);
+    $('#countText').textContent = `${state.filtered.length}건`;
   }
 
-  function fillForm(d) {
-    current = d;
-    els.id.value = d.id || '';
-    els.title.value = d.title || '';
-    els.author.value = d.author || '';
-    els.date.value = d.date || '';
-    els.category.value = d.category || '';
-    els.image.value = d.imageURL || '';
-    els.thumbPrev.src = d.imageURL || '';
-    els.content.value = d.content || '';
-  }
+  // ====== wire up ======
+  document.addEventListener('DOMContentLoaded', () => {
+    $('#refreshBtn')?.addEventListener('click', load);
+    $('#q')?.addEventListener('input', () => load());
+    $('#size')?.addEventListener('change', load);
 
-  function toPatchPayload() {
-    const body = {};
-    if ((current.title ?? '')     !== els.title.value)    body.title = els.title.value;
-    if ((current.author ?? '')    !== els.author.value)   body.author = els.author.value;
-    if ((current.date ?? '')      !== els.date.value)     body.date = els.date.value;
-    if ((current.category ?? '')  !== els.category.value) body.category = els.category.value || null;
-    if ((current.imageURL ?? '')  !== els.image.value)    body.imageURL = els.image.value || null;
-    if ((current.content ?? '')   !== els.content.value)  body.content = els.content.value;
-    return body;
-  }
+    // 새 공지
+    $('#createBtn')?.addEventListener('click', () => {
+      state.current = null;
+      state.mode = 'create';
+      $('#noticeModalTitle').textContent = '공지 등록';
+      $('#deleteBtn').classList.add('hidden');
+      fillForm(null);
+      setModal(true);
+    });
 
-  function setEditing(on) {
-    [els.title, els.author, els.date, els.category, els.image, els.content].forEach(i => i.disabled = !on);
-    els.edit.classList.toggle('hidden', on);
-    els.save.classList.toggle('hidden', !on);
-    els.cancel.classList.toggle('hidden', !on);
-  }
+    // 이미지 URL 프리뷰
+    $('#imageURL')?.addEventListener('input', () => {
+      $('#imgThumb').src = $('#imageURL').value || '';
+    });
 
-  function openModal() {
-    els.modalWrap.classList.remove('hidden');
-    setEditing(false);
-  }
-  function closeModal() {
-    els.modalWrap.classList.add('hidden');
-    current = null;
-  }
+    // 저장
+    $('#saveBtn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const body = readForm();
+        if (!body.title) { alert('제목은 필수입니다.'); return; }
 
-  async function load() {
-    els.loading.hidden = false; els.empty.hidden = true; els.error.hidden = true;
-    try {
-      const rows = await fetchList(els.q.value.trim());
-      render(rows);
-    } catch (e) {
-      console.error('[polar-notice] load error', e);
-      els.error.hidden = false;
-    } finally {
-      els.loading.hidden = true;
-    }
-  }
+        if (state.mode === 'create') {
+          const created = await create(body);
+          state.current = created;
+        } else {
+          const id = $('#id').value;
+          const updated = await patch(id, body);
+          state.current = updated;
+        }
+        setModal(false);
+        await load();
+        alert('저장되었습니다.');
+      } catch (err) {
+        console.error('[notice] save failed', err);
+        alert('저장에 실패했습니다.');
+      }
+    });
 
-  /* === 이벤트 === */
-  els.btn.addEventListener('click', load);
-  els.q.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+    // 삭제
+    $('#deleteBtn')?.addEventListener('click', async () => {
+      if (!state.current?.id) return;
+      const yes = confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+      if (!yes) return;
+      try {
+        await destroy(state.current.id);
+        setModal(false);
+        await load();
+        alert('삭제되었습니다.');
+      } catch (err) {
+        console.error('[notice] delete failed', err);
+        alert('삭제에 실패했습니다.');
+      }
+    });
 
-  els.modalClose.addEventListener('click', closeModal);
-  els.modalWrap.addEventListener('click', e => { if (e.target === els.modalWrap) closeModal(); });
+    $('#closeModal')?.addEventListener('click', () => setModal(false));
+    $('#cancelBtn')?.addEventListener('click', () => setModal(false));
 
-  els.image.addEventListener('input', () => { els.thumbPrev.src = els.image.value || ''; });
-
-  els.edit.addEventListener('click', () => { if (current) setEditing(true); });
-
-  els.cancel.addEventListener('click', () => {
-    if (!current) return;
-    fillForm(current);
-    setEditing(false);
+    // 최초 로드
+    load();
   });
-
-  els.form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!current) return;
-
-    const payload = toPatchPayload();
-    if (Object.keys(payload).length === 0) {
-      alert('변경된 내용이 없습니다.');
-      setEditing(false);
-      return;
-    }
-    try {
-      els.save.disabled = true;
-      const res = await fetch(`${API}/${encodeURIComponent(current.id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json();
-      fillForm(updated);
-      setEditing(false);
-      await load();
-      alert('저장되었습니다.');
-    } catch (err) {
-      console.error('[polar-notice] patch failed:', err);
-      alert('저장에 실패했습니다.');
-    } finally {
-      els.save.disabled = false;
-    }
-  });
-
-  els.del.addEventListener('click', async () => {
-    if (!current) return;
-    const yes = confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
-    if (!yes) return;
-
-    try {
-      els.del.disabled = true;
-      const res = await fetch(`${API}/${encodeURIComponent(current.id)}`, { method: 'DELETE' });
-      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
-      closeModal();
-      await load();
-      alert('삭제되었습니다.');
-    } catch (err) {
-      console.error('[polar-notice] delete failed:', err);
-      alert('삭제에 실패했습니다.');
-    } finally {
-      els.del.disabled = false;
-    }
-  });
-
-  /* 초기 로딩 */
-  document.addEventListener('DOMContentLoaded', load);
 })();
