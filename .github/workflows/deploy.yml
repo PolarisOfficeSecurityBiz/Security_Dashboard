@@ -1,4 +1,4 @@
-name: Build & Deploy (Docker + Compose)
+name: Build & Deploy (Runner-in-server)
 
 on:
   push:
@@ -7,9 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    permissions: { contents: read, packages: write }
     steps:
       - uses: actions/checkout@v4
       - name: Log in to GHCR
@@ -18,40 +16,26 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push
+      - name: Build & Push
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: ghcr.io/lily-b-lee/security_dashboard:latest
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # ← 또는 ["self-hosted","deploy-runner"]
     steps:
-      - name: Add server to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Write SSH key
-        run: |
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Deploy via SSH
+      - name: Pull and restart via compose
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          COMPOSE_DIR: ${{ secrets.COMPOSE_DIR }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPOSE_DIR: /home/posacuser/apps/security_dashboard
         run: |
-          ssh -p "$SSH_PORT" -i ~/.ssh/id_ed25519 "$SSH_USER@$SSH_HOST" << 'EOF'
-            set -e
-            cd "$COMPOSE_DIR"
-            docker login ghcr.io -u "$GITHUB_ACTOR" -p "$GITHUB_TOKEN"
-            docker compose pull
-            docker compose up -d
-          EOF
+          docker login ghcr.io -u "$GITHUB_ACTOR" -p "$GITHUB_TOKEN"
+          cd "$COMPOSE_DIR"
+          docker compose pull
+          docker compose up -d
+          docker image prune -f
