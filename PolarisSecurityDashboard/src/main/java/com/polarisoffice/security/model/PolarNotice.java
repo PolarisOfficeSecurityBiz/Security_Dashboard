@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Setter
-@NoArgsConstructor @Builder 
+@NoArgsConstructor
 public class PolarNotice {
     private String id;  // Firestore의 document ID
     private String author;  // 작성자
