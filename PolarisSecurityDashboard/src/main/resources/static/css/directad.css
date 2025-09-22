@@ -1,0 +1,184 @@
+/* 페이지 컨테이너 */
+.directad { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+
+/* === 공통 헤더(뒤로가기 + 제목 + 추가 버튼) === */
+.page-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:#fff; padding:14px 16px; border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.08);
+  margin-bottom:12px;
+}
+.page-head .left{ display:flex; align-items:center; gap:10px; }
+.page-head .title{ font-size:20px; font-weight:700; color:#111827; margin:0; }
+.page-head .actions{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* 뒤로가기: id/class 둘 다 지원 */
+#backBtn, .page-head .back-btn{
+  width:36px; height:36px; border-radius:8px; border:1px solid #e5e7eb; background:#fff;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; margin-right:4px;
+}
+#backBtn:hover, .page-head .back-btn:hover{ background:#f3f4f6; }
+#backBtn img, #backBtn svg, .page-head .back-btn img, .page-head .back-btn svg{ width:20px; height:20px; object-fit:contain; }
+
+/* 툴바 */
+.directad .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0; }
+.directad .toolbar .left { display: flex; gap: 8px; align-items: center; }
+.directad .toolbar input[type="search"] { width: 280px; padding: 8px 10px; border: 1px solid #d0d5dd; border-radius: 8px; }
+.directad .toolbar select, .directad .toolbar button { padding: 8px 10px; border: 1px solid #d0d5dd; border-radius: 8px; background: #fff; cursor: pointer; }
+.directad .toolbar #refreshBtn { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+
+/* 버튼 공통 */
+.btn{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-weight:600; }
+.btn:disabled{ opacity:.5; cursor:not-allowed; }
+.btn.primary{ background:#2563eb; border-color:#1d4ed8; color:#fff; }
+.btn.danger{ background:#ef4444; border-color:#dc2626; color:#fff; }
+.btn.ghost{ background:#f1f5f9; }
+.btn.pill{ border-radius:9999px; padding:8px 14px; }
+
+/* 테이블 */
+.directad .ad-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.directad .ad-table thead th { text-align: left; font-weight: 600; font-size: 12px; color: #6b7280; background: #f8fafc; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
+.directad .ad-table tbody td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.directad .ad-table tbody tr:hover { background: #f9fafb; cursor: pointer; }
+
+/* 컬러 표시 */
+.directad .color-chip { display: inline-flex; align-items: center; gap: 6px; }
+.directad .color-dot { width: 14px; height: 14px; border-radius: 999px; border: 1px solid #e5e7eb; }
+
+/* 이미지 썸네일 */
+.directad .thumb { width: 54px; height: 32px; border-radius: 6px; border: 1px solid #e5e7eb; object-fit: cover; background: #f3f4f6; display: block; }
+
+/* 상태 표시 */
+.directad .loading, .directad .empty, .directad .error { margin: 16px 0; color: #6b7280; font-size: 14px; }
+.directad .error { color: #ef4444; }
+
+/* 링크 공통 */
+.directad .link, .directad .img-link { color: #0ea5e9; text-decoration: none; }
+.directad .link:hover, .directad .img-link:hover { text-decoration: underline; }
+
+/* ── Modal polish ───────────────────────────────────────────── */
+.modal {
+  display:none !important; position:fixed; inset:0; z-index:2147483646;
+  background:rgba(15,23,42,.45); backdrop-filter:saturate(120%) blur(2px);
+}
+.modal.open { display:block !important; }
+.modal .modal-content {
+  position:relative; background:#fff; margin:6% auto; padding:20px 20px 16px;
+  width:min(560px, calc(100% - 24px));
+  border-radius:16px; box-shadow:0 20px 60px rgba(2,6,23,.25); animation:pop .16s ease-out;
+  max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
+}
+@keyframes pop { from { transform:translateY(6px) scale(.98); opacity:.6;} to{ transform:none; opacity:1;} }
+.close-btn { position:absolute; top:10px; right:10px; border:0; background:transparent; font-size:22px; line-height:1; cursor:pointer; color:#64748b; }
+.close-btn:hover { color:#0ea5e9; }
+
+/* Header */
+.modal-header { margin-bottom:10px; }
+.modal-header h2 { margin:0; font-size:18px; font-weight:700; }
+.modal-header .subtitle { margin:4px 0 0; color:#6b7280; font-size:12px; }
+
+/* Form (scrollable area) */
+.form { margin-top:8px; flex:1; overflow:auto; }
+.form-grid { display:grid; grid-template-columns:120px 1fr; gap:10px 12px; align-items:center; min-width:0; }
+.form-grid label { font-size:12px; color:#475569; }
+.form-grid input {
+  width:100%; padding:9px 10px; border:1px solid #d0d5dd; border-radius:10px; font-size:14px; background:#f8fafc; min-width:0;
+}
+.form-grid input:focus { outline:none; border-color:#0ea5e9; background:#fff; box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+.form-grid input:disabled { color:#334155; opacity:1; background:#f8fafc; }
+
+/* inline addons */
+.with-action { display:flex; gap:8px; align-items:center; min-width:0; }
+.with-action input { flex:1; min-width:0; }
+.btn.sm { padding:7px 10px; font-size:12px; }
+
+/* bottom buttons */
+.modal-buttons { display:flex; gap:8px; margin-top:14px; }
+.modal-buttons.right { justify-content:flex-end; }
+.flex-1 { flex:1; }
+
+/* color field + dot */
+.color-field { display:flex; align-items:center; gap:8px; min-width:0; }
+.color-dot.lg { width:18px; height:18px; }
+
+/* preview */
+.preview { margin-top:12px; padding:10px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:12px; }
+.preview img { display:block; width:100%; max-height:180px; object-fit:contain; }
+/* ── Modal polish (fixed) ───────────────────────────────────── */
+.modal{
+  display:none !important;
+  position:fixed; inset:0; z-index:2147483646;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:saturate(120%) blur(2px);
+  /* 뷰포트가 작을 때도 아래가 안 잘리도록 */
+  padding:24px 12px;
+  overflow:auto;
+}
+.modal.open{ display:block !important; }
+
+.modal .modal-content{
+  position:relative; background:#fff;
+  margin:0 auto;                          /* 중앙정렬 */
+  padding:20px 20px 16px;
+  width:min(560px, calc(100% - 24px));
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(2,6,23,.25);
+  animation:pop .16s ease-out;
+
+  /* 뷰포트 높이에 맞춰 내부만 스크롤 */
+  max-height:calc(100vh - 48px);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+@keyframes pop{from{transform:translateY(6px) scale(.98); opacity:.6;} to{transform:none; opacity:1;}}
+
+.close-btn{ position:absolute; top:10px; right:10px; border:0; background:transparent;
+  font-size:22px; line-height:1; cursor:pointer; color:#64748b; }
+.close-btn:hover{ color:#0ea5e9; }
+
+.modal-header{ margin-bottom:10px; }
+.modal-header h2{ margin:0; font-size:18px; font-weight:700; }
+.modal-header .subtitle{ margin:4px 0 0; color:#6b7280; font-size:12px; }
+
+/* 스크롤은 본문만 */
+.form{ margin-top:8px; flex:1; overflow:auto; padding-bottom:8px; }
+
+/* 폼 그리드 */
+.form-grid{ display:grid; grid-template-columns:120px 1fr; gap:10px 12px; align-items:center; min-width:0; }
+.form-grid label{ font-size:12px; color:#475569; }
+.form-grid input{
+  width:100%; padding:9px 10px; border:1px solid #d0d5dd; border-radius:10px;
+  font-size:14px; background:#f8fafc; min-width:0;
+}
+.form-grid input:focus{ outline:none; border-color:#0ea5e9; background:#fff; box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+.form-grid input:disabled{ color:#334155; opacity:1; background:#f8fafc; }
+
+.with-action{ display:flex; gap:8px; align-items:center; min-width:0; }
+.with-action input{ flex:1; min-width:0; }
+.btn.sm{ padding:7px 10px; font-size:12px; }
+
+/* 버튼 행을 고정해서 더 이상 안 잘림 */
+.modal-buttons{
+  display:flex; gap:8px; margin-top:12px;
+  position:sticky; bottom:0;
+  background:#fff;
+  padding-top:10px;
+}
+.modal-buttons.right{ justify-content:flex-end; }
+.flex-1{ flex:1; }
+
+.color-field{ display:flex; align-items:center; gap:8px; min-width:0; }
+.color-dot.lg{ width:18px; height:18px; }
+.preview{ margin-top:12px; padding:10px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:12px; }
+.preview img{ display:block; width:100%; max-height:180px; object-fit:contain; }
+
+@media (max-width:480px){
+  .form-grid{ grid-template-columns:1fr; }
+  .form-grid label{ margin-top:6px; }
+}
+
+/* small screens */
+@media (max-width: 480px){
+  .form-grid { grid-template-columns:1fr; }
+  .form-grid label { margin-top:6px; }
+}

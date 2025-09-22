@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <meta charset="UTF-8" />
+  <title>SecuOne 운영관리 개요</title>
+
+  <!-- 정적 리소스 경로는 환경에 맞게 조정 -->
+  <link rel="stylesheet" href="/css/secuone.css" th:href="@{/css/secuone.css}">
+  <script defer src="/js/secuone.js" th:src="@{/js/secuone.js}"></script>
+</head>
+<body>
+<div layout:fragment="content">
+  <main class="secuone" role="main">
+
+    <!-- 헤더 -->
+    <header class="page-head">
+      <div>
+        <div class="title">Polaris SecuOne · 운영 개요</div>
+        <div class="muted" id="nowText">시스템 현황 요약</div>
+      </div>
+      <nav class="quick" aria-label="빠른 이동">
+	      <a class="btn" th:href="@{/admin/secuone/notice}">공지사항 관리</a>
+		<a class="btn" th:href="@{/admin/secuone/polarletter}">폴라레터 관리</a>
+		<a class="btn" th:href="@{/admin/secuone/secunews}">시큐뉴스 관리</a>
+		<a class="btn" th:href="@{/admin/secuone/directad}">직광고 관리</a>
+      </nav>
+    </header>
+
+    <!-- KPI -->
+    <section class="grid metrics" aria-label="주요 지표">
+      <article class="card metric" aria-live="polite">
+        <div>
+          <h3>공지사항</h3>
+          <div class="value" id="noticeCount">–</div>
+        </div>
+        <span class="tag" id="noticeDelta">+0 신규</span>
+      </article>
+      <article class="card metric">
+        <div>
+          <h3>폴라레터</h3>
+          <div class="value" id="letterCount">–</div>
+        </div>
+        <span class="tag" id="letterDelta">+0 신규</span>
+      </article>
+      <article class="card metric">
+        <div>
+          <h3>시큐뉴스</h3>
+          <div class="value" id="newsCount">–</div>
+        </div>
+        <span class="tag" id="newsDelta">+0 신규</span>
+      </article>
+      <article class="card metric">
+        <div>
+          <h3>직광고</h3>
+          <div class="value" id="adCount">–</div>
+        </div>
+        <span class="tag" id="adDelta">+0 신규</span>
+      </article>
+    </section>
+
+    <!-- 최근 항목 -->
+    <section class="grid lists" aria-label="최근 업데이트">
+      <!-- 공지사항 -->
+      <div class="card list">
+        <div class="section-head">
+          <h4>최근 공지사항</h4>
+          <span class="label">최신 5건</span>
+        </div>
+        <ul id="noticeList"></ul>
+        <div class="more"><a href="/notice" th:href="@{/notice}">더보기</a></div>
+      </div>
+
+      <!-- 폴라레터 -->
+      <div class="card list">
+        <div class="section-head">
+          <h4>최근 폴라레터</h4>
+          <span class="label">최신 5건</span>
+        </div>
+        <ul id="letterList"></ul>
+        <div class="more"><a href="/polarletter" th:href="@{/polarletter}">더보기</a></div>
+      </div>
+
+      <!-- 시큐뉴스 -->
+      <div class="card list">
+        <div class="section-head">
+          <h4>최근 시큐뉴스</h4>
+          <span class="label">최신 5건</span>
+        </div>
+        <ul id="newsList"></ul>
+        <div class="more"><a href="/secunews" th:href="@{/secunews}">더보기</a></div>
+      </div>
+
+      <!-- 직광고 -->
+      <div class="card list">
+        <div class="section-head">
+          <h4>최근 직광고</h4>
+          <span class="label">최신 5건</span>
+        </div>
+        <ul id="adList"></ul>
+        <div class="more"><a href="/directad" th:href="@{/directad}">더보기</a></div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

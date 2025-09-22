@@ -21,6 +21,12 @@
         사용자 관리
       </a>
     </li>
+        <li>
+      <a th:href="@{/admin/secuone}"
+         th:classappend="${#strings.startsWith(path, '/admin/secuone')} ? ' active' : ''">
+        시큐원 관리
+      </a>
+    </li>
     <li>
       <a th:href="@{/admin/settings}"
          th:classappend="${#strings.startsWith(path, '/admin/settings')} ? ' active' : ''">
