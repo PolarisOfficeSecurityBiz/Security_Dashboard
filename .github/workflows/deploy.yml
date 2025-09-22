@@ -1,4 +1,4 @@
-name: Build & Deploy (Runner-in-server)
+name: Build & Deploy (Maven outside Docker)
 
 on:
   push:
@@ -7,16 +7,36 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: { contents: read, packages: write }
+    permissions:
+      contents: read
+      packages: write    # GHCR 푸시 권한
     steps:
       - uses: actions/checkout@v4
+
+      # JDK 설치 (필요하면 21로 변경)
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 1) Maven으로 JAR 빌드 (테스트 실행은 생략)
+      - name: Build JAR
+        run: |
+          mvn -B -DskipTests -f PolarisSecurityDashboard/pom.xml package
+          ls -al PolarisSecurityDashboard/target
+
+      # 2) GHCR 로그인
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build & Push
+
+      # 3) Docker 이미지 빌드 & 푸시 (Dockerfile은 루트)
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -26,9 +46,10 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: self-hosted   # ← 또는 ["self-hosted","deploy-runner"]
+    # ← 이미 self-hosted로 바꿔놨다고 했으니 그대로 사용
+    runs-on: self-hosted
     steps:
-      - name: Pull and restart via compose
+      - name: Pull & restart via compose
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
