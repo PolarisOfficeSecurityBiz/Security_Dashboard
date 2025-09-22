@@ -15,11 +15,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         com.polarisoffice.security.model.User u = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-        // DB에는 "ADMIN" 또는 "CUSTOMER"로 저장해 두고…
-        String roleWithPrefix = "ROLE_" + u.getRole(); // → "ROLE_ADMIN"/"ROLE_CUSTOMER"
-        return new org.springframework.security.core.userdetails.User(
-            u.getEmail(), u.getPassword(), List.of(new SimpleGrantedAuthority(roleWithPrefix))
-        );
+            .orElseThrow(() -> new UsernameNotFoundException(email));
+
+        // DB role이 ADMIN/CUSTOMER 로 저장되어 있다면 접두사 부여
+        String authority = u.getRole().startsWith("ROLE_") ? u.getRole() : "ROLE_" + u.getRole();
+
+        return org.springframework.security.core.userdetails.User
+            .withUsername(u.getEmail())      // ← 시큐리티의 username은 email로 사용
+            .password(u.getPassword())       // ← BCrypt 해시 여야 함
+            .authorities(authority)
+            .build();
     }
 }

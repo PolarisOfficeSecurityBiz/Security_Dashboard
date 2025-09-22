@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <meta charset="UTF-8" />
+  <title>폴라레터 관리</title>
+
+  <link rel="stylesheet" href="/css/secuone.css" th:href="@{/css/secuone.css}">
+  <link rel="stylesheet" href="/css/polarletter.css" th:href="@{/css/polarletter.css}">
+  <script defer src="/js/polarletter.js" th:src="@{/js/polarletter.js}"></script>
+</head>
+<body>
+<div layout:fragment="content">
+  <main class="secuone" role="main">
+    <!-- ✅ 헤더 -->
+    <header class="page-head">
+      <div class="left">
+        <button type="button" class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+          <img src="/images/back.png" alt="뒤로가기" />
+        </button>
+        <h1 class="title">폴라레터 관리</h1>
+      </div>
+      <div class="actions">
+        <button id="createNewBtn" type="button" class="btn primary pill">+ 새 레터</button>
+      </div>
+    </header>
+
+    <!-- 툴바 -->
+    <section class="toolbar row">
+      <div class="left">
+        <input id="q" type="search" placeholder="제목/작성자/URL/본문 검색…" />
+        <button id="refreshBtn" type="button" class="btn">새로고침</button>
+      </div>
+      <div class="right">
+        <span id="countText">0건</span>
+      </div>
+    </section>
+
+    <!-- 목록 -->
+    <section class="table-wrap">
+      <table class="letter-table">
+        <thead>
+        <tr>
+          <th style="width: 120px;">ID</th>
+          <th style="width: 88px;">썸네일</th>
+          <th>제목</th>
+          <th style="width: 120px;">작성자</th>
+          <th style="width: 110px;">게시일</th>
+          <th style="width: 70px;">링크</th>
+        </tr>
+        </thead>
+        <tbody id="letter-tbody"><!-- JS가 채움 --></tbody>
+      </table>
+
+      <div id="empty" class="empty" hidden>데이터가 없습니다.</div>
+      <div id="error" class="error" hidden>불러오기 실패 — 콘솔을 확인하세요.</div>
+      <div id="loading" class="loading" hidden>불러오는 중…</div>
+    </section>
+
+    <!-- === Modal === -->
+    <div id="letter-modal-wrap" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal">
+        <header>
+          <div class="title" id="modalTitle">레터 상세</div>
+          <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.75 6.75l10.5 10.5M17.25 6.75L6.75 17.25"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <form id="letter-form">
+          <div class="body">
+            <div class="row"><label for="f-id">ID</label><input id="f-id" type="text" readonly></div>
+            <div class="row"><label for="f-title">제목</label><input id="f-title" type="text" required></div>
+            <div class="row"><label for="f-author">작성자</label><input id="f-author" type="text"></div>
+            <div class="row"><label for="f-date">게시일</label><input id="f-date" type="text" placeholder="YYYY-MM-DD"></div>
+            <div class="row"><label for="f-url">URL</label><input id="f-url" type="url" placeholder="https://..."></div>
+            <div class="row">
+              <label for="f-thumbnail">썸네일</label>
+              <div class="thumb-wrap">
+                <img id="f-thumb-preview" alt="">
+                <input id="f-thumbnail" type="url" placeholder="https://...">
+              </div>
+            </div>
+            <div class="row"><label for="f-content">본문</label><textarea id="f-content" placeholder="내용을 입력하세요."></textarea></div>
+          </div>
+
+          <footer>
+            <div><button type="button" class="btn danger" id="deleteBtn">삭제</button></div>
+            <div>
+              <button type="button" class="btn" id="editBtn">수정</button>
+              <button type="submit" class="btn primary hidden" id="saveBtn">저장</button>
+              <button type="button" class="btn ghost hidden" id="cancelBtn">취소</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </div>
+    <!-- /Modal -->
+
+  </main>
+</div>
+</body>
+</html>

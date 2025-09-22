@@ -1,0 +1,220 @@
+/* === Table === */
+.news-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.news-table th, .news-table td {
+  border-bottom: 1px solid #eef0f3;
+  padding: 10px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+.news-table thead th {
+  background: #f7f9fb;
+  color: #556;
+  font-weight: 600;
+}
+.thumb {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+.title-cell { font-weight: 600; color: #1f2937; }
+.link a { color: #2563eb; text-decoration: none; }
+.link a:hover { text-decoration: underline; }
+
+/* === 공통 버튼/유틸 === */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: #2563eb; border-color: #1d4ed8; color: #fff; }
+.btn.danger  { background: #ef4444; border-color: #dc2626; color: #fff; }
+.btn.ghost   { background: #f9fafb; }
+.btn.pill    { border-radius: 9999px; padding: 8px 14px; }
+.hidden { display: none !important; }
+
+/* === 상태 === */
+.empty, .error, .loading { padding: 16px; color: #444; }
+.error { color: #b91c1c; }
+
+/* === 헤더(뒤로가기 + 제목 + 추가 버튼) === */
+.page-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:#fff; padding:14px 16px; border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.08);
+  margin-bottom:12px;
+}
+.page-head .left{ display:flex; align-items:center; gap:10px; }
+.page-head .title{ font-size:20px; font-weight:700; color:#111827; margin:0; }
+.page-head .actions{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* 뒤로가기 버튼: id/class 모두 지원 */
+#backBtn,
+.page-head .back-btn{
+  width:36px; height:36px;
+  border-radius:8px; border:1px solid #e5e7eb; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; padding:0; margin-right:4px;
+}
+#backBtn:hover,
+.page-head .back-btn:hover{ background:#f3f4f6; }
+#backBtn img, #backBtn svg,
+.page-head .back-btn img, .page-head .back-btn svg{ width:20px; height:20px; object-fit:contain; }
+
+/* ===== Pretty Modal v2 ===== */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;                 /* 작은 화면 여백 */
+  background: rgba(15,23,42,.48);
+  backdrop-filter: blur(4px);    /* 배경 블러 */
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.modal {
+  width: min(720px, 100%);
+  max-height: 88vh;
+  display: flex; flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow:
+    0 30px 60px rgba(2,6,23,.25),
+    0 2px 8px rgba(2,6,23,.1);
+  overflow: hidden;              /* 헤더/푸터 라운드 유지 */
+}
+
+/* 헤더 */
+.modal header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f7;
+  background: linear-gradient(#fbfdff, #f7f9fc);
+}
+.modal header .title {
+  font-size: 18px; font-weight: 700; color: #0f172a;
+  letter-spacing: -.01em;
+}
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 10px;
+  border: 1px solid #e5e7eb; background: #fff; color: #64748b;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: .16s ease;
+}
+.icon-btn:hover { background:#f3f4f6; color:#0f172a; border-color:#d1d5db; }
+.icon-btn svg { width: 18px; height: 18px; }
+
+/* 본문 */
+.modal .body {
+  padding: 16px;
+  overflow: auto;                /* 내용만 스크롤 */
+  display: grid;
+  gap: 12px;
+}
+.modal .row {
+  display: grid;
+  grid-template-columns: 128px minmax(0,1fr);
+  align-items: center;
+  gap: 12px;
+}
+.modal .row label {
+  font-size: 13px; font-weight: 600; color: #334155; text-align: right;
+}
+
+/* 입력 공통 */
+.modal input[type="text"],
+.modal input[type="url"],
+.modal input[type="date"],
+.modal textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d7dde5;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 14px; color: #0f172a;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.modal textarea { min-height: 110px; resize: vertical; }
+.modal input:disabled, .modal textarea:disabled { background:#f5f7fb; color:#64748b; }
+
+/* 포커스 링 */
+.modal input:focus, .modal textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* 썸네일 필드 */
+.modal .thumb-wrap {
+  display: grid;
+  grid-template-columns: 120px minmax(0,1fr);
+  gap: 12px; align-items: center;
+}
+.modal .thumb-wrap img {
+  width: 120px; height: 72px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb; border-radius: 10px;
+  background: #f8fafc;
+}
+
+/* 푸터 */
+.modal footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid #eef2f7;
+  background: #fbfcfe;
+}
+
+/* 버튼 */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  height: 36px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid #e5e7eb; background:#fff;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  transition: transform .02s ease, filter .15s ease, background .15s ease;
+}
+.btn:hover { filter: brightness(0.98); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity:.55; cursor:not-allowed; }
+
+.btn.primary { background:#2563eb; border-color:#1d4ed8; color:#fff; }
+.btn.ghost   { background:#f3f6fb; }
+.btn.danger  { background:#ef4444; border-color:#dc2626; color:#fff; }
+
+/* 작은 도움문구 */
+.readonly-note {
+  margin-top: 6px; font-size: 12px; color:#6b7280;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 560px) {
+  .modal { border-radius: 14px; }
+  .modal .row, .modal .thumb-wrap {
+    grid-template-columns: 1fr;  /* 라벨 위, 입력 아래 */
+  }
+  .modal .row label { text-align: left; }
+}
+
+
+/* 닫기 아이콘 버튼 */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid #e5e7eb; background: #fff; color: #6b7280; cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.icon-btn:hover { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+.icon-btn svg { width: 18px; height: 18px; }
