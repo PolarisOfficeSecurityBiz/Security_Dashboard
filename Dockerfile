@@ -1,16 +1,16 @@
 # ---------- build stage ----------
-FROM gradle:8.9-jdk21-alpine AS build
-WORKDIR /workspace
-COPY build.gradle settings.gradle gradle.properties* ./
-COPY gradle gradle
-RUN gradle --no-daemon build -x test || true  # 의존성 캐시용 프리빌드
-COPY . .
-RUN gradle --no-daemon clean bootJar
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /src
+# 의존성 캐시
+COPY PolarisSecurityDashboard/pom.xml .
+RUN mvn -B -q -DskipTests dependency:go-offline
+# 소스 복사 & 빌드
+COPY PolarisSecurityDashboard/src ./src
+RUN mvn -B -DskipTests package
 
 # ---------- runtime stage ----------
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-# 빌드 산출물 jar 경로는 프로젝트 구조에 맞게 조정
-COPY --from=build /workspace/build/libs/*-SNAPSHOT.jar app.jar
+COPY --from=build /src/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
