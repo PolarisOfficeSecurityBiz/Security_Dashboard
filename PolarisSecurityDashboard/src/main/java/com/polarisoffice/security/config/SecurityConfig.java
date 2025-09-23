@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,23 +23,35 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                                   DaoAuthenticationProvider provider) throws Exception {
+                                           DaoAuthenticationProvider provider) throws Exception {
         http
             .authenticationProvider(provider)
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                // Swagger UI & API Docs 허용
+                .requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+
+                // 공용 접근 허용
                 .requestMatchers(
                     "/", "/login", "/signup", "/admin/signup", "/after-login",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error"
                 ).permitAll()
+
+                // 권한 기반 접근
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
+
+                // 나머지 인증 필요
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email")      // ★ 이메일로 변경
+                .usernameParameter("email")      // 이메일로 로그인
                 .passwordParameter("password")
                 .successHandler((req, res, auth) -> res.sendRedirect("/after-login"))
                 .failureUrl("/login?error")
@@ -58,12 +71,11 @@ public class SecurityConfig {
         String idForEncode = "bcrypt";
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put("bcrypt", new BCryptPasswordEncoder());
-        // 운영에서는 아래 줄 주석/삭제 권장
+        // 운영에서는 NoOp는 제거 권장
         encoders.put("noop", NoOpPasswordEncoder.getInstance());
 
         DelegatingPasswordEncoder delegating =
                 new DelegatingPasswordEncoder(idForEncode, encoders);
-        // {id} 없는 레거시 해시는 BCrypt로 매칭 시도
         delegating.setDefaultPasswordEncoderForMatches(new BCryptPasswordEncoder());
         return delegating;
     }
