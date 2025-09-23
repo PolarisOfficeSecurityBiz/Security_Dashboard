@@ -71,7 +71,7 @@ public class SecurityConfig {
         String idForEncode = "bcrypt";
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put("bcrypt", new BCryptPasswordEncoder());
-        // 운영에서는 NoOp는 제거 권장
+        // 운영에서는 NoOp 제거 권장
         encoders.put("noop", NoOpPasswordEncoder.getInstance());
 
         DelegatingPasswordEncoder delegating =
