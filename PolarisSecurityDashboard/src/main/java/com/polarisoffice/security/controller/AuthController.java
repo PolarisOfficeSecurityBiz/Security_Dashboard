@@ -12,10 +12,10 @@ public class AuthController {
         return "login"; // templates/login.html
     }
 
-    /** 회원가입 페이지 (필요 시) */
-    @GetMapping("/signup")
-    public String signupPage() {
-        return "signup"; // templates/signup.html (관리자 전용은 /admin/signup 사용)
+    @GetMapping("/admin/signup")
+    public String adminSignupPage() {
+        // templates/admin/signup.html 을 렌더
+        return "admin_signup";
     }
 
 }
