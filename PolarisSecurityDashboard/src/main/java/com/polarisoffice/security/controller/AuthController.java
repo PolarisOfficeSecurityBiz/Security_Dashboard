@@ -12,10 +12,5 @@ public class AuthController {
         return "login"; // templates/login.html
     }
 
-    @GetMapping("/admin/signup")
-    public String adminSignupPage() {
-        // templates/admin/signup.html 을 렌더
-        return "admin_signup";
-    }
 
 }
