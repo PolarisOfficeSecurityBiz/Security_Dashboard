@@ -15,11 +15,12 @@ import org.springframework.core.io.Resource;
 @Configuration
 public class FirestoreConfig {
 
-  @Value("${gcp.project-id:}")
+  // gcp.project-id 우선, 없으면 spring.cloud.gcp.project-id
+  @Value("${gcp.project-id:${spring.cloud.gcp.project-id:}}")
   private String projectId;
 
-  // Resource 타입으로 받으면 file:, classpath: 모두 처리 가능
-  @Value("${gcp.credentials.location:}")
+  // gcp.credentials.location 우선, 없으면 spring.cloud.gcp.credentials.location
+  @Value("${gcp.credentials.location:${spring.cloud.gcp.credentials.location:}}")
   private Resource credentialsLocation;
 
   @Bean
@@ -31,7 +32,7 @@ public class FirestoreConfig {
         credentials = GoogleCredentials.fromStream(is);
       }
     } else {
-      // 환경변수 GOOGLE_APPLICATION_CREDENTIALS 또는 GCP 런타임 기본자격증명 사용
+      // 최후: ADC (환경변수 GOOGLE_APPLICATION_CREDENTIALS, gcloud ADC, GCP 메타데이터)
       credentials = GoogleCredentials.getApplicationDefault();
     }
 

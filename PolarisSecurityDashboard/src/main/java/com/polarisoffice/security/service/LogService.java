@@ -41,4 +41,28 @@ public class LogService {
     }
 
     // Remote, Rooting 도 같은 방식
+    public RemoteLog attachRemote(RemoteLogRequest req) {
+        LogEntry entry = logEntryRepo.findById(req.getLogEntryId()).orElseThrow();
+        RemoteLog ml = RemoteLog.builder()
+                .logEntry(entry)
+                .remoteType(req.getRemoteType())
+                .packageName(req.getPackageName())
+                .path(req.getPath())
+                .androidId(req.getAndroidId())
+                .build();
+        return remoteRepo.save(ml);
+    }
+
+    public RootingLog attachRooting(RootingRequest req) {
+        LogEntry entry = logEntryRepo.findById(req.getLogEntryId()).orElseThrow();
+        RootingLog ml = RootingLog.builder()
+                .logEntry(entry)
+                .rootReason(req.getRootReason())
+                .path(req.getPath())
+                .androidId(req.getAndroidId())
+                .build();
+        return rootingRepo.save(ml);
+    }
+
+    
 }
