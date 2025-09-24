@@ -18,15 +18,15 @@ jobs:
         uses: actions/checkout@v4
 
       # Docker 이미지 메타데이터 (태그, 라벨 등 자동 생성)
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/lilyblee123/security-app
-          tags: |
-            type=raw,value=latest
-            type=sha
-
+- name: Docker meta
+  id: meta
+  uses: docker/metadata-action@v5
+  with:
+    # 👇 리포 풀네임(OWNER/REPO)을 그대로 이미지 이름으로 사용
+    images: ghcr.io/${{ github.repository }}
+    tags: |
+      type=raw,value=latest
+      type=sha,format=short
       # GHCR 로그인
       - name: Login to GHCR
         uses: docker/login-action@v3
