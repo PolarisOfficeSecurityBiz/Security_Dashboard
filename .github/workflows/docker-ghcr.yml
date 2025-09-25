@@ -1,4 +1,4 @@
-name: Build & Push (GHCR)
+name: Build & Deploy (GHCR)
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # 예: lily-b-lee/Security_Dashboard
 
 jobs:
   build-push:
@@ -28,12 +27,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 👇 여기서 소문자 이미지 이름을 만들어 환경변수로 저장
-      - name: Compute lowercased image name
+      # 이미지 이름 계산: 전부 소문자(LC) + 언더스코어를 하이픈으로 바꾼(HY) 버전 동시 푸시
+      - name: Compute image names (lowercase + hyphen)
         run: |
-             echo "IMAGE_NAME_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-             echo "IMAGE_NAME_HY=${GITHUB_REPOSITORY,,}" | sed 's/_/-/g' | awk '{print "IMAGE_NAME_HY="$1}' >> $GITHUB_ENV
-
+          echo "IMAGE_NAME_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          echo "IMAGE_NAME_HY=$(echo ${GITHUB_REPOSITORY,,} | sed 's/_/-/g')" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -41,14 +39,35 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+            ghcr.io/${{ env.IMAGE_NAME_LC }}:latest
+            ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+            ghcr.io/${{ env.IMAGE_NAME_HY }}:latest
+            ghcr.io/${{ env.IMAGE_NAME_HY }}:${{ github.sha }}
+
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy (pin to this commit)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             set -e
-            echo "${{ secrets.PROD_DOCKER_PAT }}" | docker login ghcr.io -u lily-b-lee --password-stdin
             cd ~/apps/security_dashboard
+
+            # 이번 커밋 SHA로 이미지 태그 고정 (compose에서 ${IMAGE_TAG} 사용)
+            echo "IMAGE_TAG=${GITHUB_SHA}" > .env
+
+            # GHCR 로그인(PAT: read:packages)
+            echo "${{ secrets.PROD_DOCKER_PAT }}" | docker login ghcr.io -u lily-b-lee --password-stdin
+
+            # 새 태그로 pull & 재기동
             docker compose pull
             docker compose up -d
+
+            # 상태 확인
             docker compose ps
-          # 필요하면:
-          # platforms: linux/amd64,linux/arm64
+            docker inspect -f '{{.Config.Image}} {{.Image}} {{.State.StartedAt}}' security_dashboard
