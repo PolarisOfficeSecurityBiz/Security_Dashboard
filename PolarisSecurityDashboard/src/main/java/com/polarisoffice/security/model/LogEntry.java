@@ -18,9 +18,12 @@ public class LogEntry {
     private LogType logType;
 
     private LocalDateTime createdAt;
+
+    // DTO는 문자열이지만, 여기서는 Integer로 유지 → 서비스에서 파싱
     private Integer osVersion;
     private Integer appVersion;
 
+    // DTO.extra(Map) → 여기서는 JSON 문자열로 저장
     @Column(columnDefinition = "TEXT")
     private String extra;
 }

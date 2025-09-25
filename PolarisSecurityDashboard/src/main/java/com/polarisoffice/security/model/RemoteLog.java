@@ -10,6 +10,7 @@ public class RemoteLog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // DTO는 List<String> → 여기서는 JSON 문자열로 저장
     @Column(columnDefinition = "TEXT")
     private String remoteType;
 
@@ -17,6 +18,6 @@ public class RemoteLog {
     private String path;
     private String androidId;
 
-    @OneToOne @JoinColumn(name="log_id")
+    @OneToOne @JoinColumn(name="log_id", nullable = false, unique = true)
     private LogEntry logEntry;
 }

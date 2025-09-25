@@ -1,4 +1,4 @@
-// model/RootingLog.java
+// model/RootingLog.java  ← 누락되어 있던 엔티티 추가
 package com.polarisoffice.security.model;
 
 import jakarta.persistence.*;
@@ -10,12 +10,10 @@ public class RootingLog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
     private String rootReason;
-
     private String path;
     private String androidId;
 
-    @OneToOne @JoinColumn(name="log_id")
+    @OneToOne @JoinColumn(name="log_id", nullable = false, unique = true)
     private LogEntry logEntry;
 }
