@@ -48,26 +48,27 @@ jobs:
     needs: build-push
     runs-on: ubuntu-latest
     steps:
-      - name: SSH deploy (pin to this commit)
+      - name: Assert secrets
+      - run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "Missing SSH_HOST"; exit 1; }
+          test -n "${{ secrets.SSH_USER }}" || { echo "Missing SSH_USER"; exit 1; }
+          test -n "${{ secrets.PROD_SSH_KEY }}" || { echo "Missing PROD_SSH_KEY"; exit 1; }
+          test -n "${{ secrets.PROD_DOCKER_PAT }}" || { echo "Missing PROD_DOCKER_PAT"; exit 1; }
+
+      - name: SSH deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USER }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             set -e
-            cd ~/apps/security_dashboard
-
-            # 이번 커밋 SHA로 이미지 태그 고정 (compose에서 ${IMAGE_TAG} 사용)
+            cd ${COMPOSE_DIR:-~/apps/security_dashboard}
             echo "IMAGE_TAG=${GITHUB_SHA}" > .env
-
-            # GHCR 로그인(PAT: read:packages)
             echo "${{ secrets.PROD_DOCKER_PAT }}" | docker login ghcr.io -u lily-b-lee --password-stdin
-
-            # 새 태그로 pull & 재기동
             docker compose pull
             docker compose up -d
-
-            # 상태 확인
             docker compose ps
-            docker inspect -f '{{.Config.Image}} {{.Image}} {{.State.StartedAt}}' security_dashboard
+
+
