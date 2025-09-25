@@ -40,5 +40,12 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+          script: |
+            set -e
+            echo "${{ secrets.PROD_DOCKER_PAT }}" | docker login ghcr.io -u lily-b-lee --password-stdin
+            cd ~/apps/security_dashboard
+            docker compose pull
+            docker compose up -d
+            docker compose ps
           # 필요하면:
           # platforms: linux/amd64,linux/arm64
