@@ -33,4 +33,9 @@ public class HomeController {
     public String customerDashboard() {
         return "customer/dashboard";
     }
+    
+    @GetMapping("/admin/logs")
+    public String adminLogs() {
+    	return "admin/logs";
+    }
 }

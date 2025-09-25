@@ -1,15 +1,31 @@
-# ---------- build stage ----------
+# ---------- Build stage ----------
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /workspace
-# 전체 모듈을 통째로 복사(멀티모듈/추가 파일 누락 방지)
-COPY PolarisSecurityDashboard/ .
-# 의존성/빌드
-RUN mvn -B -DskipTests package
 
-# ---------- runtime stage ----------
-FROM eclipse-temurin:17-jre-alpine
+# 모듈 POM만 먼저 복사 (루트 POM이 없다고 가정)
+COPY PolarisSecurityDashboard/pom.xml PolarisSecurityDashboard/pom.xml
+
+# 의존성 선반영
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -e -U \
+        -f PolarisSecurityDashboard/pom.xml \
+        -DskipTests -DskipITs -Dmaven.test.skip=true \
+        --no-transfer-progress dependency:go-offline
+
+# 실제 소스 복사 (모듈만)
+COPY PolarisSecurityDashboard/ PolarisSecurityDashboard/
+
+# 패키징
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -e -U \
+        -f PolarisSecurityDashboard/pom.xml \
+        clean package \
+        -DskipTests -DskipITs -Dmaven.test.skip=true \
+        --no-transfer-progress
+
+# ---------- Runtime stage ----------
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-# 결과 JAR 복사 (target/*.jar)
-COPY --from=build /workspace/target/*.jar app.jar
+COPY --from=build /workspace/PolarisSecurityDashboard/target/*jar /app/app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]

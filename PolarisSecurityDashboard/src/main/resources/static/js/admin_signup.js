@@ -6,7 +6,7 @@
   const qsa = (sel, root = document) => Array.prototype.slice.call(root.querySelectorAll(sel));
   const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  // 비번 토글 (로그인 페이지와 동일 UX)
+  /* ======== 비번 토글 ======== */
   window.togglePassword = function (btnEl) {
     try {
       const btn = btnEl || qs('.pw-toggle');
@@ -16,10 +16,10 @@
       const nextType = input.type === 'password' ? 'text' : 'password';
       input.type = nextType;
       btn.setAttribute('aria-label', nextType === 'password' ? 'Show password' : 'Hide password');
-    } catch(_) {}
+    } catch (_) {}
   };
 
-  // 에러박스
+  /* ======== 에러 박스 ======== */
   const showError = function (form, text) {
     let box = qs('.alert.dynamic', form);
     if (!box) {
@@ -36,6 +36,12 @@
     box.textContent = text;
   };
 
+  const clearError = function (form) {
+    const box = qs('.alert.dynamic', form);
+    if (box) box.remove();
+  };
+
+  /* ======== 제출 상태 ======== */
   const setSubmitting = function (form, on) {
     const btn = qs('#btn-submit', form);
     if (!btn) return;
@@ -52,7 +58,7 @@
     }
   };
 
-  // 비번 강도
+  /* ======== 비번 강도 ======== */
   const scorePassword = (pw) => {
     let s = 0;
     if (!pw) return 0;
@@ -68,9 +74,12 @@
     const bar = qs('#pw-bar');
     const hint = qs('#pw-hint');
     const sc = scorePassword(pw);
-    const perc = (sc/5)*100;
+    const perc = (sc / 5) * 100;
     if (bar) {
       bar.style.width = perc + '%';
+      bar.style.height = '6px';
+      bar.style.borderRadius = '6px';
+      bar.style.transition = 'width .15s ease';
       bar.style.background = sc <= 2 ? '#ef4444' : sc <= 3 ? '#f59e0b' : '#10b981';
     }
     if (hint) {
@@ -78,9 +87,21 @@
     }
   };
 
+  /* ======== 초기화 ======== */
   document.addEventListener('DOMContentLoaded', function () {
     const form = qs('#admin-signup-form');
     if (!form) return;
+
+    // ✅ 서버 안전 가드: action을 반드시 /admin/signup 으로 고정
+    try {
+      const url = new URL(location.href);
+      const base = url.origin; // http(s)://host[:port]
+      form.setAttribute('action', '/admin/signup'); // 앱 컨텍스트 루트 기준
+      // 필요 시 절대 URL로 강제하려면 아래 사용:
+      // form.setAttribute('action', base + '/admin/signup');
+    } catch (_) {
+      form.setAttribute('action', '/admin/signup');
+    }
 
     const nameEl = qs('#username', form);
     const emailEl = qs('#email', form);
@@ -97,9 +118,17 @@
 
     // 강도 업데이트
     pwEl && pwEl.addEventListener('input', () => updateMeter(pwEl.value));
+    updateMeter(''); // 초기 표시
 
-    // 전송
+    // BFCache 복귀 시 버튼 잠김 해제
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) setSubmitting(form, false);
+    });
+
+    // 제출
     form.addEventListener('submit', function (e) {
+      clearError(form);
+
       const name = (nameEl?.value || '').trim();
       const email = (emailEl?.value || '').trim();
       const pw = pwEl?.value || '';
@@ -123,12 +152,10 @@
         e.preventDefault(); showError(form, '약관에 동의해 주세요.'); agreeEl?.focus(); return;
       }
 
-      // 서버 DTO와 일치: email, password, username, role=ADMIN (hidden)
-      // 컨트롤러는 /signup POST 처리 후 /login으로 리다이렉트함
+      // 제출 진행
       setSubmitting(form, true);
+      // 서버 컨트롤러가 성공 시 반드시 redirect:/login 하도록 구성해야 최종 이동이 /login
+      // 실패 시 RedirectAttributes로 error flash → 다시 /admin/signup 로 리다이렉트
     });
-
-    // 초기 강도 표시
-    updateMeter('');
   });
 })();
