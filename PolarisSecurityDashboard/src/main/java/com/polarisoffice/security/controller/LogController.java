@@ -4,6 +4,7 @@ import com.polarisoffice.security.dto.*;
 import com.polarisoffice.security.model.*;
 import com.polarisoffice.security.service.LogService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.net.URI;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/logs")
@@ -34,4 +36,23 @@ public class LogController {
                 .toUri();
         return ResponseEntity.created(location).build();  // 201 + Location 헤더, 바디 없음
     }
+    
+    @GetMapping("/report")
+    @Operation(summary = "최근 로그 조회(집계용 원본 목록)",
+            description = """
+                days 일수 이내의 로그 목록을 반환합니다(기본 7, 최대 30).
+                선택 필터: type(MALWARE/REMOTE/ROOTING), domain(부분일치).
+                응답은 프론트에서 클라이언트 집계/페이징에 사용됩니다.
+                """)
+    public ResponseEntity<List<LogListItem>> getReport(
+            @Parameter(description = "조회 기간(일). 기본 7, 최대 30")
+            @RequestParam(name = "days", required = false) Integer days,
+            @Parameter(description = "로그 타입 필터 (예: MALWARE, REMOTE, ROOTING)")
+            @RequestParam(name = "type", required = false) LogType type,
+            @Parameter(description = "도메인 부분일치 필터")
+            @RequestParam(name = "domain", required = false) String domain
+    ) {
+        return ResponseEntity.ok(logService.getReport(days, type, domain));
+    }
+    
 }

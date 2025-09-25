@@ -3,6 +3,7 @@ package com.polarisoffice.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.polarisoffice.security.dto.LogListItem;
 import com.polarisoffice.security.dto.LogUpsertRequest;
 import com.polarisoffice.security.model.*;
 import com.polarisoffice.security.repository.*;
@@ -93,5 +94,25 @@ public class LogService {
         if (list == null) return null;
         try { return om.writeValueAsString(list); }
         catch (JsonProcessingException e) { throw new IllegalArgumentException("invalid list json", e); }
+    }
+    
+    public List<LogListItem> getReport(Integer days, LogType type, String domain) {
+        int d = (days == null ? 7 : Math.max(1, Math.min(days, 30))); // 1~30일로 가드
+        LocalDateTime from = LocalDateTime.now().minusDays(d);
+
+        String domainLike = (domain == null || domain.isBlank()) ? null : domain;
+        List<LogEntry> rows = logEntryRepo.findRecent(from, type, domainLike);
+
+        return rows.stream()
+                .map(l -> new LogListItem(
+                        l.getId(),
+                        l.getDomain(),
+                        l.getLogType(),
+                        l.getCreatedAt(),
+                        l.getOsVersion(),
+                        l.getAppVersion(),
+                        l.getExtra()
+                ))
+                .toList();
     }
 }
