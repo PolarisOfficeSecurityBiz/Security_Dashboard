@@ -30,7 +30,10 @@ jobs:
 
       # 👇 여기서 소문자 이미지 이름을 만들어 환경변수로 저장
       - name: Compute lowercased image name
-        run: echo "IMAGE_NAME_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+        run: |
+             echo "IMAGE_NAME_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+             echo "IMAGE_NAME_HY=${GITHUB_REPOSITORY,,}" | sed 's/_/-/g' | awk '{print "IMAGE_NAME_HY="$1}' >> $GITHUB_ENV
+
 
       - name: Build and push
         uses: docker/build-push-action@v6
