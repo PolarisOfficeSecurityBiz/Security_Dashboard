@@ -1,0 +1,95 @@
+/* ===== 라이트 테마 변수 ===== */
+:root{
+  --bg:#f7f9fc;
+  --panel:#ffffff;
+  --accent:#2563eb;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --ok:#16a34a;
+  --warn:#d97706;
+  --bad:#dc2626;
+}
+
+/* ===== 페이지 범위 강제 오버라이드 (네비는 유지, 콘텐츠만 라이트) ===== */
+.admin-body, .admin-main { background:var(--bg) !important; }
+.admin-main, .admin-main * { color:var(--text) !important; background-image:none !important; }
+
+/* 상단바 */
+.admin-main .topbar{
+  padding:20px 24px; border-bottom:1px solid var(--border);
+  background:#fff !important; position:sticky; top:0; z-index:20;
+}
+.admin-main .topbar h1{margin:0; font-size:20px}
+.admin-main .subtitle{color:var(--muted); font-size:12px; margin-top:6px}
+
+/* 레이아웃 */
+.admin-main .container{max-width:1100px; margin:22px auto; padding:0 16px}
+
+/* 공통 카드/패널 */
+.admin-main .panel{
+  background:#fff !important;
+  border:1px solid var(--border) !important;
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 8px 24px rgba(15,23,42,.06) !important;
+}
+
+/* 필터 영역 */
+.admin-main .filters .row{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap}
+.admin-main label{display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted)}
+.admin-main input, .admin-main select{
+  background:#fff !important; color:var(--text) !important; border:1px solid var(--border) !important;
+  border-radius:10px; padding:10px 12px; min-width:200px; outline:none;
+}
+.admin-main .grow{flex:1}
+.admin-main .btn{
+  border:1px solid var(--border) !important; background:#fff !important; color:var(--text) !important;
+  padding:10px 14px; border-radius:10px; cursor:pointer;
+}
+.admin-main .btn:hover{border-color:#cbd5e1 !important}
+.admin-main .btn.primary{background:var(--accent) !important; color:#fff !important; border-color:transparent !important}
+
+/* KPI */
+.admin-main .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0}
+.admin-main .kpi{background:#fff !important; border:1px solid var(--border) !important; border-radius:12px; padding:14px}
+.admin-main .kpi-label{color:var(--muted); font-size:12px}
+.admin-main .kpi-value{font-size:26px; margin-top:6px; font-weight:700}
+
+/* 그룹 리스트 */
+.admin-main .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0}
+.admin-main .list{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+.admin-main .item{display:flex; justify-content:space-between; border:1px dashed var(--border) !important; border-radius:10px; padding:10px 12px; background:#fff !important}
+.admin-main .badge{font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--border) !important; background:#fff !important}
+.admin-main .badge.type-MALWARE{border-color:var(--bad) !important; color:#991b1b !important}
+.admin-main .badge.type-REMOTE{border-color:var(--warn) !important; color:#7c2d12 !important}
+.admin-main .badge.type-ROOTING{border-color:var(--ok) !important; color:#14532d !important}
+
+/* 테이블 */
+.admin-main .table-header{display:flex; justify-content:space-between; align-items:center}
+.admin-main .table-wrap{overflow:auto; border:1px solid var(--border) !important; border-radius:12px; margin-top:10px; background:#fff !important}
+.admin-main table{border-collapse:separate; border-spacing:0; width:100%; min-width:880px; background:#fff !important}
+.admin-main thead th{
+  position:sticky; top:0; background:#f3f4f6 !important; color:#334155 !important;
+  font-weight:600; text-align:left; padding:12px; font-size:12px; border-bottom:1px solid var(--border) !important;
+}
+.admin-main tbody td{padding:10px 12px; border-bottom:1px solid #e5e7eb !important; font-size:13px; color:#111827 !important}
+.admin-main tbody tr:hover{background:#f9fafb !important}
+
+/* 푸터/자잘한 것 */
+.admin-main .pager{display:flex; justify-content:center; gap:12px; margin-top:12px}
+.admin-main .muted{color:var(--muted) !important}
+.admin-main .foot{max-width:1100px; margin:24px auto; padding:0 16px; text-align:center; font-size:12px; opacity:.8}
+
+/* 네비게이션(.admin-nav)은 그대로 어둡게 유지됨 */
+/* ---- Day bar chart ---- */
+.chart-wrap{
+  width:100%;
+  height:260px;              /* 카드 안 고정 높이 */
+  padding:8px 6px 4px;
+}
+.chart-wrap canvas{
+  width:100%;                /* 반응형 */
+  height:100%;
+  display:block;
+}
