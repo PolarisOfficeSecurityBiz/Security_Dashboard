@@ -40,15 +40,28 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // CORS preflight 허용
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
                 // ✅ 목록 읽기(모든 GET) 공개
                 .requestMatchers(HttpMethod.GET, "/api/v1/polar-notices", "/api/v1/polar-notices/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/polar-letters", "/api/v1/polar-letters/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/secu-news", "//api/v1/secu-news/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/direct-ads", "/api/v1/direct-ads/**").permitAll()
 
                 // ✍️ 쓰기는 ADMIN만
                 .requestMatchers(HttpMethod.POST,   "/api/v1/polar-notices/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH,  "/api/v1/polar-notices/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/polar-notices/**").hasRole("ADMIN")
-
+                //폴라레터
+                .requestMatchers(HttpMethod.POST,   "/api/v1/polar-letters/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/v1/polar-letters/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/polar-letters/**").hasRole("ADMIN")
+                //시큐뉴스
+                .requestMatchers(HttpMethod.POST,   "/api/v1/secu-news/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/v1/secu-news/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/secu-news/**").hasRole("ADMIN")
+                //직광고
+                .requestMatchers(HttpMethod.POST,   "/api/v1/direct-ads/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/v1/direct-ads/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/direct-ads/**").hasRole("ADMIN")
                 // 그 외 API는 인증 필요
                 .anyRequest().authenticated()
             )
