@@ -34,21 +34,17 @@ public class SecurityConfig {
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http
             .securityMatcher(new AntPathRequestMatcher("/api/**"))
+            .cors(Customizer.withDefaults()) // ⬅️ 전역 CORS Bean 사용
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // CORS preflight 허용
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 공개 API
                 .requestMatchers("/api/logs/**").permitAll()
-                // 나머지 API는 인증 필요 (원하면 더 개방 가능)
+                // 읽기 공개를 원하면 다음 줄 추가
                 .anyRequest().authenticated()
             )
-            // API는 리다이렉트 대신 401/403만
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            // 필요 시 토큰 없을 때 간단 인증용
             .httpBasic(Customizer.withDefaults())
-            // 폼 로그인/로그아웃 비활성화
             .formLogin(f -> f.disable())
             .logout(l -> l.disable());
 
@@ -62,25 +58,21 @@ public class SecurityConfig {
                                            DaoAuthenticationProvider provider) throws Exception {
         http
             .authenticationProvider(provider)
+            .cors(Customizer.withDefaults()) // ⬅️ 전역 CORS Bean 사용
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Swagger / OpenAPI
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                // 헬스체크
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // 정적/공용
                 .requestMatchers(
                     "/", "/login", "/signup", "/admin/signup", "/after-login",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error"
                 ).permitAll()
-                // 권한별 페이지
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                // 그 외는 인증
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -107,8 +99,7 @@ public class SecurityConfig {
         String idForEncode = "bcrypt";
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put("bcrypt", new BCryptPasswordEncoder());
-        // 운영에선 noop 제거 권장
-        encoders.put("noop", NoOpPasswordEncoder.getInstance());
+        encoders.put("noop", NoOpPasswordEncoder.getInstance()); // 운영에선 제거 권장
 
         DelegatingPasswordEncoder delegating =
                 new DelegatingPasswordEncoder(idForEncode, encoders);
