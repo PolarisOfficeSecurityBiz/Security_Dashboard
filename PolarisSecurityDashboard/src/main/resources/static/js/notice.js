@@ -1,22 +1,20 @@
 (function () {
-  const API = '/api/v1/polar-notices';
+  // ============ 🔧 설정 ============
+  // 같은 오리진으로 호출
+  const API_BASE = '';
+  const API = `${API_BASE}/api/v1/polar-notices`;
+
+  // 타임아웃(ms)
+  const FETCH_TIMEOUT = 10000;
+
+  // ============ 🔧 유틸 ============
   const $ = (s) => document.querySelector(s);
+  const state = { raw: [], filtered: [], current: null, mode: 'create' };
 
-  const state = { raw: [], filtered: [], current: null, mode: 'create' }; // mode: 'create' | 'edit'
-
-  // ====== helpers ======
   const esc = (s) => String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-  const toMs = (v) => {
-    if (!v) return 0;
-    const n = Date.parse(v);
-    return isNaN(n) ? 0 : n;
-  };
-
-  function show(id, visible) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = visible ? 'block' : 'none';
-  }
+  const toMs = (v) => { if (!v) return 0; const n = Date.parse(v); return isNaN(n) ? 0 : n; };
+  function show(id, visible) { const el = document.getElementById(id); if (el) el.style.display = visible ? 'block' : 'none'; }
+  function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text ?? ''; }
 
   function setModal(open) {
     const wrap = $('#noticeModal');
@@ -38,7 +36,6 @@
 
   function readForm() {
     return {
-      // id는 서버 생성(POST) 또는 path 변수(PATCH)
       title: $('#title').value?.trim(),
       category: $('#category').value?.trim(),
       author: $('#author').value?.trim(),
@@ -48,65 +45,78 @@
     };
   }
 
-  // ====== API ======
+  // ============ 공통 fetch ============
+  function withFetchOptions(extra = {}) {
+    const base = { headers: { Accept: 'application/json' } };
+    if (extra.headers) base.headers = { ...base.headers, ...extra.headers };
+    return { ...base, ...extra };
+  }
+
+  async function fetchJSON(url, options = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    const opts = withFetchOptions({ ...options, signal: controller.signal });
+
+    try {
+      const res = await fetch(url, opts);
+      if (!res.ok) {
+        let detail = '';
+        try { const txt = await res.text(); detail = txt ? ` - ${txt.slice(0, 500)}` : ''; } catch {}
+        throw new Error(`HTTP ${res.status}${detail}`);
+      }
+      if (res.status === 204) return null;
+
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        const txt = await res.text();
+        throw new Error(`Unexpected content-type: ${ct} - ${txt.slice(0, 200)}`);
+      }
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // ============ 📡 API 래퍼 ============
   async function list(size, q) {
     const params = new URLSearchParams();
     if (size) params.set('size', size);
     if (q) params.set('q', q);
-    const res = await fetch(`${API}?${params.toString()}`, { headers: { Accept: 'application/json'}});
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    return fetchJSON(`${API}?${params.toString()}`, { method: 'GET' });
   }
-
-  async function getById(id) {
-    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { headers: { Accept: 'application/json'}});
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-
+  async function getById(id) { return fetchJSON(`${API}/${encodeURIComponent(id)}`, { method: 'GET' }); }
   async function create(body) {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    return fetchJSON(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   }
-
   async function patch(id, body) {
-    const res = await fetch(`${API}/${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type':'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    return fetchJSON(`${API}/${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   }
+  async function destroy(id) { await fetchJSON(`${API}/${encodeURIComponent(id)}`, { method: 'DELETE' }); }
 
-  async function destroy(id) {
-    const res = await fetch(`${API}/${encodeURIComponent(id)}`, { method: 'DELETE' });
-    if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
-  }
-
-  // ====== list & render ======
+  // ============ 📋 목록 & 렌더 ============
   async function load() {
-    show('loading', true); show('error', false); show('empty', false);
+    show('loading', true); show('error', false); show('empty', false); setText('errorText', '');
     try {
       const size = Number($('#size')?.value || 100);
       const q = $('#q')?.value?.trim();
-      const data = await list(size, q);
-      state.raw = Array.isArray(data) ? data : [];
 
-      // 간단 정렬: 최신 작성일/수정일 우선(모델은 date만 있으므로 date 기준)
+      const data = await list(size, q);
+
+      let arr = [];
+      if (Array.isArray(data)) arr = data;
+      else if (Array.isArray(data?.content)) arr = data.content;
+      else if (Array.isArray(data?.items)) arr = data.items;
+
+      state.raw = arr;
       state.raw.sort((a, b) => toMs(b?.date) - toMs(a?.date));
       state.filtered = state.raw;
 
       render();
     } catch (e) {
       console.error('[notice] load failed', e);
-      $('#notice-tbody').innerHTML = '';
+      $('#notice-tbody') && ($('#notice-tbody').innerHTML = '');
       show('error', true);
+      setText('errorText', String(e.message || e));
     } finally {
       show('loading', false);
     }
@@ -119,7 +129,7 @@
 
     if (!state.filtered.length) {
       show('empty', true);
-      $('#countText').textContent = '0건';
+      setText('countText', '0건');
       return;
     }
     show('empty', false);
@@ -128,7 +138,6 @@
     state.filtered.forEach(n => {
       const tr = document.createElement('tr');
       tr.dataset.id = n.id ?? '';
-
       tr.innerHTML = `
         <td>${esc(n.date || '')}</td>
         <td>${esc(n.title || '')}</td>
@@ -136,14 +145,12 @@
         <td>${esc(n.author || '')}</td>
         <td>${n.imageURL ? `<img src="${esc(n.imageURL)}" alt="" style="width:50px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb">` : '—'}</td>
       `;
-
       tr.addEventListener('click', async () => {
         const id = tr.dataset.id;
         if (!id) return;
         try {
           const fresh = await getById(id);
-          state.current = fresh;
-          state.mode = 'edit';
+          state.current = fresh; state.mode = 'edit';
           $('#noticeModalTitle').textContent = '공지 수정';
           $('#deleteBtn').classList.remove('hidden');
           fillForm(fresh);
@@ -153,50 +160,35 @@
           alert('항목을 불러오지 못했습니다.');
         }
       });
-
       frag.appendChild(tr);
     });
-
     tb.appendChild(frag);
-    $('#countText').textContent = `${state.filtered.length}건`;
+    setText('countText', `${state.filtered.length}건`);
   }
 
-  // ====== wire up ======
+  // ============ 🔗 바인딩 ============
   document.addEventListener('DOMContentLoaded', () => {
     $('#refreshBtn')?.addEventListener('click', load);
     $('#q')?.addEventListener('input', () => load());
     $('#size')?.addEventListener('change', load);
 
-    // 새 공지
     $('#createBtn')?.addEventListener('click', () => {
-      state.current = null;
-      state.mode = 'create';
+      state.current = null; state.mode = 'create';
       $('#noticeModalTitle').textContent = '공지 등록';
       $('#deleteBtn').classList.add('hidden');
       fillForm(null);
       setModal(true);
     });
 
-    // 이미지 URL 프리뷰
-    $('#imageURL')?.addEventListener('input', () => {
-      $('#imgThumb').src = $('#imageURL').value || '';
-    });
+    $('#imageURL')?.addEventListener('input', () => { $('#imgThumb').src = $('#imageURL').value || ''; });
 
-    // 저장
     $('#saveBtn')?.addEventListener('click', async (e) => {
       e.preventDefault();
       try {
         const body = readForm();
         if (!body.title) { alert('제목은 필수입니다.'); return; }
-
-        if (state.mode === 'create') {
-          const created = await create(body);
-          state.current = created;
-        } else {
-          const id = $('#id').value;
-          const updated = await patch(id, body);
-          state.current = updated;
-        }
+        if (state.mode === 'create') state.current = await create(body);
+        else state.current = await patch($('#id').value, body);
         setModal(false);
         await load();
         alert('저장되었습니다.');
@@ -206,11 +198,9 @@
       }
     });
 
-    // 삭제
     $('#deleteBtn')?.addEventListener('click', async () => {
       if (!state.current?.id) return;
-      const yes = confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
-      if (!yes) return;
+      if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
       try {
         await destroy(state.current.id);
         setModal(false);
@@ -225,7 +215,6 @@
     $('#closeModal')?.addEventListener('click', () => setModal(false));
     $('#cancelBtn')?.addEventListener('click', () => setModal(false));
 
-    // 최초 로드
     load();
   });
 })();

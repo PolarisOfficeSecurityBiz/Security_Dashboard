@@ -34,16 +34,27 @@ public class SecurityConfig {
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http
             .securityMatcher(new AntPathRequestMatcher("/api/**"))
-            .cors(Customizer.withDefaults()) // ⬅️ 전역 CORS Bean 사용
+            .cors(Customizer.withDefaults())                 // 전역 CORS Bean 사용(같은 오리진이면 큰 영향 없음)
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // CORS preflight 허용
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/logs/**").permitAll()
-                // 읽기 공개를 원하면 다음 줄 추가
+
+                // ✅ 목록 읽기(모든 GET) 공개
+                .requestMatchers(HttpMethod.GET, "/api/v1/polar-notices", "/api/v1/polar-notices/**").permitAll()
+
+                // ✍️ 쓰기는 ADMIN만
+                .requestMatchers(HttpMethod.POST,   "/api/v1/polar-notices/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH,  "/api/v1/polar-notices/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/polar-notices/**").hasRole("ADMIN")
+
+                // 그 외 API는 인증 필요
                 .anyRequest().authenticated()
             )
+            // API는 리다이렉트 대신 401/403만
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+            // stateless + Basic(필요시 Post/Patch/Delete에 사용)
             .httpBasic(Customizer.withDefaults())
             .formLogin(f -> f.disable())
             .logout(l -> l.disable());
@@ -58,21 +69,26 @@ public class SecurityConfig {
                                            DaoAuthenticationProvider provider) throws Exception {
         http
             .authenticationProvider(provider)
-            .cors(Customizer.withDefaults()) // ⬅️ 전역 CORS Bean 사용
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                // Swagger / OpenAPI
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
+                // 헬스체크
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // 정적/공용
                 .requestMatchers(
                     "/", "/login", "/signup", "/admin/signup", "/after-login",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error"
                 ).permitAll()
+                // 권한별 페이지
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                // 나머지는 인증
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
