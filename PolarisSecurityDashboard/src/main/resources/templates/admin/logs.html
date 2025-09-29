@@ -5,45 +5,36 @@
 <head>
   <meta charset="UTF-8"/>
   <title>로그 관리</title>
-  <!-- 부모 레이아웃이 head를 컨트롤하므로 여기 링크는 생략 -->
+
+  <!-- 부모 레이아웃의 <head> 뒤에 페이지 전용 리소스 주입 -->
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/css/logs.css(v=${#dates.createNow().time})}" href="/css/logs.css"/>
+    <script defer th:src="@{/js/logs.js(v=${#dates.createNow().time})}" src="/js/logs.js"></script>
+  </th:block>
 </head>
 <body>
   <!-- ✅ 레이아웃의 layout:fragment="content" 를 채움 -->
   <div layout:fragment="content">
 
-    <!-- ✅ 페이지 전용 CSS를 head에 '확실히' 삽입 (부모 CSS 이후 로드) -->
-    <script>
-      (function injectLogsCss(){
-        var href = '/css/logs.css?v=10';
-        if(!document.querySelector('link[data-page-style="logs"]')){
-          var l = document.createElement('link');
-          l.rel = 'stylesheet';
-          l.href = href;
-          l.setAttribute('data-page-style','logs');
-          document.head.appendChild(l);
-        }
-      })();
-    </script>
-
-    <!-- (선택) 즉시 전환용 최소 인라인 보정 -->
-    <style>
-      .admin-body, .admin-main { background:#f7f9fc !important; }
-      .panel{ background:#fff !important; }
-    </style>
-
-    <header class="topbar">
-      <h1>Security Logs Dashboard</h1>
+    <!-- 상단 브레드크럼: Dashboards / 로그관리 -->
+    <header class="page-header">
+      <div class="breadcrumbs">
+        <a th:href="@{/admin}">Dashboards</a>
+        <span>/</span>
+        <strong>로그관리</strong>
+      </div>
     </header>
 
     <main class="container">
+
       <!-- Filters -->
       <section class="panel filters">
         <div class="row">
           <label>
             기간
             <select id="range">
-              <option value="7" selected>최근 7일</option>
               <option value="1">오늘</option>
+              <option value="7" selected>최근 7일</option>
               <option value="14">최근 14일</option>
               <option value="30">최근 30일</option>
             </select>
@@ -90,13 +81,12 @@
 
       <!-- Grouped Summaries -->
       <section class="grid-2">
-		<div class="panel">
-		  <h3>날짜별(최근 7일)</h3>
-		  <!-- 인라인 크기 강제 (CSS 미적용 대비) -->
-		  <div class="chart-wrap" style="width:100%;height:260px">
-		    <canvas id="by-day-chart" style="width:100%;height:100%;display:block"></canvas>
-		  </div>
-		</div>
+        <div class="panel">
+          <h3>날짜별(최근 7일)</h3>
+          <div class="chart-wrap">
+            <canvas id="by-day-chart"></canvas>
+          </div>
+        </div>
 
         <div class="panel">
           <h3>고객사(도메인)별</h3>
@@ -138,19 +128,6 @@
     <footer class="foot muted">
       Asia/Seoul 기준 · 클라이언트 집계(백엔드 응답 스키마: id, domain, logType, createdAt, osVersion, appVersion, extra)
     </footer>
-
-    <!-- ✅ 페이지 전용 JS (부모 후순위 로드 보장) -->
-    <script defer src="/js/logs.js?v=10"></script>
-    <script>
-      // 방어적으로 CSS 주입 재확인
-      (function ensureCss(){
-        if(!document.querySelector('link[data-page-style="logs"]')){
-          var l=document.createElement('link'); l.rel='stylesheet'; l.href='/css/logs.css?v=10'; l.setAttribute('data-page-style','logs');
-          document.head.appendChild(l);
-        }
-      })();
-    </script>
-
   </div>
 </body>
 </html>

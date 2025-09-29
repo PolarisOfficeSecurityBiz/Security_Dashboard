@@ -8,6 +8,7 @@
   <meta charset="UTF-8"/>
   <title th:text="${service.serviceName} + ' - 서비스 상세'">서비스 상세</title>
 
+  <!-- 페이지 전용 CSS/JS는 레이아웃의 <head> 영역에 삽입 -->
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/css/service_detail.css(v=${#dates.createNow().time})}"/>
     <script defer th:src="@{/js/service_detail.js(v=${#dates.createNow().time})}"></script>
@@ -31,95 +32,91 @@
     </div>
 
     <!-- =========== 서비스 정보 =========== -->
-    <!-- =========== 서비스 정보 =========== -->
-<section class="card card-elev section">
-  <div class="card-head">
-    <h3>서비스 정보</h3>
+    <section class="card card-elev section">
+      <div class="card-head">
+        <h3>서비스 정보</h3>
 
-		<div class="head-actions" id="svcToolbar">
-		  <!-- 보기 모드에서 보임 -->
-		  <button type="button" id="btnSvcEdit"   class="btn btn-ghost btn-sm">수정</button>
-		
-		  <form class="inline" id="deleteForm"
-		        th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/delete|}"
-		        method="post">
-		    <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-		    <button id="btnSvcDelete" type="submit" class="btn btn-danger btn-sm"
-		            onclick="return confirm('서비스를 삭제할까요?');">삭제</button>
-		  </form>
-		
-		  <!-- 편집 모드에서만 보임 -->
-		  <button type="submit" form="svcForm" id="btnSvcSave"   class="btn btn-primary btn-sm" hidden>저장</button>
-		  <button type="button"               id="btnSvcCancel" class="btn btn-ghost   btn-sm" hidden>취소</button>
-		</div>
+        <div class="head-actions" id="svcToolbar">
+          <!-- 보기 모드에서 보임 -->
+          <button type="button" id="btnSvcEdit"   class="btn btn-ghost btn-sm">수정</button>
 
-  </div>
+          <form class="inline" id="deleteForm"
+                th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/delete|}"
+                method="post">
+            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+            <button id="btnSvcDelete" type="submit" class="btn btn-danger btn-sm"
+                    onclick="return confirm('서비스를 삭제할까요?');">삭제</button>
+          </form>
 
-	  <div class="accordion-panel show">
-	  <form id="svcForm" class="form-grid" data-mode="view"
-	        th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/update|}"
-	        method="post" th:object="${service}">
-	    <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-	
-	    <!-- 1) 서비스 ID -->
-	    <label class="form-label">서비스 ID</label>
-	    <input class="form-control" th:value="${service.serviceId}" disabled/>
-	
-	    <!-- 2) 서비스명 -->
-	    <label class="form-label">서비스명 *</label>
-	    <input class="form-control" name="serviceName" required data-editable
-	           th:value="${service.serviceName}" disabled/>
-	
-	    <!-- 3) 도메인 -->
-	    <label class="form-label">도메인</label>
-	    <input class="form-control" name="domain" data-editable
-	           th:value="${service.domain}" disabled/>
-	
-	    <!-- 4) 상품유형 -->
-	    <label class="form-label">상품유형</label>
-	    <select class="form-control" data-editable disabled th:field="*{productType}">
-	      <option value="">-- 선택 --</option>
-	      <option value="V-Guard SDK2.0 - 일반버전">V-Guard SDK2.0 - 일반버전</option>
-	      <option value="V-Guard SDK2.0 - RB 포함버전">V-Guard SDK2.0 - RB 포함버전</option>
-	      <option value="V-Guard SDK2.0 - iOS 포함버전">V-Guard SDK2.0 - iOS 포함버전</option>
-	      <option value="V-Guard SDK3.0 - 일반버전">V-Guard SDK3.0 - 일반버전</option>
-	      <option value="V-Guard SDK3.0 - RB 포함버전">V-Guard SDK3.0 - RB 포함버전</option>
-	      <option value="V-Guard SDK3.0 - iOS 포함버전">V-Guard SDK3.0 - iOS 포함버전</option>
-	      <option value="Polaris SecuOne Web To App">Polaris SecuOne Web To App</option>
-	      <option value="Polaris SecuOne App To App">Polaris SecuOne App To App</option>
-	    </select>
-	
-	    <!-- 5) 라이선스 키 (입력과 같은 박스, 우측 버튼) -->
-	    <label class="form-label">라이선스 키</label>
-	    <div class="form-control input-addon">
-	      <span class="grow"
-	            th:classappend="${service.licenseId == null} ? 'muted' : ''"
-	            th:text="${service.licenseId != null ? service.licenseId : '미발급'}">미발급</span>
-	      <button type="submit" id="btnLicense" class="btn btn-primary btn-sm"
-	              form="licenseIssueForm">발급하기</button>
-	    </div>
-	
-	    <!-- 6) CPI -->
-	    <label class="form-label">CPI</label>
-	    <input class="form-control" type="number" name="cpiValue" data-editable
-	           th:value="${service.cpiValue}" min="0" step="1" disabled/>
-	
-	    <!-- 7) RS Rate -->
-	    <label class="form-label">RS Rate</label>
-	    <input class="form-control" type="number" name="rsRate" data-editable
-	           th:value="${service.rsRate}" min="0" step="0.01" disabled/>
-	  </form>
-	
-	  <!-- ▶ 라이선스 발급 별도 form (중첩 방지) -->
-	  <form id="licenseIssueForm"
-	        th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}"
-	        method="post" hidden>
-	    <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-	  </form>
-	</div>
+          <!-- 편집 모드에서만 보임 -->
+          <button type="submit" form="svcForm" id="btnSvcSave"   class="btn btn-primary btn-sm" hidden>저장</button>
+          <button type="button"               id="btnSvcCancel" class="btn btn-ghost   btn-sm" hidden>취소</button>
+        </div>
+      </div>
 
-</section>
+      <div class="accordion-panel show">
+        <form id="svcForm" class="form-grid" data-mode="view"
+              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/update|}"
+              method="post" th:object="${service}">
+          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
+          <!-- 1) 서비스 ID -->
+          <label class="form-label">서비스 ID</label>
+          <input class="form-control" th:value="${service.serviceId}" disabled/>
+
+          <!-- 2) 서비스명 -->
+          <label class="form-label">서비스명 *</label>
+          <input class="form-control" name="serviceName" required data-editable
+                 th:value="${service.serviceName}" disabled/>
+
+          <!-- 3) 도메인 -->
+          <label class="form-label">도메인</label>
+          <input class="form-control" name="domain" data-editable
+                 th:value="${service.domain}" disabled/>
+
+          <!-- 4) 상품유형 -->
+          <label class="form-label">상품유형</label>
+          <select class="form-control" data-editable disabled th:field="*{productType}">
+            <option value="">-- 선택 --</option>
+            <option value="V-Guard SDK2.0 - 일반버전">V-Guard SDK2.0 - 일반버전</option>
+            <option value="V-Guard SDK2.0 - RB 포함버전">V-Guard SDK2.0 - RB 포함버전</option>
+            <option value="V-Guard SDK2.0 - iOS 포함버전">V-Guard SDK2.0 - iOS 포함버전</option>
+            <option value="V-Guard SDK3.0 - 일반버전">V-Guard SDK3.0 - 일반버전</option>
+            <option value="V-Guard SDK3.0 - RB 포함버전">V-Guard SDK3.0 - RB 포함버전</option>
+            <option value="V-Guard SDK3.0 - iOS 포함버전">V-Guard SDK3.0 - iOS 포함버전</option>
+            <option value="Polaris SecuOne Web To App">Polaris SecuOne Web To App</option>
+            <option value="Polaris SecuOne App To App">Polaris SecuOne App To App</option>
+          </select>
+
+          <!-- 5) 라이선스 키 (입력과 같은 박스, 우측 버튼) -->
+          <label class="form-label">라이선스 키</label>
+          <div class="form-control input-addon">
+            <span class="grow"
+                  th:classappend="${service.licenseId == null} ? 'muted' : ''"
+                  th:text="${service.licenseId != null ? service.licenseId : '미발급'}">미발급</span>
+            <button type="submit" id="btnLicense" class="btn btn-primary btn-sm"
+                    form="licenseIssueForm">발급하기</button>
+          </div>
+
+          <!-- 6) CPI -->
+          <label class="form-label">CPI</label>
+          <input class="form-control" type="number" name="cpiValue" data-editable
+                 th:value="${service.cpiValue}" min="0" step="1" disabled/>
+
+          <!-- 7) RS Rate -->
+          <label class="form-label">RS Rate</label>
+          <input class="form-control" type="number" name="rsRate" data-editable
+                 th:value="${service.rsRate}" min="0" step="0.01" disabled/>
+        </form>
+
+        <!-- ▶ 라이선스 발급 별도 form (중첩 방지) -->
+        <form id="licenseIssueForm"
+              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}"
+              method="post" hidden>
+          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+        </form>
+      </div>
+    </section>
 
     <!-- =========== 담당자 =========== -->
     <section class="card card-elev section">
@@ -158,16 +155,52 @@
       </div>
     </section>
 
-    <!-- =========== 로그 (틀) =========== -->
-    <section class="card card-elev section">
-      <div class="card-head"><h3>로그</h3></div>
-      <div class="section-body">
-        <table class="table log-table">
-          <thead><tr><th>시간</th><th>레벨</th><th>메시지</th></tr></thead>
-          <tbody><tr><td colspan="3" class="empty">로그 데이터가 없습니다.</td></tr></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- =========== 로그(도메인 자동 필터) =========== -->
+<section
+  id="logsSection"
+  class="card card-elev section"
+  th:attr="data-domain=${service.domain}"
+  data-days="7">
+
+  <div class="card-head">
+    <h3>로그</h3>
+    <div class="head-actions">
+      <select id="logsDays" class="form-control" style="width:110px">
+        <option value="7" selected>최근 7일</option>
+        <option value="14">최근 14일</option>
+        <option value="30">최근 30일</option>
+      </select>
+      <span id="logsResultInfo" class="badge-muted" style="margin-left:8px">0 rows</span>
+    </div>
+  </div>
+
+  <div class="section-body">
+    <table class="table log-table" id="logsTable">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Created At</th>
+        <th>Domain</th>
+        <th>Type</th>
+        <th>OS</th>
+        <th>App</th>
+        <th>Extra</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="empty-row">
+        <td colspan="7" class="empty">로그 데이터가 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="pager" style="margin-top:10px">
+      <button id="logsPrev" class="btn btn-ghost btn-sm">이전</button>
+      <span id="logsPageInfo" class="muted" style="margin:0 8px">1 / 1</span>
+      <button id="logsNext" class="btn btn-ghost btn-sm">다음</button>
+    </div>
+  </div>
+</section>
 
     <!-- ===== 담당자 추가 모달 ===== -->
     <div id="contactModal" class="modal" aria-hidden="true">

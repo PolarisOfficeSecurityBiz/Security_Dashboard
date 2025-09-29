@@ -1,51 +1,61 @@
 (function () {
-  const $modal  = document.getElementById('createCustomerModal');
-  const $open   = document.getElementById('btnOpenCreateModal');
-  const $close  = document.getElementById('btnCloseCreateModal');
-  const $cancel = document.getElementById('btnCancelCreate');
+  // ===== Modal =====
+  const modal = document.getElementById('createCustomerModal');
+  const btnOpen = document.getElementById('btnOpenCreateModal');
+  const btnClose = document.getElementById('btnCloseCreateModal');
+  const btnCancel = document.getElementById('btnCancelCreate');
 
   function openModal() {
-    if (!$modal) return;
-    $modal.classList.remove('hidden');
-    $modal.setAttribute('aria-hidden', 'false');
-    const first = document.getElementById('customerName');
-    if (first) first.focus();
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.getElementById('customerName')?.focus();
+    document.body.style.overflow = 'hidden';
   }
   function closeModal() {
-    if (!$modal) return;
-    $modal.classList.add('hidden');
-    $modal.setAttribute('aria-hidden', 'true');
-    if ($open) $open.focus();
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    btnOpen?.focus();
+    document.body.style.overflow = '';
   }
-  if ($open)  $open.addEventListener('click', openModal);
-  if ($close) $close.addEventListener('click', closeModal);
-  if ($cancel)$cancel.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeModal(); });
-  if ($modal) $modal.addEventListener('click', (e)=>{ if (e.target === $modal) closeModal(); });
+  btnOpen?.addEventListener('click', openModal);
+  btnClose?.addEventListener('click', closeModal);
+  btnCancel?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-  // ---- 행 클릭 → 상세 이동 + 키보드 접근성
-  (function () {
-    const rows = document.querySelectorAll('tr.row-link[data-href]');
-    rows.forEach(tr => {
-      tr.style.cursor = 'pointer';
-      tr.addEventListener('click', () => {
-        if (window.getSelection && String(window.getSelection())) return;
-        const url = tr.getAttribute('data-href');
-        if (url) window.location.href = url;
-      });
-      tr.tabIndex = 0;
-      tr.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const url = tr.getAttribute('data-href');
-          if (url) window.location.href = url;
-        }
-      });
-    });
-  })();
+  // ===== Row click / keyboard : 이벤트 위임 =====
+  const tbody = document.querySelector('.page-customers #customersTable tbody');
 
-  // ---- 검색 필터
+  function getHref(tr){
+    return tr?.dataset?.href || tr?.getAttribute('data-href') || '';
+  }
+  function go(tr) {
+    const url = getHref(tr);
+    if (url) {
+      window.location.assign(url);
+    }
+  }
+
+  // 클릭
+  tbody?.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr.row-link');
+    if (!tr) return;
+    go(tr);
+  });
+
+  // Enter 키
+  tbody?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const tr = e.target.closest('tr.row-link') ||
+               document.activeElement.closest('tr.row-link');
+    go(tr);
+  });
+
+  // ===== Search filter =====
   const $search = document.getElementById('searchInput');
-  const $table  = document.getElementById('customersTable');
+  const $table = document.getElementById('customersTable');
   function normalize(s){ return (s||'').toString().toLowerCase().trim(); }
   function filterRows() {
     if (!$table) return;
@@ -57,42 +67,55 @@
       tr.style.display = text.includes(q) ? '' : 'none';
     });
   }
-  if ($search) $search.addEventListener('input', filterRows);
+  $search?.addEventListener('input', filterRows);
 
-  // ---- 정렬 드롭다운
-  const $sortBtn   = document.getElementById('sortBtn');
-  const $sortMenu  = document.getElementById('sortMenu');
-  const $sortLabel = document.getElementById('sortLabel');
+  // ===== Sort dropdown =====
+  const sortBtn = document.getElementById('sortBtn');
+  const sortMenu = document.getElementById('sortMenu');
+  const sortLabel = document.getElementById('sortLabel');
 
-  function toggleSortMenu(){ if($sortMenu) $sortMenu.classList.toggle('hidden'); }
-  function closeSortMenu(){ if($sortMenu) $sortMenu.classList.add('hidden'); }
-
-  if ($sortBtn) $sortBtn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleSortMenu(); });
-  document.addEventListener('click', closeSortMenu);
+  function toggleMenu() {
+    if (!sortMenu) return;
+    sortMenu.classList.toggle('hidden');
+    const expanded = sortBtn.getAttribute('aria-expanded') === 'true';
+    sortBtn.setAttribute('aria-expanded', String(!expanded));
+  }
+  function closeMenu() {
+    if (!sortMenu) return;
+    sortMenu.classList.add('hidden');
+    sortBtn.setAttribute('aria-expanded', 'false');
+  }
+  sortBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMenu(); });
+  document.addEventListener('click', (e)=>{
+    if (e.target.closest('.page-customers .dropdown')) return;
+    closeMenu();
+  });
 
   function sortRows(mode){
     if (!$table) return;
     const tbody = $table.tBodies[0];
     const rows = Array.from(tbody.querySelectorAll('tr.row-link'));
-
-    // 현재 컬럼 순서: [0]=고객사ID, [1]=고객사명, [2]=연결사, [3]=생성일
     let accessor = ()=>'';
-    if (mode === 'name')    accessor = tr => tr.cells[1].innerText.toLowerCase(); // 고객사명
-    if (mode === 'company') accessor = tr => tr.cells[2].innerText.toLowerCase(); // 연결사
-    if (mode === 'new')     { /* 서버 최신순이면 건드리지 않음 */ return; }
+    if (mode === 'name') accessor = tr => (tr.cells[1]?.innerText || '').toLowerCase();
+    if (mode === 'company') accessor = tr => (tr.cells[2]?.innerText || '').toLowerCase();
+    if (mode === 'new') return; // 서버 최신순 유지
 
     rows.sort((a,b)=> accessor(a).localeCompare(accessor(b), 'ko'));
     rows.forEach(r=>tbody.appendChild(r));
   }
 
-  if ($sortMenu){
-    $sortMenu.querySelectorAll('li[data-sort]').forEach(li=>{
-      li.addEventListener('click', ()=>{
-        const mode = li.getAttribute('data-sort');
-        if ($sortLabel) $sortLabel.textContent = li.textContent.trim();
-        sortRows(mode);
-        closeSortMenu();
-      });
+  sortMenu?.querySelectorAll('li[data-sort]').forEach(li=>{
+    li.addEventListener('click', ()=>{
+      const mode = li.getAttribute('data-sort');
+      if (sortLabel) sortLabel.textContent = li.textContent.trim();
+      sortRows(mode);
+      closeMenu();
     });
-  }
+    li.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        li.click();
+      }
+    });
+  });
 })();
