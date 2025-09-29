@@ -6,143 +6,126 @@
   <meta charset="UTF-8" />
   <title th:text="${customer.customerName} + ' - 고객사 상세'">고객사 상세</title>
 
-  <link rel="stylesheet" th:href="@{/css/customer_detail.css}" href="/css/customer_detail.css"/>
+  <!-- 레이아웃 head 슬롯으로 넣어주세요 -->
+  <th:block layout:fragment="head">
+    <link rel="stylesheet"
+          th:href="@{/css/customer_detail.css(v=${#dates.createNow().time})}" />
+    <script defer
+            th:src="@{/js/customer_detail.js(v=${#dates.createNow().time})}"></script>
+  </th:block>
 </head>
+
 <body data-page="customer-detail">
 <div layout:fragment="content">
-
-  <!-- 레이아웃 합성 시 보장되도록 fragment 내부에 배치 -->
-  <script defer th:src="@{/js/customer_detail.js(v=${#dates.createNow().time})}"></script>
-
   <main class="admin-main" role="main">
-    <div class="customer-detail">
 
-      <!-- 상단 제목/액션 -->
-      <div class="detail-header">
-        <div class="detail-title">
-          고객사 상세 <span class="muted" th:text="${customer.customerName}">고객사명</span>
-        </div>
-		<div class="detail-actions">
-		  <a class="btn btn-ghost" th:href="@{/admin/customers}">← 목록</a>
-		</div>
+    <div class="customer-detail"><!-- 가로 Full 내부 컨테이너 -->
 
-          <!-- 상단 삭제 -->
-          <form id="formDeleteCustomer"
-                th:action="@{|/admin/customers/${customer.customerId}/delete|}"
-                method="post" class="inline">
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf?.token}"/>
-          </form>
-        </div>
+      <!-- 상단 브레드크럼: '고객사 상세 / {고객사명}' -->
+      <div class="page-breadcrumbs">
+        <span class="crumb">고객사 상세</span>
+        <span class="sep">/</span>
+        <strong class="current" th:text="${customer.customerName}">폴라리스 테스트</strong>
       </div>
 
-      <!-- ───────── 고객사 정보 ───────── -->
-      <section class="card section" id="secCustomerInfo">
+      <!-- ■ 고객사 정보 -->
+      <section class="card card-elev section" id="secCustomerInfo">
         <div class="card-head">
           <h3>고객사 정보</h3>
-          <div class="head-actions">
-            <button type="button" class="chevron-btn"
-                    aria-expanded="true" aria-controls="customerInfo" title="접기/펼치기">
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="pointer-events:none">
-                <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
+          <button type="button" class="chevron-btn"
+                  aria-expanded="true" aria-controls="customerInfo" title="접기/펼치기">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
 
         <div class="accordion-panel show" id="customerInfo">
-          <!-- key-value -->
-          <div class="kv mt-8">
-            <div class="key">고객사ID</div><div class="val" th:text="${customer.customerId}">CID</div>
-            <div class="key">고객사명</div><div class="val" th:text="${customer.customerName}">회사</div>
-            <div class="key">연결사</div><div class="val" th:text="${customer.connectedCompany} ?: '-'">-</div>
-            <div class="key">생성일</div><div class="val" th:text="${customer.createAt}">2025-01-01</div>
-          </div>
-
-          <!-- 수정 폼 -->
-          <form id="customerUpdateForm" class="form-grid mt-16"
+          <form id="customerUpdateForm" class="form-grid"
                 th:action="@{|/admin/customers/${customer.customerId}/update|}" method="post">
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf?.token}"/>
+            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
+            <!-- 고객사ID (읽기전용) -->
+            <label class="form-label" for="customerId">고객사 ID</label>
+            <input class="form-control" id="customerId"
+                   th:value="${customer.customerId}" readonly disabled/>
+
+            <!-- 고객사명 (편집) -->
             <label class="form-label" for="customerName">고객사명 *</label>
             <input class="form-control" id="customerName" name="customerName" required
-                   th:value="${customer.customerName}" placeholder="고객사명" disabled/>
+                   th:value="${customer.customerName}" placeholder="고객사명"/>
 
+            <!-- 연결사 (편집) -->
             <label class="form-label" for="connectedCompany">연결사</label>
             <input class="form-control" id="connectedCompany" name="connectedCompany"
-                   th:value="${customer.connectedCompany}" placeholder="연결사(선택)" disabled/>
+                   th:value="${customer.connectedCompany}" placeholder="연결사(선택)"/>
 
-			<div class="form-row-span-4 form-actions justify-end gap-8">
-			  <button id="btnEditCustomer" class="btn btn-primary" type="button">수정하기</button>
-			  <button id="btnDeleteCustomerInline" class="btn btn-danger" type="button">삭제하기</button>
-			</div>
+            <!-- 생성일 (읽기전용) -->
+            <label class="form-label" for="createAt">생성일</label>
+            <input class="form-control" id="createAt"
+                   th:value="${customer.createAt}" readonly disabled/>
 
+            <div class="form-row-span-4 form-actions">
+              <button id="btnEditCustomer" class="btn btn-primary" type="button">수정</button>
+              <button id="btnDeleteCustomerInline" class="btn btn-danger" type="button">삭제</button>
+            </div>
           </form>
 
-          <!-- 인라인 삭제 폼 -->
+          <!-- 삭제 폼 -->
           <form id="formDeleteCustomerInline"
                 th:action="@{|/admin/customers/${customer.customerId}/delete|}"
-                method="post" class="inline" hidden>
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf?.token}"/>
+                method="post" hidden>
+            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
           </form>
         </div>
       </section>
 
-      <!-- ───────── 연결된 서비스 ───────── -->
-      <section class="card section mt-16" id="secServices">
+      <!-- ■ 연결된 서비스 -->
+      <section class="card card-elev section" id="secServices">
         <div class="card-head">
           <h3>연결된 서비스</h3>
-          <div class="head-actions">
-            <button type="button" class="btn btn-primary btn-sm" id="btnOpenSvcCreate">서비스 추가</button>
-          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btnOpenSvcCreate">+ 서비스 추가</button>
         </div>
 
         <div class="section-body">
-          <table class="table customers-table mt-12 fancy">
+          <table class="table fancy">
             <thead>
             <tr>
-              <th>서비스명</th>
-              <th>도메인</th>
+              <th>서비스 명</th>
+              <th>도메인/pkg명</th>
               <th>상품유형</th>
               <th class="num-col">CPI</th>
               <th class="num-col">RS Rate</th>
-              <th>라이선스ID</th>
+              <th>라이선스키</th>
               <th>생성일</th>
-              <th style="width:140px;">액션</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="s : ${services}">
+            <tr th:each="s : ${services}"
+                class="row-link"
+                th:attr="data-href=@{|/admin/customers/${customer.customerId}/services/${s.serviceId}|}">
               <td class="strong" th:text="${s.serviceName}">서비스명</td>
-              <td class="mono" th:text="${s.domain} ?: '-'">-</td>
-              <td class="wrap" th:text="${s.productType} ?: '-'">-</td>
-              <td class="num-col" th:text="${s.cpiValue} ?: '-'">-</td>
-              <td class="num-col" th:text="${s.rsRate} ?: '-'">-</td>
-
+              <td class="mono" th:text="${s.domain != null && !#strings.isEmpty(s.domain) ? s.domain : '-'}">-</td>
+              <td class="wrap" th:text="${s.productType != null && !#strings.isEmpty(s.productType) ? s.productType : '-'}">-</td>
+              <td class="num-col" th:text="${s.cpiValue != null ? s.cpiValue : 0}">0</td>
+              <td class="num-col" th:text="${s.rsRate  != null ? s.rsRate  : 0}">0</td>
               <td>
                 <span th:if="${s.licenseId != null}" class="code-chip" th:text="${s.licenseId}">000000</span>
                 <span th:if="${s.licenseId == null}" class="badge-muted">미발급</span>
               </td>
-
-              <td class="mono" th:text="${s.createAt}">2025-01-01</td>
-
-              <td class="actions">
-                <a class="btn btn-primary btn-sm"
-                   th:href="@{|/admin/customers/${customer.customerId}/services/${s.serviceId}|}">
-                  상세보기
-                </a>
-              </td>
+              <td class="mono" th:text="${s.createAt}">2025-09-23</td>
             </tr>
 
             <tr th:if="${#lists.isEmpty(services)}">
-              <td colspan="8" class="empty">등록된 서비스가 없습니다.</td>
+              <td colspan="7" class="empty">등록된 서비스가 없습니다.</td>
             </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- 서비스 추가 모달 -->
+      <!-- (선택) 서비스 추가 모달: 필요 시 기존 것 사용 -->
       <div id="svcCreateModal" class="modal" aria-hidden="true">
         <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcCreateTitle">
           <div class="modal-header">
@@ -150,11 +133,10 @@
             <button type="button" class="icon-btn" data-close="svcCreateModal" aria-label="닫기">✕</button>
           </div>
           <form th:action="@{|/admin/customers/${customer.customerId}/services|}" method="post" class="modal-body">
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf?.token}"/>
+            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
             <div class="form-row"><label>서비스명 *</label><input name="serviceName" required/></div>
             <div class="form-row"><label>도메인</label><input name="domain"/></div>
-
             <div class="form-row">
               <label>상품유형</label>
               <select name="productType">
@@ -169,7 +151,6 @@
                 <option>Polaris SecuOne App To App</option>
               </select>
             </div>
-
             <div class="form-row"><label>CPI</label><input name="cpiValue" type="number"/></div>
             <div class="form-row"><label>RS Rate</label><input name="rsRate" type="number" step="0.01"/></div>
             <div class="modal-actions">
@@ -180,47 +161,8 @@
         </div>
       </div>
 
-      <!-- (옵션) 서비스 수정 모달 -->
-      <div id="svcEditModal" class="modal" aria-hidden="true">
-        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcEditTitle">
-          <div class="modal-header">
-            <h3 id="svcEditTitle">서비스 수정</h3>
-            <button type="button" class="icon-btn" data-close="svcEditModal" aria-label="닫기">✕</button>
-          </div>
-          <form id="svcEditForm" method="post" class="modal-body"
-                th:action="@{|/admin/customers/${customer.customerId}/services/0/update|}">
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf?.token}"/>
-
-            <div class="form-row"><label>서비스명 *</label><input id="svcEditName" name="serviceName" required/></div>
-            <div class="form-row"><label>도메인</label><input id="svcEditDomain" name="domain"/></div>
-
-            <div class="form-row">
-              <label>상품유형</label>
-              <select id="svcEditProduct" name="productType">
-                <option value="">-- 선택 --</option>
-                <option>V-Guard SDK2.0 - 일반버전</option>
-                <option>V-Guard SDK2.0 - RB 포함버전</option>
-                <option>V-Guard SDK2.0 - iOS 포함버전</option>
-                <option>V-Guard SDK3.0 - 일반버전</option>
-                <option>V-Guard SDK3.0 - RB 포함버전</option>
-                <option>V-Guard SDK3.0 - iOS 포함버전</option>
-                <option>Polaris SecuOne Web To App</option>
-                <option>Polaris SecuOne App To App</option>
-              </select>
-            </div>
-
-            <div class="form-row"><label>CPI</label><input id="svcEditCpi" name="cpiValue" type="number"/></div>
-            <div class="form-row"><label>RS Rate</label><input id="svcEditRs" name="rsRate" type="number" step="0.01"/></div>
-            <div class="form-row"><label>라이선스ID</label><input id="svcEditLic" name="licenseId" type="number"/></div>
-            <div class="modal-actions">
-              <button type="button" class="btn btn-ghost" data-close="svcEditModal">취소</button>
-              <button type="submit" class="btn btn-primary">저장</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
     </div><!-- /.customer-detail -->
+
   </main>
 </div>
 </body>

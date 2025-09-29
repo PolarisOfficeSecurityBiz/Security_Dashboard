@@ -7,49 +7,140 @@
 
   <!-- 페이지 전용 CSS -->
   <link rel="stylesheet" th:href="@{/css/customers.css}" href="/css/customers.css"/>
+  <!-- (선택) 네비 전용 CSS가 별도라면 유지 -->
+  <link rel="stylesheet" th:href="@{/css/admin_nav.css}" href="/css/admin_nav.css"/>
 </head>
 <body class="admin-body">
 
-  <!-- 고정 네비게이션 (좌측) -->
-  <nav class="admin-nav" th:replace="fragments/admin_nav :: nav"></nav>
+  <!-- ✅ 레이아웃 래퍼: 좌측 네비 + 우측 본문 (grid) -->
+  <div class="admin-shell">
+    <!-- 좌측 고정 네비(프래그먼트) -->
+    <nav class="admin-nav" th:replace="fragments/admin_nav :: nav"></nav>
 
-  <!-- 오른쪽 콘텐츠 -->
-  <main class="admin-main">
-    <div class="customers-toolbar">
-      <h2>고객사 목록</h2>
-      <button id="btnOpenCreateModal" type="button" class="btn-primary">고객사 추가</button>
-    </div>
+    <!-- 우측 본문 -->
+    <main class="admin-main">
+      <!-- 헤더 -->
+      <header class="page-header">
+        <div class="breadcrumbs">
+          <a th:href="@{/admin}">Dashboards</a>
+          <span>/</span>
+          <strong>Customers</strong>
+        </div>
+        <div class="page-actions">
+          <button id="btnOpenCreateModal" type="button" class="btn-primary">고객사 추가</button>
+        </div>
+      </header>
 
-    <section class="card">
-      <table class="customers-table">
-        <thead>
-        <tr>
-          <th style="width: 28%">고객사ID</th>
-          <th style="width: 28%">고객사명</th>
-          <th style="width: 24%">연결사</th>
-          <th style="width: 20%">생성일</th>
-        </tr>
-        </thead>
-		<tbody>
-		  <tr class="row-link"
-		      th:each="c : ${customers}"
-		      th:attr="data-href=@{|/admin/customers/${c.customerId}|}">
-		    <td th:text="${c.customerId}">CID</td>
-		    <td th:text="${c.customerName}">이름</td>
-		    <td th:text="${c.connectedCompany}">연결사</td>
-		    <td th:text="${c.createAt}">2025-01-01</td>
-		  </tr>
-		
-		  <tr th:if="${#lists.isEmpty(customers)}">
-		    <td colspan="4" class="empty">등록된 고객사가 없습니다.</td>
-		  </tr>
-		</tbody>
+      <!-- KPI 카드 -->
+      <section class="kpis">
+        <article class="kpi-card">
+          <div class="kpi-icon users"></div>
+          <div>
+            <div class="kpi-label">Total Customers</div>
+            <div class="kpi-value"
+                 th:text="${metrics != null and metrics.totalCustomers != null ? metrics.totalCustomers : 0}">0</div>
+            <div class="kpi-trend up"><span>16%</span><small> this month</small></div>
+          </div>
+        </article>
 
-      </table>
-    </section>
-  </main>
+        <article class="kpi-card">
+          <div class="kpi-icon vguard"></div>
+          <div>
+            <div class="kpi-label">V-Guard</div>
+            <div class="kpi-value"
+                 th:text="${metrics != null and metrics.vguard != null ? metrics.vguard : 0}">0</div>
+            <div class="kpi-trend down"><span>1%</span><small> this month</small></div>
+          </div>
+        </article>
 
-  <!-- 추가 모달 -->
+        <article class="kpi-card">
+          <div class="kpi-icon secuone"></div>
+          <div>
+            <div class="kpi-label">SecuOne</div>
+            <div class="kpi-value"
+                 th:text="${metrics != null and metrics.secuone != null ? metrics.secuone : 0}">0</div>
+            <div class="kpi-trend neutral"><span>—</span><small> this month</small></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- 고객사 목록 -->
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>All Customers</h2>
+            <button class="link-btn" type="button">Active Members</button>
+          </div>
+          <div class="table-tools">
+            <label class="search">
+              <input id="searchInput" type="search" placeholder="Search"/>
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M21 21l-4.3-4.3m1.3-5A7 7 0 1 1 7 4a7 7 0 0 1 11 7Z"/>
+              </svg>
+            </label>
+            <div class="dropdown">
+              <button id="sortBtn" class="btn-ghost">
+                Sort by : <strong id="sortLabel">Newest</strong>
+              </button>
+              <ul id="sortMenu" class="menu hidden" role="menu" aria-labelledby="sortBtn">
+                <li data-sort="new" role="menuitem">Newest</li>
+                <li data-sort="name" role="menuitem">Name (A→Z)</li>
+                <li data-sort="company" role="menuitem">Company (A→Z)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="customers-table" id="customersTable">
+            <thead>
+            <tr>
+              <th style="width:28%">고객사ID</th>
+              <th style="width:28%">고객사명</th>
+              <th style="width:24%">연결사</th>
+              <th style="width:20%">생성일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="row-link"
+                th:each="c : ${customers}"
+                th:attr="data-href=@{|/admin/customers/${c.customerId}|}"
+                tabindex="0">
+              <td th:text="${c.customerId}">CID</td>
+              <td th:text="${c.customerName}">이름</td>
+              <td th:text="${c.connectedCompany}">연결사</td>
+              <td th:text="${c.createAt}">2025-01-01</td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(customers)}">
+              <td colspan="4" class="empty">등록된 고객사가 없습니다.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 페이징 -->
+        <footer class="pagination">
+          <span class="page-hint"
+                th:text="${page != null ? 'Showing data ' + page.from + ' to ' + page.to + ' of ' + page.total + ' entries' : 'Showing data 0 to 0 of 0 entries'}">
+            Showing data 0 to 0 of 0 entries
+          </span>
+          <nav class="pager" aria-label="pagination">
+            <button class="icon-btn" data-page="prev" aria-label="이전 페이지">‹</button>
+            <button class="page is-current">1</button>
+            <button class="page">2</button>
+            <button class="page">3</button>
+            <button class="page">4</button>
+            <button class="page">…</button>
+            <button class="page">40</button>
+            <button class="icon-btn" data-page="next" aria-label="다음 페이지">›</button>
+          </nav>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <!-- 고객사 추가 모달(Body 직속) -->
   <div id="createCustomerModal" class="modal hidden" aria-hidden="true">
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="createCustomerTitle">
       <div class="modal-header">
@@ -58,8 +149,7 @@
       </div>
 
       <form th:action="@{/admin/customers}" method="post" class="modal-body">
-        <!-- CSRF (CSRF 사용 시에만 렌더) -->
-        <input type="hidden" name="_csrf" th:value="${_csrf?.token}" th:if="${_csrf != null}"/>
+        <input type="hidden" name="_csrf" th:value="${_csrf != null ? _csrf.token : ''}" th:if="${_csrf != null}"/>
 
         <div class="form-row">
           <label for="customerName">고객사명 <span class="req">*</span></label>
@@ -72,9 +162,7 @@
             <option value="">-- 선택 없음 --</option>
             <option th:each="cc : ${connectedCompanies}"
                     th:value="${cc.customerId}"
-                    th:text="${cc.customerName}">
-              리셀러A
-            </option>
+                    th:text="${cc.customerName}">리셀러A</option>
           </select>
         </div>
 

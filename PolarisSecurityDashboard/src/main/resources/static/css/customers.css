@@ -1,202 +1,162 @@
-/* ───────────── Reset & 기본 설정 ───────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box; /* padding, border 포함 폭 계산 */
+/* ---------- Light Theme Palette ---------- */
+:root{
+  --bg:#f5f7fa;       /* 전체 배경 */
+  --panel:#ffffff;    /* 메인 패널/카드 */
+  --card:#ffffff;
+  --muted:#6b7280;    /* 보조 텍스트 */
+  --text:#111827;     /* 본문 텍스트 */
+  --line:#e5e7eb;     /* 구분선 */
+  --brand:#10b981;    /* 포인트(민트) */
+  --danger:#ef4444;   /* 하락/경고 */
+  --accent:#3b82f6;   /* 포커스 블루 */
+  --shadow:0 4px 12px rgba(0,0,0,.08);
+  --radius:12px;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #f5f6fa;
-  color: #111;
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body.admin-body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.5 "Pretendard","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 
-/* ───────────── 공통 버튼 ───────────── */
-.btn-primary {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-primary:hover {
-  background: #1d4ed8;
-}
-.btn-ghost {
-  background: transparent;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-}
-.icon-btn {
-  background: transparent;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
+/* ---------- Layout: NAV + MAIN (grid) ---------- */
+.admin-shell{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  min-height:100vh;
 }
 
-/* ───────────── 레이아웃 ───────────── */
-:root {
-  --sidebar-w: 240px; /* nav 폭 */
+/* 좌측 네비: sticky로 상단 고정, fixed 사용 안 함 */
+.admin-nav{
+  position:sticky; top:0;
+  height:100vh;
+  width:260px;
+  border-right:1px solid var(--line);
+  background:#f9fafb;
 }
 
-.admin-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: var(--sidebar-w);
-  background: #1f1f1f;
-  color: #fff;
-  padding: 20px 12px;
-  overflow-y: auto;
-  z-index: 1000;
-}
-.admin-nav .brand {
-  font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 24px;
-}
-.admin-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.admin-nav li {
-  margin-bottom: 8px;
-}
-.admin-nav a {
-  display: block;
-  padding: 10px 12px;
-  border-radius: 6px;
-  color: #ddd;
-  text-decoration: none;
-  font-size: 14px;
-  transition: background 0.2s, color 0.2s;
-}
-.admin-nav a:hover {
-  background: #333;
-  color: #fff;
-}
-.admin-nav a.active {
-  background: #2563eb;
-  color: #fff;
+/* 본문: margin-left 제거, 패딩만 */
+.admin-main{
+  margin:0;
+  padding:20px 28px 28px;  /* 상단 여백을 작게 */
+  min-height:100vh;
 }
 
-.admin-main {
-  margin-left: var(--sidebar-w);
-  padding: 24px;
-  min-height: 100vh;
-  background: #f5f6fa;
+/* ---------- Header ---------- */
+.page-header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin:0 0 22px 0;       /* 위쪽 여백 0 */
 }
+.breadcrumbs{ display:flex; gap:8px; align-items:center; color:var(--muted) }
+.breadcrumbs a{ color:var(--muted); text-decoration:none }
+.breadcrumbs strong{ color:var(--text) }
+.page-actions{ display:flex; gap:10px }
 
-/* ───────────── 툴바 ───────────── */
-.customers-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+/* Buttons */
+.btn-primary{
+  background:var(--brand); color:#fff; border:none;
+  padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer;
+  box-shadow:0 2px 6px rgba(16,185,129,.25);
 }
-.customers-toolbar h2 {
-  margin: 0;
-  font-size: 20px;
+.btn-primary:focus{ outline:2px solid var(--accent); outline-offset:2px }
+.btn-ghost{
+  background:transparent; color:var(--text); border:1px solid var(--line);
+  padding:8px 12px; border-radius:8px; cursor:pointer;
 }
+.link-btn{ background:none; border:none; color:var(--accent); padding:0; cursor:pointer }
 
-/* ───────────── 테이블 ───────────── */
-.card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+/* ---------- KPI Cards ---------- */
+.kpis{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:20px; }
+.kpi-card{
+  display:flex; gap:14px; align-items:center;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
 }
-.customers-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.customers-table th,
-.customers-table td {
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 14px;
-}
-.customers-table thead {
-  background: #f9fafb;
-}
-.customers-table tbody tr:nth-child(even) {
-  background: #f5f6fa;
-}
-.customers-table .empty {
-  text-align: center;
-  color: #888;
-  padding: 20px 0;
-}
+.kpi-icon{ width:44px; height:44px; border-radius:50%; background:#f3f4f6;
+  display:flex; align-items:center; justify-content:center; font-size:22px; }
+.kpi-icon.users::after{ content:"👥"; }
+.kpi-icon.vguard::after{ content:"🛡️"; }
+.kpi-icon.secuone::after{ content:"💻"; }
+.kpi-label{ color:var(--muted); font-weight:600 }
+.kpi-value{ font-size:24px; font-weight:700 }
+.kpi-trend{ font-size:12px; margin-top:2px; display:flex; gap:4px; align-items:center; color:var(--muted) }
+.kpi-trend.up span{ color:var(--brand) }
+.kpi-trend.down span{ color:var(--danger) }
 
-/* ───────────── 모달 ───────────── */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
+/* ---------- Card & Table ---------- */
+.card{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:var(--radius); box-shadow:var(--shadow);
 }
-.modal.hidden {
-  display: none;
+.card-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border-bottom:1px solid var(--line);
 }
-.modal-panel {
-  background: #fff;
-  width: 420px;
-  max-width: 90%;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.card-head h2{ margin:0; font-size:18px }
+
+.table-tools{ display:flex; gap:10px; align-items:center }
+.search{ position:relative; display:flex; align-items:center }
+.search input{
+  background:#fff; color:var(--text); border:1px solid var(--line); border-radius:8px;
+  height:36px; padding:0 36px 0 12px; min-width:240px;
 }
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f9fafb;
-  border-bottom: 1px solid #eee;
+.search svg{ position:absolute; right:10px; width:18px; height:18px; stroke:#9ca3af; fill:none; stroke-width:2 }
+
+.dropdown{ position:relative }
+.dropdown .btn-ghost{ height:36px }
+.menu{
+  position:absolute; right:0; top:44px; min-width:160px;
+  background:#fff; border:1px solid var(--line); border-radius:8px; padding:4px;
+  box-shadow:var(--shadow); z-index:20;
 }
-.modal-header h3 {
-  margin: 0;
-  font-size: 16px;
+.menu.hidden{ display:none }
+.menu li{ list-style:none; padding:8px 10px; border-radius:6px; cursor:pointer }
+.menu li:hover{ background:#f3f4f6 }
+
+/* Table */
+.table-wrapper{ width:100%; overflow:auto }
+.customers-table{ width:100%; border-collapse:collapse; }
+.customers-table thead th{
+  text-align:left; color:var(--muted); font-weight:600; padding:12px 16px; border-bottom:1px solid var(--line);
 }
-.modal-body {
-  padding: 16px;
+.customers-table tbody td{ padding:14px 16px; border-bottom:1px solid var(--line); }
+.customers-table tr.row-link{ transition:background .12s ease }
+.customers-table tr.row-link:hover{ background:#f9fafb; }
+.customers-table tr.row-link:focus{ outline:2px solid var(--accent); outline-offset:-2px }
+
+.badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:600; font-size:12px; }
+.badge.green{ background:#d1fae5; color:#065f46; }
+.badge.red{ background:#fee2e2; color:#991b1b; }
+
+.empty{ text-align:center; padding:28px; color:var(--muted) }
+
+/* ---------- Pagination ---------- */
+.pagination{
+  display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
 }
-.form-row {
-  margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
+.page-hint{ color:var(--muted) }
+.pager{ display:flex; gap:6px; align-items:center }
+.pager .page, .pager .icon-btn{
+  background:#fff; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 10px; cursor:pointer;
 }
-.form-row label {
-  font-size: 14px;
-  margin-bottom: 4px;
+.pager .page.is-current{ background:var(--brand); color:#fff; font-weight:700; }
+
+/* ---------- Modal ---------- */
+.modal{ position:fixed; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.3); z-index:50 }
+.modal.hidden{ display:none }
+.modal-panel{
+  width:520px; max-width:90vw; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
 }
-.form-row .req {
-  color: #dc2626;
-  margin-left: 2px;
+.modal-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line) }
+.modal-body{ padding:16px }
+.modal-footer{ display:flex; justify-content:flex-end; gap:8px; padding-top:8px }
+.icon-btn{ background:#fff; color:var(--text); border:1px solid var(--line); border-radius:6px; height:32px; padding:0 8px; cursor:pointer }
+
+.form-row{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+.form-row input, .form-row select{
+  background:#fff; color:var(--text); border:1px solid var(--line); border-radius:8px; height:36px; padding:0 10px;
 }
-.form-row input,
-.form-row select {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 14px;
-}
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-}
+.req{ color:var(--danger) }

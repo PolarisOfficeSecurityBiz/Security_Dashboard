@@ -1,9 +1,11 @@
 package com.polarisoffice.security.controller;
 
+import com.polarisoffice.security.dto.MetricsDto;
 import com.polarisoffice.security.model.Customer;
 import com.polarisoffice.security.model.Service;
 import com.polarisoffice.security.repository.CustomerRepository;
 import com.polarisoffice.security.repository.ServiceRepository;
+import com.polarisoffice.security.service.CompanyServiceService;
 import com.polarisoffice.security.repository.ServiceContactRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,12 +23,15 @@ public class AdminCustomerController {
     private final CustomerRepository customerRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceContactRepository serviceContactRepository;
+    private final CompanyServiceService compoanyService;
 
     /* 목록 */
     @GetMapping
     public String list(Model model) {
         model.addAttribute("customers", customerRepository.findAll());
         model.addAttribute("connectedCompanies", customerRepository.findAll());
+        MetricsDto metrics = compoanyService.getMetrics();
+        model.addAttribute("metrics", metrics);
         return "admin/customer/customers";
     }
 
@@ -179,5 +184,16 @@ public class AdminCustomerController {
 
     private static String blankToNull(String s){
         return (s == null || s.isBlank()) ? null : s;
+    }
+    
+    @GetMapping("/admin/customers")
+    public String customers(Model model) {
+    	
+        MetricsDto metrics = compoanyService.getMetrics();
+        model.addAttribute("metrics", metrics);
+
+        // 기존 목록/페이지 모델도 같이
+        // model.addAttribute("customers", ...);
+        return "admin/customer/customers";
     }
 }
