@@ -5,104 +5,142 @@
       layout:decorate="~{layout/admin_layout}">
 <head>
   <meta charset="UTF-8" />
-  <title>SecuOne 운영관리 개요</title>
+  <title>Polaris SecuOne 관리</title>
 
-  <!-- 정적 리소스 경로는 환경에 맞게 조정 -->
   <link rel="stylesheet" href="/css/secuone.css" th:href="@{/css/secuone.css}">
+  <style>
+    /* 카드 전체가 클릭영역이 되도록 */
+    .kpi-link{display:block;text-decoration:none;}
+    .kpi-card{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+    .kpi-link:hover .kpi-card{transform:translateY(-1px);}
+    .kpi-link:focus-visible .kpi-card{box-shadow:0 0 0 3px rgba(37,99,235,.18);}
+  </style>
   <script defer src="/js/secuone.js" th:src="@{/js/secuone.js}"></script>
 </head>
 <body>
 <div layout:fragment="content">
-  <main class="secuone" role="main">
+  <main class="secuone" role="main" style="max-width:1200px;margin:0 auto;padding:24px 16px;">
 
-    <!-- 헤더 -->
-    <header class="page-head">
-      <div>
-        <div class="title">Polaris SecuOne · 운영 개요</div>
-        <div class="muted" id="nowText">시스템 현황 요약</div>
+    <!-- 상단 브레드크럼/타이틀 -->
+    <header class="page-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:10px;color:#6b7280;font-size:14px;">
+        <span style="display:inline-flex;align-items:center;gap:6px;">
+          <span style="font-size:18px;">▦</span>
+          <span>Dashboards</span>
+        </span>
+        <span>/</span>
+        <strong style="color:#111827;">Polaris SecuOne 관리</strong>
       </div>
-      <nav class="quick" aria-label="빠른 이동">
-	      <a class="btn" th:href="@{/admin/secuone/notice}">공지사항 관리</a>
-		<a class="btn" th:href="@{/admin/secuone/polarletter}">폴라레터 관리</a>
-		<a class="btn" th:href="@{/admin/secuone/secunews}">시큐뉴스 관리</a>
-		<a class="btn" th:href="@{/admin/secuone/directad}">직광고 관리</a>
-      </nav>
+      <div style="display:flex;gap:10px;">
+			<button type="button" class="icon-btn" aria-label="새로고침" id="refreshOverviewBtn">
+			  ⟳
+			</button>
+			<button type="button" class="icon-btn" aria-label="알림">
+			  🔔
+			</button>
+      </div>
     </header>
 
-    <!-- KPI -->
-    <section class="grid metrics" aria-label="주요 지표">
-      <article class="card metric" aria-live="polite">
-        <div>
-          <h3>공지사항</h3>
-          <div class="value" id="noticeCount">–</div>
-        </div>
-        <span class="tag" id="noticeDelta">+0 신규</span>
-      </article>
-      <article class="card metric">
-        <div>
-          <h3>폴라레터</h3>
-          <div class="value" id="letterCount">–</div>
-        </div>
-        <span class="tag" id="letterDelta">+0 신규</span>
-      </article>
-      <article class="card metric">
-        <div>
-          <h3>시큐뉴스</h3>
-          <div class="value" id="newsCount">–</div>
-        </div>
-        <span class="tag" id="newsDelta">+0 신규</span>
-      </article>
-      <article class="card metric">
-        <div>
-          <h3>직광고</h3>
-          <div class="value" id="adCount">–</div>
-        </div>
-        <span class="tag" id="adDelta">+0 신규</span>
-      </article>
-    </section>
+    <!-- KPI 캡슐 4개 (클릭 이동) -->
+    <section class="kpis" aria-label="주요 지표"
+             style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px;">
 
-    <!-- 최근 항목 -->
-    <section class="grid lists" aria-label="최근 업데이트">
       <!-- 공지사항 -->
-      <div class="card list">
-        <div class="section-head">
-          <h4>최근 공지사항</h4>
-          <span class="label">최신 5건</span>
-        </div>
-        <ul id="noticeList"></ul>
-        <div class="more"><a href="/notice" th:href="@{/notice}">더보기</a></div>
-      </div>
+      <a class="kpi-link" th:href="@{/admin/secuone/notice}" aria-label="공지사항 관리로 이동">
+        <article class="kpi-card"
+                 style="border-radius:18px;padding:18px;background:linear-gradient(180deg,#111 0%,#2b2b2b 70%);color:#fff;display:flex;justify-content:space-between;align-items:flex-end;height:96px;">
+          <div style="font-size:14px;opacity:.9;">공지사항</div>
+          <div id="noticeCount" style="font-weight:700;font-size:28px;">-</div>
+        </article>
+      </a>
 
       <!-- 폴라레터 -->
-      <div class="card list">
-        <div class="section-head">
-          <h4>최근 폴라레터</h4>
-          <span class="label">최신 5건</span>
-        </div>
-        <ul id="letterList"></ul>
-        <div class="more"><a href="/polarletter" th:href="@{/polarletter}">더보기</a></div>
-      </div>
+      <a class="kpi-link" th:href="@{/admin/secuone/polarletter}" aria-label="폴라레터 관리로 이동">
+        <article class="kpi-card"
+                 style="border-radius:18px;padding:18px;background:linear-gradient(180deg,#111 0%,#2b2b2b 70%);color:#fff;display:flex;justify-content:space-between;align-items:flex-end;height:96px;">
+          <div style="font-size:14px;opacity:.9;">폴라레터</div>
+          <div id="letterCount" style="font-weight:700;font-size:28px;">-</div>
+        </article>
+      </a>
 
       <!-- 시큐뉴스 -->
-      <div class="card list">
-        <div class="section-head">
-          <h4>최근 시큐뉴스</h4>
-          <span class="label">최신 5건</span>
-        </div>
-        <ul id="newsList"></ul>
-        <div class="more"><a href="/secunews" th:href="@{/secunews}">더보기</a></div>
-      </div>
+      <a class="kpi-link" th:href="@{/admin/secuone/secunews}" aria-label="시큐뉴스 관리로 이동">
+        <article class="kpi-card"
+                 style="border-radius:18px;padding:18px;background:linear-gradient(180deg,#111 0%,#2b2b2b 70%);color:#fff;display:flex;justify-content:space-between;align-items:flex-end;height:96px;">
+          <div style="font-size:14px;opacity:.9;">시큐뉴스</div>
+          <div id="newsCount" style="font-weight:700;font-size:28px;">-</div>
+        </article>
+      </a>
 
       <!-- 직광고 -->
-      <div class="card list">
-        <div class="section-head">
-          <h4>최근 직광고</h4>
-          <span class="label">최신 5건</span>
+      <a class="kpi-link" th:href="@{/admin/secuone/directad}" aria-label="직광고 관리로 이동">
+        <article class="kpi-card"
+                 style="border-radius:18px;padding:18px;background:linear-gradient(180deg,#111 0%,#2b2b2b 70%);color:#fff;display:flex;justify-content:space-between;align-items:flex-end;height:96px;">
+          <div style="font-size:14px;opacity:.9;">직광고</div>
+          <div id="adCount" style="font-weight:700;font-size:28px;">-</div>
+        </article>
+      </a>
+    </section>
+
+    <!-- 2열 테이블: 최근 7일 클릭수 / 조회수 -->
+    <section class="tables" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+      <article class="card" style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.06);">
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 12px;">직광고 클릭 수</h3>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">회사별</div>
+        <div class="table-wrap">
+          <table class="simple-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="text-align:left;background:#f3f4f6;">
+                <th style="padding:10px;border-radius:8px 0 0 8px;">회사명</th>
+                <th style="padding:10px;">광고 종류</th>
+                <th style="padding:10px;border-radius:0 8px 8px 0;">클릭 수</th>
+              </tr>
+            </thead>
+            <tbody id="adClicksTbody"></tbody>
+          </table>
         </div>
-        <ul id="adList"></ul>
-        <div class="more"><a href="/directad" th:href="@{/directad}">더보기</a></div>
+      </article>
+
+      <article class="card" style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.06);">
+        <h3 style="font-size:16px;font-weight:700;margin:0 0 12px;">직광고 조회 수</h3>
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">회사별</div>
+        <div class="table-wrap">
+          <table class="simple-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="text-align:left;background:#f3f4f6;">
+                <th style="padding:10px;border-radius:8px 0 0 8px;">회사명</th>
+                <th style="padding:10px;">광고 종류</th>
+                <th style="padding:10px;border-radius:0 8px 8px 0;">조회 수</th>
+              </tr>
+            </thead>
+            <tbody id="adViewsTbody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- 폴라레터 캐러셀 -->
+    <section class="carousel-section" style="background:#f8fafc;border-radius:16px;padding:16px;margin-bottom:18px;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:16px;font-weight:700;margin:0;">폴라레터</h3>
+        <button class="icon-btn" id="lettersNextBtn" aria-label="다음">›</button>
+      </div>
+      <div class="carousel" style="overflow:hidden;">
+        <ul id="lettersCarousel" style="display:grid;grid-auto-flow:column;grid-auto-columns:calc(33.333% - 10px);gap:15px;list-style:none;padding:0;margin:0;"></ul>
       </div>
     </section>
+
+    <!-- 시큐뉴스 캐러셀 -->
+    <section class="carousel-section" style="background:#f8fafc;border-radius:16px;padding:16px;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="font-size:16px;font-weight:700;margin:0;">시큐뉴스</h3>
+        <button class="icon-btn" id="newsNextBtn" aria-label="다음">›</button>
+      </div>
+      <div class="carousel" style="overflow:hidden;">
+        <ul id="newsCarousel" style="display:grid;grid-auto-flow:column;grid-auto-columns:calc(33.333% - 10px);gap:15px;list-style:none;padding:0;margin:0;"></ul>
+      </div>
+    </section>
+
   </main>
 </div>
 </body>

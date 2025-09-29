@@ -1,5 +1,8 @@
 package com.polarisoffice.security.model;
 
+import com.google.cloud.firestore.annotation.ServerTimestamp;
+import com.google.cloud.Timestamp;
+
 import lombok.*;
 
 @Getter @Setter
@@ -12,6 +15,7 @@ public class SecuNews {
 	private String url;
 	private String thumbnail;
 	private String date;
-	private String updateAt;
+	@ServerTimestamp
+	private Timestamp updateAt;
 	
 }

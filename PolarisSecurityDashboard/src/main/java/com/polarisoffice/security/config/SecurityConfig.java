@@ -45,7 +45,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/polar-letters", "/api/v1/polar-letters/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/secu-news", "//api/v1/secu-news/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/direct-ads", "/api/v1/direct-ads/**").permitAll()
-
+                .requestMatchers(HttpMethod.GET, "/api/v1/overview").permitAll()
+                
                 // ✍️ 쓰기는 ADMIN만
                 .requestMatchers(HttpMethod.POST,   "/api/v1/polar-notices/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH,  "/api/v1/polar-notices/**").hasRole("ADMIN")
