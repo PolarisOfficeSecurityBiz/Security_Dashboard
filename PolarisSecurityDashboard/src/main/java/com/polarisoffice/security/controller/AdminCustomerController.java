@@ -7,6 +7,7 @@ import com.polarisoffice.security.repository.CustomerRepository;
 import com.polarisoffice.security.repository.ServiceRepository;
 import com.polarisoffice.security.service.CompanyServiceService;
 import com.polarisoffice.security.repository.ServiceContactRepository;
+import com.polarisoffice.security.dto.CustomerRowDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/customers")
@@ -28,11 +30,33 @@ public class AdminCustomerController {
     /* 목록 */
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("customers", customerRepository.findAll());
-        model.addAttribute("connectedCompanies", customerRepository.findAll());
+        // 전체 고객 조회 (셀렉트 옵션 & id->name 매핑에 함께 사용)
+        List<Customer> all = customerRepository.findAll();
+
+        // id -> name 매핑
+        Map<String, String> idToName = all.stream()
+                .collect(Collectors.toMap(Customer::getCustomerId, Customer::getCustomerName, (a, b) -> a));
+
+        // 뷰 전용 DTO로 변환 (연결사명을 resolve)
+        List<CustomerRowDto> rows = all.stream()
+                .map(c -> new CustomerRowDto(
+                        c.getCustomerId(),
+                        c.getCustomerName(),
+                        resolveConnectedCompanyName(c.getConnectedCompany(), idToName),
+                        c.getCreateAt()
+                ))
+                .collect(Collectors.toList());
+
+        model.addAttribute("customers", rows);          // 리스트 표시는 DTO
+        model.addAttribute("connectedCompanies", all);  // 모달의 셀렉트 옵션은 원본 리스트
         MetricsDto metrics = compoanyService.getMetrics();
         model.addAttribute("metrics", metrics);
         return "admin/customer/customers";
+    }
+
+    private static String resolveConnectedCompanyName(String connectedCompanyId, Map<String, String> idToName) {
+        if (connectedCompanyId == null || connectedCompanyId.isBlank()) return null;
+        return idToName.getOrDefault(connectedCompanyId, connectedCompanyId); // 맵에 없으면 원값(id) fallback
     }
 
     /* 고객사 생성 */
@@ -153,7 +177,6 @@ public class AdminCustomerController {
         Service service = serviceRepository.findByServiceIdAndCustomerId(sid, id)
                 .orElseThrow(() -> new IllegalArgumentException("서비스를 찾을 수 없습니다: " + sid));
 
-        // 연락처는 최신순
         var contacts = serviceContactRepository.findByCustomerIdAndServiceIdOrderByCreateAtDesc(id, sid);
         var logs = Collections.emptyList(); // 이후 실제 조회로 교체
 
@@ -167,7 +190,6 @@ public class AdminCustomerController {
         params.put("q", q); params.put("level", level);
         model.addAttribute("params", params);
 
-        // ★ 템플릿 물리 경로와 일치
         return "admin/customer/service_detail";
     }
 
@@ -185,15 +207,6 @@ public class AdminCustomerController {
     private static String blankToNull(String s){
         return (s == null || s.isBlank()) ? null : s;
     }
-    
-    @GetMapping("/admin/customers")
-    public String customers(Model model) {
-    	
-        MetricsDto metrics = compoanyService.getMetrics();
-        model.addAttribute("metrics", metrics);
 
-        // 기존 목록/페이지 모델도 같이
-        // model.addAttribute("customers", ...);
-        return "admin/customer/customers";
-    }
+    // ⚠️ 중복 매핑 메서드(/admin/customers/admin/customers)는 제거했습니다.
 }
