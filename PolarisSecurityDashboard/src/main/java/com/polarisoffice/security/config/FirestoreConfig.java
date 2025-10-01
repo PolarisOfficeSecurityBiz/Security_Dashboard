@@ -1,8 +1,12 @@
 package com.polarisoffice.security.config;
 
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.firestore.v1.stub.FirestoreStubSettings;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,26 +30,26 @@ public class FirestoreConfig {
   @Bean
   public Firestore firestore() throws IOException {
     GoogleCredentials credentials;
-    String origin;
-
     if (credentialsLocation != null && credentialsLocation.exists()) {
       try (InputStream is = credentialsLocation.getInputStream()) {
         credentials = GoogleCredentials.fromStream(is);
-        origin = credentialsLocation.getURI().toString();
       }
     } else {
       credentials = GoogleCredentials.getApplicationDefault();
-      origin = "ADC(Application Default Credentials)";
     }
 
-    FirestoreOptions.Builder builder = FirestoreOptions.newBuilder().setCredentials(credentials);
-    if (StringUtils.hasText(projectId)) {
+    // ✅ HTTP/JSON 트랜스포트 강제
+    TransportChannelProvider httpJson =
+        FirestoreStubSettings.defaultHttpJsonTransportProviderBuilder().build();
+
+    FirestoreOptions.Builder builder = FirestoreOptions.newBuilder()
+        .setCredentials(credentials)
+        .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
+        .setChannelProvider(httpJson);
+
+    if (projectId != null && !projectId.isBlank()) {
       builder.setProjectId(projectId);
     }
-
-    Firestore fs = builder.build().getService();
-    log.info("✅ Firestore initialized. projectId={}, credsOrigin={}", 
-             fs.getOptions().getProjectId(), origin);
-    return fs;
+    return builder.build().getService();
   }
 }
