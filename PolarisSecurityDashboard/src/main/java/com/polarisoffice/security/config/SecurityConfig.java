@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/polar-notices", "/api/v1/polar-notices/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/polar-letters", "/api/v1/polar-letters/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/secu-news",   "/api/v1/secu-news/**").permitAll() // 오타 수정
-                .requestMatchers(HttpMethod.GET, "/api/v1/direct-abs",  "/api/v1/direct-ads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/direct-ads",  "/api/v1/direct-ads/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/overview").permitAll()
 
                 // ====== 쓰기(ADMIN) ======
