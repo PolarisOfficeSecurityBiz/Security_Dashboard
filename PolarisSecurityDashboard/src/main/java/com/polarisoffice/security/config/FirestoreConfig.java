@@ -1,23 +1,19 @@
 package com.polarisoffice.security.config;
 
-import com.google.api.gax.core.FixedCredentialsProvider;
-import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
-import com.google.cloud.firestore.v1.stub.FirestoreStubSettings;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
+// ★ 이걸 import 해야 gRPC 제공자를 쓸 수 있어요
+import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-@Slf4j
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+
 @Configuration
 public class FirestoreConfig {
 
@@ -30,6 +26,7 @@ public class FirestoreConfig {
   @Bean
   public Firestore firestore() throws IOException {
     GoogleCredentials credentials;
+
     if (credentialsLocation != null && credentialsLocation.exists()) {
       try (InputStream is = credentialsLocation.getInputStream()) {
         credentials = GoogleCredentials.fromStream(is);
@@ -38,18 +35,19 @@ public class FirestoreConfig {
       credentials = GoogleCredentials.getApplicationDefault();
     }
 
-    // ✅ HTTP/JSON 트랜스포트 강제
-    TransportChannelProvider httpJson =
-        FirestoreStubSettings.defaultHttpJsonTransportProviderBuilder().build();
-
-    FirestoreOptions.Builder builder = FirestoreOptions.newBuilder()
+    FirestoreOptions.Builder builder = FirestoreOptions.getDefaultInstance().toBuilder()
         .setCredentials(credentials)
-        .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
-        .setChannelProvider(httpJson);
+        // ★ gRPC를 setChannelProvider로 강제 (HttpJson 절대 금지)
+        .setChannelProvider(
+            InstantiatingGrpcChannelProvider.newBuilder()
+                .setEndpoint("firestore.googleapis.com:443")
+                .build()
+        );
 
     if (projectId != null && !projectId.isBlank()) {
       builder.setProjectId(projectId);
     }
+
     return builder.build().getService();
   }
 }
