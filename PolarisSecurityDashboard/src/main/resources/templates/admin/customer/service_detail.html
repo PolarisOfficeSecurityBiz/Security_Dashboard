@@ -8,7 +8,6 @@
   <meta charset="UTF-8"/>
   <title th:text="${service.serviceName} + ' - 서비스 상세'">서비스 상세</title>
 
-  <!-- 페이지 전용 CSS/JS는 레이아웃의 <head> 영역에 삽입 -->
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/css/service_detail.css(v=${#dates.createNow().time})}"/>
     <script defer th:src="@{/js/service_detail.js(v=${#dates.createNow().time})}"></script>
@@ -19,7 +18,7 @@
 <div layout:fragment="content">
   <main class="service-detail" role="main">
 
-    <!-- 브레드크럼: 화살표만 -->
+    <!-- 브레드크럼 -->
     <div class="page-breadcrumbs">
       <a class="btn btn-ghost btn-pill icon-back"
          aria-label="뒤로가기"
@@ -37,7 +36,6 @@
         <h3>서비스 정보</h3>
 
         <div class="head-actions" id="svcToolbar">
-          <!-- 보기 모드에서 보임 -->
           <button type="button" id="btnSvcEdit"   class="btn btn-ghost btn-sm">수정</button>
 
           <form class="inline" id="deleteForm"
@@ -48,7 +46,6 @@
                     onclick="return confirm('서비스를 삭제할까요?');">삭제</button>
           </form>
 
-          <!-- 편집 모드에서만 보임 -->
           <button type="submit" form="svcForm" id="btnSvcSave"   class="btn btn-primary btn-sm" hidden>저장</button>
           <button type="button"               id="btnSvcCancel" class="btn btn-ghost   btn-sm" hidden>취소</button>
         </div>
@@ -88,14 +85,28 @@
             <option value="Polaris SecuOne App To App">Polaris SecuOne App To App</option>
           </select>
 
-          <!-- 5) 라이선스 키 (입력과 같은 박스, 우측 버튼) -->
+          <!-- 5) 라이선스 키 (우측 액션) -->
           <label class="form-label">라이선스 키</label>
           <div class="form-control input-addon">
             <span class="grow"
                   th:classappend="${service.licenseId == null} ? 'muted' : ''"
                   th:text="${service.licenseId != null ? service.licenseId : '미발급'}">미발급</span>
-            <button type="submit" id="btnLicense" class="btn btn-primary btn-sm"
-                    form="licenseIssueForm">발급하기</button>
+
+            <!-- 미발급 → 발급하기 버튼 -->
+            <th:block th:if="${service.licenseId == null}">
+              <!-- JS가 모달을 띄움 -->
+              <button type="button" id="btnLicense" class="btn btn-primary btn-sm">발급하기</button>
+            </th:block>
+
+            <!-- 발급됨 → 상세보기 버튼 -->
+            <th:block th:if="${service.licenseId != null}">
+              <!-- 라우트는 필요에 맞게 수정: 아래는 상세 보기 페이지 예시 -->
+              <a id="btnLicenseView"
+                 class="btn btn-ghost btn-sm"
+                 th:href="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}">
+                상세보기
+              </a>
+            </th:block>
           </div>
 
           <!-- 6) CPI -->
@@ -109,7 +120,7 @@
                  th:value="${service.rsRate}" min="0" step="0.01" disabled/>
         </form>
 
-        <!-- ▶ 라이선스 발급 별도 form (중첩 방지) -->
+        <!-- ▶ 라이선스 발급 POST용 별도 form -->
         <form id="licenseIssueForm"
               th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}"
               method="post" hidden>
@@ -156,51 +167,51 @@
     </section>
 
     <!-- =========== 로그(도메인 자동 필터) =========== -->
-<section
-  id="logsSection"
-  class="card card-elev section"
-  th:attr="data-domain=${service.domain}"
-  data-days="7">
+    <section
+      id="logsSection"
+      class="card card-elev section"
+      th:attr="data-domain=${service.domain}"
+      data-days="7">
 
-  <div class="card-head">
-    <h3>로그</h3>
-    <div class="head-actions">
-      <select id="logsDays" class="form-control" style="width:110px">
-        <option value="7" selected>최근 7일</option>
-        <option value="14">최근 14일</option>
-        <option value="30">최근 30일</option>
-      </select>
-      <span id="logsResultInfo" class="badge-muted" style="margin-left:8px">0 rows</span>
-    </div>
-  </div>
+      <div class="card-head">
+        <h3>로그</h3>
+        <div class="head-actions">
+          <select id="logsDays" class="form-control" style="width:110px">
+            <option value="7" selected>최근 7일</option>
+            <option value="14">최근 14일</option>
+            <option value="30">최근 30일</option>
+          </select>
+          <span id="logsResultInfo" class="badge-muted" style="margin-left:8px">0 rows</span>
+        </div>
+      </div>
 
-  <div class="section-body">
-    <table class="table log-table" id="logsTable">
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>Created At</th>
-        <th>Domain</th>
-        <th>Type</th>
-        <th>OS</th>
-        <th>App</th>
-        <th>Extra</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr class="empty-row">
-        <td colspan="7" class="empty">로그 데이터가 없습니다.</td>
-      </tr>
-      </tbody>
-    </table>
+      <div class="section-body">
+        <table class="table log-table" id="logsTable">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Created At</th>
+            <th>Domain</th>
+            <th>Type</th>
+            <th>OS</th>
+            <th>App</th>
+            <th>Extra</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr class="empty-row">
+            <td colspan="7" class="empty">로그 데이터가 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
 
-    <div class="pager" style="margin-top:10px">
-      <button id="logsPrev" class="btn btn-ghost btn-sm">이전</button>
-      <span id="logsPageInfo" class="muted" style="margin:0 8px">1 / 1</span>
-      <button id="logsNext" class="btn btn-ghost btn-sm">다음</button>
-    </div>
-  </div>
-</section>
+        <div class="pager" style="margin-top:10px">
+          <button id="logsPrev" class="btn btn-ghost btn-sm">이전</button>
+          <span id="logsPageInfo" class="muted" style="margin:0 8px">1 / 1</span>
+          <button id="logsNext" class="btn btn-ghost btn-sm">다음</button>
+        </div>
+      </div>
+    </section>
 
     <!-- ===== 담당자 추가 모달 ===== -->
     <div id="contactModal" class="modal" aria-hidden="true">
@@ -223,6 +234,50 @@
           <div class="modal-actions">
             <button type="button" class="btn btn-ghost" data-close="contactModal">취소</button>
             <button type="submit" class="btn btn-primary">추가</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== 라이선스 발급 모달 ===== -->
+    <div id="licenseModal" class="modal" aria-hidden="true">
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="licenseTitle">
+        <div class="modal-header">
+          <h3 id="licenseTitle">라이선스 발급</h3>
+          <button type="button" class="icon-btn" data-close="licenseModal" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="licenseForm" class="modal-body" autocomplete="off">
+          <div class="form-row">
+            <label for="licExpires">만료일 *</label>
+            <input id="licExpires" class="form-control" type="date" required />
+          </div>
+
+          <div class="form-row">
+            <label for="licMaxUses">사용제한수</label>
+            <input id="licMaxUses" class="form-control" type="number" min="1" step="1" value="2" />
+          </div>
+
+          <div class="form-row">
+            <label for="licType">라이선스 타입</label>
+            <select id="licType" class="form-control">
+              <option value="PROD">정식</option>
+              <option value="TEST">테스트</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="licVersion">라이선스 버전</label>
+            <select id="licVersion" class="form-control">
+              <option value="SDK2">SDK 2.0</option>
+              <option value="SDK3" selected>SDK 3.0</option>
+              <option value="SECUONE">SecuOne</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close="licenseModal">취소</button>
+            <button type="submit" class="btn btn-primary">발급</button>
           </div>
         </form>
       </div>

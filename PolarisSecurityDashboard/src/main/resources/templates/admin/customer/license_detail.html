@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${customer.customerName} + ' / 라이선스 관리'">라이선스 관리</title>
+
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/css/license_detail.css(v=${#dates.createNow().time})}"/>
+    <script defer th:src="@{/js/license_detail.js(v=${#dates.createNow().time})}"></script>
+  </th:block>
+</head>
+
+<body data-page="license-detail">
+<div layout:fragment="content">
+  <main class="license-detail" role="main">
+    <!-- Breadcrumbs -->
+    <div class="page-breadcrumbs">
+      <div class="crumbs">
+        <a class="btn btn-ghost btn-pill" aria-label="뒤로가기"
+           th:href="@{|/admin/customers/${customer.customerId}|}">←</a>
+        <span class="crumb" th:text="${customer.customerName}">고객명</span>
+        <span class="sep">/</span>
+        <strong class="current">라이선스 관리</strong>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" title="새로고침" onclick="location.reload()">⟲</button>
+      </div>
+    </div>
+
+    <!-- ===== 전체 정보 ===== -->
+    <section class="card section">
+      <div class="card-head">
+        <h3>전체 정보</h3>
+        <div class="head-actions">
+          <button type="button" id="btnEdit"   class="btn btn-ghost btn-sm">수정</button>
+
+          <form id="deleteForm" class="inline"
+                th:action="@{|/admin/licenses/${license.licenseId}/delete|}"
+                method="post">
+            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger btn-sm"
+                    onclick="return confirm('라이선스를 삭제할까요?');">삭제</button>
+          </form>
+
+          <button type="submit" form="licForm" id="btnSave"   class="btn btn-primary btn-sm" hidden>수정</button>
+          <button type="button"                 id="btnCancel" class="btn btn-ghost btn-sm" hidden>취소</button>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <form id="licForm" class="form-grid" data-mode="view"
+              th:action="@{|/admin/licenses/${license.licenseId}/update|}"
+              method="post" th:object="${license}">
+          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+          <!-- 라이선스ID (읽기전용) -->
+          <label class="form-label">라이선스ID</label>
+          <input class="form-control" th:value="${license.licenseId}" value="2dfb36ea-1a05-4a5b-831d-d794ed46119a" disabled/>
+
+          <!-- 만료일 -->
+          <label class="form-label" for="expiryDate">지정 만료일</label>
+          <input id="expiryDate" name="expiryDate" class="form-control" type="date" data-editable
+                 th:value="${#dates.format(license.expiryDate, 'yyyy-MM-dd')}" value="2025-09-22" disabled/>
+
+          <!-- 사용 제한수 -->
+          <label class="form-label" for="usageLimit">사용 제한수</label>
+          <input id="usageLimit" name="usageLimit" class="form-control" type="number" min="1" step="1" data-editable
+                 th:value="${license.usageLimit}" value="2" disabled/>
+
+          <!-- 라이선스 타입 -->
+          <label class="form-label" for="licenseType">라이선스 타입</label>
+          <select id="licenseType" name="licenseType" class="form-control" data-editable disabled
+                  th:value="${license.licenseType}">
+            <option value="PROD" th:selected="${license.licenseType=='PROD'}">정식</option>
+            <option value="TEST" th:selected="${license.licenseType=='TEST'}">테스트</option>
+          </select>
+
+          <!-- 라이선스 버전 -->
+          <label class="form-label" for="licenseVersion">라이선스 버전</label>
+          <select id="licenseVersion" name="licenseVersion" class="form-control" data-editable disabled
+                  th:value="${license.licenseVersion}">
+            <option value="SDK2"    th:selected="${license.licenseVersion=='SDK2'}">SDK 2.0</option>
+            <option value="SDK3"    th:selected="${license.licenseVersion=='SDK3'}">SDK 3.0</option>
+            <option value="SECUONE" th:selected="${license.licenseVersion=='SECUONE'}">SecuOne</option>
+          </select>
+
+          <!-- 생성일 (읽기전용) -->
+          <label class="form-label">생성일</label>
+          <input class="form-control" th:value="${#dates.format(license.createdAt, 'yyyy-MM-dd')}" value="2025-08-12" disabled/>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== 히스토리 ===== -->
+    <section class="card section">
+      <div class="card-head">
+        <h3>라이선스 히스토리</h3>
+        <div class="head-actions">
+          <button type="button" id="btnAddService" class="btn btn-primary btn-sm">+ 서비스 추가</button>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <table class="table" id="histTable">
+          <thead>
+          <tr>
+            <th>변경자</th>
+            <th>변경타입</th>
+            <th>메모</th>
+            <th style="width:160px">변경날짜</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="h : ${histories}">
+            <td th:text="${h.actor}">lily.b.lee (이보연)</td>
+            <td th:text="${h.type}">사용제한수 변경</td>
+            <td th:text="${h.memo}">2 > 3</td>
+            <td th:text="${#dates.format(h.changedAt, 'yyyy-MM-dd HH:mm')}">2025-09-22</td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(histories)}" class="empty-row">
+            <td colspan="4" class="empty">히스토리가 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== 서비스 추가 모달 ===== -->
+    <div id="svcModal" class="modal" aria-hidden="true">
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcTitle">
+        <div class="modal-header">
+          <h3 id="svcTitle">서비스 추가</h3>
+          <button type="button" class="icon-btn" data-close="svcModal" aria-label="닫기">✕</button>
+        </div>
+
+        <form id="svcForm" class="modal-body"
+              th:action="@{|/admin/licenses/${license.licenseId}/services|}" method="post" autocomplete="off">
+          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+          <div class="form-row">
+            <label for="svcName">서비스명 *</label>
+            <input id="svcName" name="serviceName" class="form-control" required placeholder="ex) com.polarisoffice.app"/>
+          </div>
+
+          <div class="form-row">
+            <label for="svcMemo">메모</label>
+            <input id="svcMemo" name="memo" class="form-control" placeholder="선택 사항"/>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close="svcModal">취소</button>
+            <button type="submit" class="btn btn-primary">추가</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

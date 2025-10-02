@@ -10,16 +10,15 @@
   const form       = $('#svcForm');
   if (!form) return;
 
-  const btnEdit    = $('#btnSvcEdit');
-  const btnSave    = $('#btnSvcSave');
-  const btnCancel  = $('#btnSvcCancel');
-  const btnLicense = $('#btnLicense');
-  const deleteForm = $('#deleteForm');     // 삭제 버튼이 들어있는 form (보기 모드에서만 표시)
+  const btnEdit      = $('#btnSvcEdit');
+  const btnSave      = $('#btnSvcSave');
+  const btnCancel    = $('#btnSvcCancel');
+  const btnLicense   = $('#btnLicense');      // 발급하기 (있을 때만)
+  const btnLicView   = $('#btnLicenseView');  // 상세보기 (있을 때만)
+  const deleteForm   = $('#deleteForm');
 
-  // 편집 가능한 요소들(필드에 data-editable 넣기)
   const editables = $$('[data-editable]');
 
-  // 원본값 스냅샷
   const snapshot = () => {
     editables.forEach(el => {
       el.dataset.orig = (el.type === 'checkbox' || el.type === 'radio')
@@ -28,7 +27,6 @@
     });
   };
 
-  // 값 복원
   const restore = () => {
     editables.forEach(el => {
       if (el.type === 'checkbox' || el.type === 'radio') {
@@ -39,18 +37,20 @@
     });
   };
 
-  // 모드 전환 (on = 편집)
   const setEditing = (on) => {
-    // 필드 활성/비활성
     editables.forEach(el => { el.disabled = !on; });
 
-    // 상단 액션 버튼 토글
-    if (btnEdit)   btnEdit.hidden   =  on;  // 편집 중이면 숨김
-    if (btnSave)   btnSave.hidden   = !on;  // 편집 중에만 보임
-    if (btnCancel) btnCancel.hidden = !on;  // 편집 중에만 보임
+    if (btnEdit)   btnEdit.hidden   =  on;
+    if (btnSave)   btnSave.hidden   = !on;
+    if (btnCancel) btnCancel.hidden = !on;
 
-    // 위험/외부 액션은 편집 중 비활성
+    // 외부 액션 제어
     if (btnLicense) btnLicense.disabled = on;
+    if (btnLicView) {
+      btnLicView.style.pointerEvents = on ? 'none' : '';
+      btnLicView.style.opacity = on ? '0.6' : '1';
+      btnLicView.tabIndex = on ? -1 : 0;
+    }
     if (deleteForm) {
       deleteForm.style.display = on ? 'none' : '';
       deleteForm.style.pointerEvents = on ? 'none' : '';
@@ -60,11 +60,9 @@
     form.dataset.mode = on ? 'edit' : 'view';
   };
 
-  // 초기: 조회 모드
   setEditing(false);
   snapshot();
 
-  // 수정 클릭 → 편집 모드
   btnEdit?.addEventListener('click', () => {
     snapshot();
     setEditing(true);
@@ -72,18 +70,15 @@
     first?.focus();
   });
 
-  // 취소 클릭 → 값 복원 + 조회 모드
   btnCancel?.addEventListener('click', () => {
     restore();
     setEditing(false);
   });
 
-  // 저장 중 중복 클릭 방지
   form.addEventListener('submit', () => {
     if (btnSave) btnSave.disabled = true;
   });
 
-  // ESC로 취소
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && form.dataset.mode === 'edit') {
       e.preventDefault();
@@ -115,21 +110,17 @@
     document.body.style.overflow = '';
   };
 
-  // 열기
   document.getElementById('btnOpenContact')
     ?.addEventListener('click', () => open('contactModal'));
 
-  // 닫기 버튼들
   document.querySelectorAll('[data-close]')
     .forEach(b => b.addEventListener('click', () => close(b.dataset.close)));
 
-  // 배경 클릭으로 닫기
   document.querySelectorAll('.modal')
     .forEach(m => m.addEventListener('click', (e) => {
       if (e.target === m) m.classList.remove('show');
     }));
 
-  // ESC로 닫기
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal.show')
@@ -140,7 +131,7 @@
 })();
 
 /* =========================
-   Domain Logs (service domain) – /api/logs/report 기반
+   Domain Logs – /api/logs/report
    ========================= */
 (() => {
   'use strict';
@@ -148,7 +139,6 @@
   const hostSection = document.getElementById('logsSection');
   if (!hostSection) return;
 
-  // DOM
   const table      = document.getElementById('logsTable');
   const tbody      = table?.querySelector('tbody');
   const daysSel    = document.getElementById('logsDays');
@@ -157,28 +147,18 @@
   const btnNext    = document.getElementById('logsNext');
   const pageInfo   = document.getElementById('logsPageInfo');
 
-  // Params
   const domainInit = (hostSection.getAttribute('data-domain') || '').trim();
-  if (!domainInit) {
-    // 도메인이 비어있으면 로그 섹션을 비활성화
-    hostSection.style.display = 'none';
-    return;
-  }
-  const PAGE_SIZE = 10;
+  if (!domainInit) { hostSection.style.display = 'none'; return; }
 
-  // State
-  let rows = [];      // 전체 원본
-  let page = 1;       // 1-based
+  const PAGE_SIZE = 10;
+  let rows = [];
+  let page = 1;
   let pages = 1;
 
-  // API 호출 (동일 오리진, 세션 쿠키 포함)
   async function fetchLogs({ days, domain }) {
     const u = new URL('/api/logs/report', window.location.origin);
     if (days)   u.searchParams.set('days',   String(days));
     if (domain) u.searchParams.set('domain', domain);
-
-    // 필요 시 타입 필터:
-    // u.searchParams.set('type','MALWARE');
 
     const res = await fetch(u.toString(), { credentials: 'same-origin' });
     if (!res.ok) {
@@ -188,7 +168,6 @@
     return await res.json();
   }
 
-  // 날짜 포맷
   function fmtDate(s) {
     if (!s) return '';
     try {
@@ -200,11 +179,8 @@
     } catch { return s; }
   }
 
-  // 행 빌드
   function buildRow(item) {
-    // 백엔드 DTO 예시: id, createdAt, domain, logType, osVersion, appVersion, extra
     const tr = document.createElement('tr');
-
     const tdId   = document.createElement('td'); tdId.textContent   = item.id ?? '';
     const tdAt   = document.createElement('td'); tdAt.textContent   = fmtDate(item.createdAt ?? item.createAt);
     const tdDom  = document.createElement('td'); tdDom.textContent  = item.domain ?? '';
@@ -217,16 +193,12 @@
     const tdApp  = document.createElement('td'); tdApp.textContent  = item.appVersion ?? '';
     const tdEx   = document.createElement('td'); tdEx.textContent   =
       (typeof item.extra === 'string' ? item.extra : (item.extra ? JSON.stringify(item.extra) : ''));
-
     tr.append(tdId, tdAt, tdDom, tdType, tdOS, tdApp, tdEx);
     return tr;
   }
 
-  // 렌더 (클라이언트 페이징)
   function render() {
     if (!tbody) return;
-
-    // 비우기
     tbody.innerHTML = '';
 
     if (!rows.length) {
@@ -238,52 +210,121 @@
       td.textContent = '로그 데이터가 없습니다.';
       tr.appendChild(td);
       tbody.appendChild(tr);
-
       infoSpan && (infoSpan.textContent = '0 rows');
       page = pages = 1;
       pageInfo && (pageInfo.textContent = '1 / 1');
       return;
     }
 
-    // 페이지 정보
     pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     if (page > pages) page = pages;
 
     const start = (page - 1) * PAGE_SIZE;
     const slice = rows.slice(start, start + PAGE_SIZE);
-
     slice.forEach(item => tbody.appendChild(buildRow(item)));
 
     infoSpan && (infoSpan.textContent = `${rows.length} rows`);
     pageInfo && (pageInfo.textContent = `${page} / ${pages}`);
   }
 
-  // 데이터 로드 + 렌더
   async function loadAndRender() {
     const days = Number(daysSel?.value || hostSection.getAttribute('data-days') || 7);
     const domain = domainInit;
-
     rows = await fetchLogs({ days, domain });
-
-    // 필요하면 완전일치 추가 필터:
-    // rows = rows.filter(r => (r.domain || '').toLowerCase() === domain.toLowerCase());
-
-    // 최신순 정렬
-    rows.sort((a,b) => {
-      const A = new Date(a.createdAt ?? a.createAt).getTime();
-      const B = new Date(b.createdAt ?? b.createAt).getTime();
-      return B - A;
-    });
-
+    rows.sort((a,b) => new Date(b.createdAt ?? b.createAt) - new Date(a.createdAt ?? a.createAt));
     page = 1;
     render();
   }
 
-  // 이벤트
   daysSel?.addEventListener('change', () => loadAndRender());
   btnPrev?.addEventListener('click', () => { if (page > 1) { page--; render(); } });
   btnNext?.addEventListener('click', () => { if (page < pages) { page++; render(); } });
 
-  // 초기 로드
   loadAndRender();
+})();
+
+/* =========================
+   License Issue Modal
+   ========================= */
+(() => {
+  'use strict';
+
+  const btnOpen   = document.getElementById('btnLicense');         // 미발급일 때만 존재
+  const modal     = document.getElementById('licenseModal');
+  const formModal = document.getElementById('licenseForm');
+  const issueForm = document.getElementById('licenseIssueForm');
+  if (!modal || !formModal || !issueForm) return;
+
+  // 미발급 상태가 아닐 수도 있으므로 버튼 없으면 모달 로직은 스킵
+  if (!btnOpen) return;
+
+  const $ = (s) => document.querySelector(s);
+
+  function open() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm   = String(today.getMonth() + 1).padStart(2, '0');
+    const dd   = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    const next = new Date(today); next.setFullYear(next.getFullYear() + 1);
+    const ny = next.getFullYear();
+    const nm = String(next.getMonth() + 1).padStart(2, '0');
+    const nd = String(next.getDate()).padStart(2, '0');
+    const nextStr = `${ny}-${nm}-${nd}`;
+
+    const exp = $('#licExpires');
+    if (exp) { exp.min = todayStr; if (!exp.value) exp.value = nextStr; }
+
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    exp?.focus();
+  }
+
+  function close() {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  btnOpen.addEventListener('click', (e) => {
+    e.preventDefault();
+    open();
+  });
+
+  document.querySelectorAll('[data-close="licenseModal"]').forEach(b => b.addEventListener('click', close));
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('show')) close(); });
+
+  function setHidden(name, value) {
+    let el = issueForm.querySelector(`input[name="${name}"]`);
+    if (!el) {
+      el = document.createElement('input');
+      el.type = 'hidden';
+      el.name = name;
+      issueForm.appendChild(el);
+    }
+    el.value = value;
+  }
+
+  formModal.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const expiryDate     = $('#licExpires')?.value || '';
+    const usageLimit     = $('#licMaxUses')?.value || '2';
+    const licenseType    = $('#licType')?.value || 'PROD';
+    const licenseVersion = $('#licVersion')?.value || 'SDK3';
+
+    if (!expiryDate) { alert('만료일을 선택하세요.'); return; }
+    const n = Number(usageLimit);
+    if (!Number.isFinite(n) || n < 1) { alert('사용제한수는 1 이상의 정수여야 합니다.'); return; }
+
+    setHidden('expiryDate', expiryDate);
+    setHidden('usageLimit', String(Math.trunc(n)));
+    setHidden('licenseType', licenseType);
+    setHidden('licenseVersion', licenseVersion);
+
+    issueForm.submit(); // 서버에서 발급 후 동일 페이지로 리다이렉트 → 버튼은 '상세보기'로 렌더됨
+  });
 })();
