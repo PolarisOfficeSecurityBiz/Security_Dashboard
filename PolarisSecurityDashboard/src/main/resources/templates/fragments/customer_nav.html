@@ -1,0 +1,50 @@
+<nav class="customer-nav" th:fragment="nav">
+  <link rel="stylesheet" th:href="@{/css/customer_nav.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- 상단 로고 -->
+  <div class="brand">
+    <img th:src="@{/images/bi_logo.png}" alt="Polaris Customer" class="brand-logo">
+    <span class="brand-name">Polaris Customer</span>
+  </div>
+
+  <!-- 네비게이션 메뉴 -->
+  <ul class="nav-menu">
+    <li>
+      <a th:href="@{/customer/dashboard}" th:classappend="${#strings.startsWith(path, '/customer/dashboard')} ? 'active' : ''">
+        <i class="fa fa-home"></i> Overview
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/customer/company}" th:classappend="${#strings.startsWith(path, '/customer/company')} ? 'active' : ''">
+        <i class="fa fa-building"></i> 고객사 정보 관리
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/customer/license}" th:classappend="${#strings.startsWith(path, '/customer/license')} ? 'active' : ''">
+        <i class="fa fa-key"></i> 라이선스 관리
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/customer/logs}" th:classappend="${#strings.startsWith(path, '/customer/logs')} ? 'active' : ''">
+        <i class="fa fa-clipboard-list"></i> 사용 로그 확인
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/customer/settlement}" th:classappend="${#strings.startsWith(path, '/customer/settlement')} ? 'active' : ''">
+        <i class="fa fa-wallet"></i> 정산 내역
+      </a>
+    </li>
+  </ul>
+
+   <div class="customer-footer">
+    <div class="user-info-box">
+<p th:text="${#authentication.principal.username + '님'}"></p>
+<p class="user-email" th:text="${#authentication.principal.username}">user@polarisoffice.com</p>
+
+    </div>
+    <a th:href="@{/logout}" class="logout-link">
+      <i class="fa fa-sign-out-alt"></i> 로그아웃
+    </a>
+  </div>
+</nav>

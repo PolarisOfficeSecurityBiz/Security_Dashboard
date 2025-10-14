@@ -1,12 +1,133 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/customer_layout}">
 <head>
   <meta charset="UTF-8">
-  <title>Customer Dashboard</title>
-  <link rel="stylesheet" th:href="@{/css/customer.css}">
+  <title>고객사 대시보드</title>
+  <link rel="stylesheet" th:href="@{/css/customer_overview.css}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-  <h1>고객사 대시보드</h1>
-  <p th:text="'환영합니다, ' + ${#authentication.principal.username} + '님'"></p>
+<!-- ✅ 네비게이션 삽입 -->
+<div th:replace="fragments/customer_nav :: nav"></div>
+
+<main class="overview-container" layout:fragment="content">
+
+  <header class="dashboard-header">
+    <h1>고객사 대시보드</h1>
+    <p th:text="'환영합니다, ' + ${#authentication.principal.username} + '님 👋'"></p>
+  </header>
+
+  <!-- 상단 통계 카드 -->
+  <section class="top-stats">
+    <div class="stat-card">
+      <h4>이번달 유입 유저 수</h4>
+      <div class="stat-value">2,040</div>
+      <div class="stat-change">+10.3%</div>
+    </div>
+    <div class="stat-card">
+      <h4>이번달 정산 현황</h4>
+      <div class="stat-value">1,203</div>
+      <div class="stat-change">+10.3%</div>
+    </div>
+    <div class="stat-card">
+      <h4>활성 라이선스 수</h4>
+      <div class="stat-value">10</div>
+      <div class="stat-change">+10.3%</div>
+    </div>
+  </section>
+
+  <!-- 라이선스 상태 -->
+  <section class="license-status">
+    <h3>라이선스 상태</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>서비스 명</th>
+        <th>만료일</th>
+        <th>D-Day</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="license : ${licenses}">
+        <td th:text="${license.name}">이지로그</td>
+        <td th:text="${license.expireDate}">2025.09.24</td>
+        <td th:text="${license.dDay}">D-20</td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(licenses)}">
+        <td colspan="3" style="text-align:center; color:#94a3b8;">등록된 라이선스가 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 월별 유저 유입 현황 -->
+  <section class="chart-section">
+    <h3>월별 유저 유입 현황</h3>
+    <canvas id="userChart"></canvas>
+  </section>
+
+  <!-- 올해 정산 현황 -->
+  <section class="settlement-status">
+    <h3>올해 정산 현황</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>월별</th>
+        <th>정산 금액</th>
+        <th>정산 파일</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="settlement : ${settlements}">
+        <td th:text="${settlement.month + '월'}">1월</td>
+        <td th:text="${#numbers.formatInteger(settlement.amount, 3, 'COMMA') + '원'}">₩ 210,900.00</td>
+        <td>
+          <a th:href="@{/files/{id}(id=${settlement.fileId})}" target="_blank">
+            <i class="fa fa-file-download"></i>
+          </a>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(settlements)}">
+        <td colspan="3" style="text-align:center; color:#94a3b8;">정산 내역이 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  // Chart.js: 유입 현황
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('userChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
+        datasets: [
+          {
+            label: '신규 유입',
+            data: [30, 40, 55, 60, 35, 50],
+            backgroundColor: 'rgba(108, 122, 255, 0.7)'
+          },
+          {
+            label: '재방문',
+            data: [15, 25, 35, 30, 25, 40],
+            backgroundColor: 'rgba(225, 165, 255, 0.7)'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  });
+</script>
 </body>
 </html>

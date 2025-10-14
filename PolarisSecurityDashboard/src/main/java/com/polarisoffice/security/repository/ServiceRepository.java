@@ -13,4 +13,7 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
     long countByProductTypeIgnoreCaseContaining(String keyword);
     // "V-Guard" 카운트도 필요하면
     long countByProductTypeIgnoreCaseContainingOrProductTypeIgnoreCaseContaining(String k1, String k2);
+    
+    List<Service> findByCustomerId(String customerId);
+
 }

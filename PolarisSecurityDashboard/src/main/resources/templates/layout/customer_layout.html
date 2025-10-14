@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Polaris Customer</title>
+
+  <link rel="stylesheet" th:href="@{/css/customer_nav.css}">
+  <link rel="stylesheet" th:href="@{/css/customer_layout.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="layout">
+    <!-- 사이드바 -->
+    <nav th:replace="~{fragments/customer_nav :: nav}"></nav>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="layout-main">
+      <main class="main-content" layout:fragment="content">
+        <div class="content-body" layout:insert="~{::content}"></div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

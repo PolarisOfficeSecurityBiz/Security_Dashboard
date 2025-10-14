@@ -54,10 +54,12 @@ public class AdminCustomerController {
         return "admin/customer/customers";
     }
 
-    private static String resolveConnectedCompanyName(String connectedCompanyId, Map<String, String> idToName) {
-        if (connectedCompanyId == null || connectedCompanyId.isBlank()) return null;
-        return idToName.getOrDefault(connectedCompanyId, connectedCompanyId); // 맵에 없으면 원값(id) fallback
+    private static String resolveConnectedCompanyName(Customer connectedCompany, Map<String, String> idToName) {
+        if (connectedCompany == null) return "-";
+        String connectedId = connectedCompany.getCustomerId();
+        return idToName.getOrDefault(connectedId, connectedCompany.getCustomerName());
     }
+
 
     /* 고객사 생성 */
     @PostMapping
@@ -66,11 +68,17 @@ public class AdminCustomerController {
         var c = new Customer();
         c.setCustomerId(UUID.randomUUID().toString());
         c.setCustomerName(customerName);
-        c.setConnectedCompany((connectedCompany != null && !connectedCompany.isBlank()) ? connectedCompany : null);
         c.setCreateAt(LocalDate.now());
+
+        if (connectedCompany != null && !connectedCompany.isBlank()) {
+            customerRepository.findByCustomerId(connectedCompany)
+                .ifPresent(c::setConnectedCompany);
+        }
+
         customerRepository.save(c);
         return "redirect:/admin/customers";
     }
+
 
     /* 고객사 상세 (서비스 리스트 포함) */
     @GetMapping("/{id}")
@@ -92,7 +100,14 @@ public class AdminCustomerController {
                                  @RequestParam(required = false) String connectedCompany) {
         Customer c = customerRepository.findById(id).orElseThrow();
         c.setCustomerName(customerName);
-        c.setConnectedCompany((connectedCompany != null && !connectedCompany.isBlank()) ? connectedCompany : null);
+
+        if (connectedCompany != null && !connectedCompany.isBlank()) {
+            customerRepository.findByCustomerId(connectedCompany)
+                .ifPresent(c::setConnectedCompany);
+        } else {
+            c.setConnectedCompany(null);
+        }
+
         customerRepository.save(c);
         return "redirect:/admin/customers/{id}";
     }
