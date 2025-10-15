@@ -38,11 +38,6 @@ public class HomeController {
         return "redirect:/login";
     }
 
-
-    @GetMapping("/admin/overview")
-    public String adminOverview() {
-        return "admin/overview";
-    }
     
     @GetMapping("/admin/logs")
     public String adminLogs() {

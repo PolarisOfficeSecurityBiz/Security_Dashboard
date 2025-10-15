@@ -26,9 +26,13 @@ public class CustomerInfoService {
         ServiceContact contact = serviceContactRepository.findByEmail(usernameOrEmail)
                 .orElseThrow(() -> new IllegalArgumentException("담당자 정보를 찾을 수 없습니다. email=" + usernameOrEmail));
 
-        // 2️⃣ 담당자가 속한 고객사(Customer) 찾기
-        return customerRepository.findByCustomerId(contact.getCustomerId())
-                .orElseThrow(() -> new IllegalArgumentException("고객 정보를 찾을 수 없습니다. customerId=" + contact.getCustomerId()));
+        // 2️⃣ 담당자가 속한 고객사(Customer) 직접 참조
+        Customer customer = contact.getCustomer();
+        if (customer == null) {
+            throw new IllegalArgumentException("담당자에 연결된 고객 정보를 찾을 수 없습니다. email=" + usernameOrEmail);
+        }
+
+        return customer;
     }
 
     /**
@@ -36,5 +40,10 @@ public class CustomerInfoService {
      */
     public List<Service> getCustomerServices(String customerId) {
         return serviceRepository.findByCustomerId(customerId);
+    }
+    
+    public Customer getCustomerById(String customerId) {
+        return customerRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("고객 정보를 찾을 수 없습니다. customerId=" + customerId));
     }
 }

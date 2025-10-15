@@ -2,10 +2,9 @@ package com.polarisoffice.security.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Comment;
 
 import java.time.LocalDate;
-
-import org.hibernate.annotations.Comment;
 
 @Entity
 @Table(name = "servicecontacts")
@@ -23,7 +22,7 @@ public class ServiceContact {
     @Column(name = "username", length = 100, nullable = false)
     private String username;
 
-    @Column(name = "email", length = 255)
+    @Column(name = "email", length = 255, nullable = false, unique = true)
     private String email;
 
     @Column(name = "passwordHash", length = 255)
@@ -38,8 +37,10 @@ public class ServiceContact {
     @Column(name = "memo", length = 500)
     private String memo;
 
-    @Column(name = "customer_id", length = 64, nullable = false)
-    private String customerId;
+    // ❌ 기존 String customerId → ✅ JPA 관계 매핑
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
+    private Customer customer;
 
     @Column(name = "service_id", nullable = false)
     private Integer serviceId;

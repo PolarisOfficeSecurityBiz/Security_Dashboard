@@ -1,42 +1,159 @@
-/* 네비게이션 컨테이너 */
+:root {
+  --nav-width: 300px;
+  --bg-nav: #fff;
+  --bg-hover: #f3f4f6;
+  --border-color: #e5e7eb;
+  --color-text: #374151;
+  --color-active: #2563eb;
+  --radius: 10px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* === 전체 nav === */
 .admin-nav {
-  background:#0f172a;
-  color:#fff;
-  padding:20px;
-  height:100vh;
-  position:sticky;
-  top:0;
-  display:flex;
-  flex-direction:column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  background: var(--bg-nav);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1000;
 }
 
-/* 브랜드 */
-.admin-nav .brand {
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:24px;
-  color:#fff;
-  letter-spacing:.3px;
+/* === 스크롤 가능한 상단 영역 === */
+.nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 메뉴 리스트 */
-.admin-nav ul {
-  list-style:none; padding:0; margin:0;
+/* === 로고 === */
+.nav-logo {
+  font-size: 18px;
+  font-weight: 700;
+  padding: 24px;
+  margin: 0;
 }
-.admin-nav ul + ul { margin-top:auto; } /* 하단 영역(로그아웃) */
 
-/* 항목 */
-.admin-nav li { margin-bottom:10px; }
-
-/* 링크 */
-.admin-nav a {
-  display:block;
-  padding:10px 12px;
-  border-radius:10px;
-  color:#e2e8f0;
-  text-decoration:none;
-  font-weight:600;
-  transition:background .2s, color .2s;
+/* === 메뉴 === */
+.nav-menu {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.admin-nav a:hover { background:rgba(255,255,255,.08); color:#fff; }
-.admin-nav a.active { background:#2563eb; color:#fff; }
+
+.nav-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  text-decoration: none;
+  color: var(--color-text);
+  border-radius: var(--radius);
+  transition: background 0.2s, color 0.2s;
+  font-weight: 500;
+}
+
+.nav-menu li a:hover {
+  background: var(--bg-hover);
+}
+
+.nav-menu li a.active {
+  background: var(--color-active);
+  color: #fff;
+}
+
+/* === 하단 프로필 영역 === */
+.nav-bottom {
+  border-top: 1px solid var(--border-color);
+  padding: 16px 18px;
+  background: #fff;
+  position: sticky;
+  bottom: 0;
+}
+
+/* 프로필 컨테이너 */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ✅ 완전한 정원형 + 중앙정렬 + 적당한 크기 */
+.avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: var(--color-active);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 0 0 2px #fff;
+  text-align: center;
+  line-height: 1;
+}
+
+/* 텍스트 정보 */
+.profile .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile .name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profile .email {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ADMIN 뱃지 */
+.role {
+  font-size: 10px;
+  background: #111827;
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-weight: 700;
+  width:30px;
+  margin-top:4px;
+}
+
+/* 로그아웃 링크 */
+.logout {
+  display: block;
+  margin-top: 10px;
+  text-align: right;
+  color: var(--color-active);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* === 반응형 === */
+@media (max-height: 600px) {
+  .nav-bottom {
+    padding: 10px 14px;
+  }
+  .profile .name {
+    font-size: 13px;
+  }
+}

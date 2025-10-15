@@ -17,4 +17,9 @@ public class ServiceService {
     public List<Service> getServicesByCustomerId(String customerId) {
         return serviceRepository.findByCustomerId(customerId);
     }
+    // 첫 번째 서비스 (대표 서비스)
+    public Service getPrimaryService(String customerId) {
+        return serviceRepository.findByCustomerIdOrderByCreateAtDesc(customerId)
+                .stream().findFirst().orElse(null);
+    }
 }

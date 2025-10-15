@@ -1,0 +1,86 @@
+body {
+  font-family: 'Pretendard', sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  color: #222;
+}
+
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.license-card {
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+}
+
+.license-card h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.form label {
+  display: block;
+  margin: 10px 0 4px;
+  font-weight: 500;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f7f7f7;
+  font-size: 14px;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.input-group input {
+  flex: 1;
+}
+
+.input-group button,
+.input-group a {
+  background-color: #eaeaea;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 14px;
+  text-decoration: none;
+  text-align: center;
+  line-height: 36px;
+}
+
+.input-group button:hover,
+.input-group a:hover {
+  background-color: #ddd;
+}
+
+.btn-green {
+  background-color: #19a974 !important;
+  color: white;
+}
+
+.btn-green:hover {
+  background-color: #13895e !important;
+}

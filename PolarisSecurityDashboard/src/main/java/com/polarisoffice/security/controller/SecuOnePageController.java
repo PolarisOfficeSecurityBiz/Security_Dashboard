@@ -8,22 +8,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin/secuone")
 public class SecuOnePageController {
 
-    @GetMapping
+    @GetMapping("")
     public String secuoneOverview() {
-        return "admin/secuone/secuone"; // templates/admin/secuone/secuone.html
+        return "admin/secuone/secuone";
     }
 
-    @GetMapping("/secunews")        // ✅ 클래스 prefix가 /admin/secuone 이라 여기엔 /secunews 만!
+    @GetMapping("/secunews")
     public String secuoneNewsPage() {
-        return "admin/secuone/secunews"; // templates/admin/secuone/secunews.html
+        return "admin/secuone/secunews";
     }
 
     @GetMapping("/directad")
-    public String directAdPage() { return "admin/secuone/directad"; }
+    public String directAdPage() {
+        return "admin/secuone/directad";
+    }
 
     @GetMapping("/notice")
-    public String noticePage() { return "admin/secuone/notice"; }
+    public String noticePage() {
+        return "admin/secuone/notice";
+    }
 
     @GetMapping("/polarletter")
-    public String polarletterPage() { return "admin/secuone/polarletter"; }
+    public String polarletterPage() {
+        return "admin/secuone/polarletter";
+    }
 }

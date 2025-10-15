@@ -1,0 +1,101 @@
+/* ============================================
+   Polaris Admin Layout (Fix 중첩 완전 해결)
+   - nav 고정 / main margin-left 일치
+   - display:flex 제거 (fixed nav 호환)
+============================================ */
+
+:root {
+  --nav-width: 260px;
+  --bg-body: #f9fafb;
+  --bg-card: #fff;
+  --border-color: #e5e7eb;
+}
+
+/* === 전체 레이아웃 === */
+.layout {
+  display: block; /* ✅ flex 제거 */
+  min-height: 100vh;
+  background: var(--bg-body);
+  position: relative;
+}
+
+/* === 좌측 nav === */
+.admin-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  background: #fff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+/* === 메인 콘텐츠 === */
+.main-content {
+  margin-left: var(--nav-width); /* ✅ nav 폭만큼 정확히 띄움 */
+  padding: 32px 40px;
+  background: var(--bg-body);
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* === 페이지 내부 기본 정렬 === */
+.overview-page,
+.secuone-page,
+.customers-page,
+.license-page,
+.vguard-page {
+  position: relative;
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* === 공통 카드 및 패널 간격 === */
+.card,
+.table,
+.panel {
+  margin-bottom: 24px;
+}
+
+/* === 반응형 === */
+@media (max-width: 1024px) {
+  :root {
+    --nav-width: 220px;
+  }
+
+  .main-content {
+    margin-left: var(--nav-width);
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-width: 200px;
+  }
+
+  .admin-nav {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .admin-nav.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
