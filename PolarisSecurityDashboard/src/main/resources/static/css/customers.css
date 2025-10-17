@@ -1,142 +1,382 @@
-/* ============ 스코프 ============ */
-.page-customers {
-  --bg:#f7f9fc; --panel:#fff; --line:#e5e7eb; --muted:#6b7280; --text:#111827;
-  --brand:#10b981; --danger:#ef4444; --accent:#3b82f6; --shadow:0 6px 24px rgba(0,0,0,.06);
+/* ============================================
+   Polaris Admin - Customers Page
+   Overview와 폭/여백/정렬 완전 통일 + customers.html 호환
+============================================ */
+
+/* 컨테이너: 둘 다 지원 (.page-customers || .customers-page) */
+.page-customers,
+.customers-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-sizing: border-box;
+  background: #f9fafb;
 }
 
-.page-customers { padding: 12px 16px; }
+/* === Header & Breadcrumb === */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
 
-/* 전역 유틸 */
+.breadcrumb,
+.breadcrumbs {
+  color: #6b7280;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.breadcrumb a,
+.breadcrumbs a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+/* 버튼 (overview 톤) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover { background: #1e40af; }
+.btn-ghost {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+}
+.btn-ghost:hover { background: #d1d5db; }
+
+/* === KPI Section (필요 시 사용) === */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.kpi-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.kpi-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: #f3f4f6; font-size: 24px;
+}
+.kpi-label { font-size: 13px; color: #6b7280; }
+.kpi-value { font-size: 26px; font-weight: 700; color: #111827; }
+.kpi-trend.up { color: #059669; }
+.kpi-trend.down { color: #dc2626; }
+.kpi-trend.neutral { color: #6b7280; }
+
+/* === 패널/카드 (customers.html에서 panel 사용) === */
+.panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.panel-header .actions {
+  display: flex; gap: 10px; align-items: center;
+}
+.panel-body { padding: 0 16px 16px; }
+
+/* === Search (헤더 우측 도구) === */
+.search-form { display: flex; gap: 10px; align-items: center; }
+.search { position: relative; }
+.search input,
+.search-form input[type="text"] {
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  font-size: 14px;
+}
+.search input:focus,
+.search-form input[type="text"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+/* === Table === */
+.table-wrapper { overflow-x: auto; }
+
+table,
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table th, table td,
+.customers-table th, .customers-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+table thead th,
+.customers-table thead th {
+  color: #6b7280;
+  background: #f9fafb;
+  font-weight: 600;
+}
+.empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 28px 0;
+}
+
+/* 링크 스타일 (목록 → 상세) */
+a.name-link,
+.panel-body a {
+  color: inherit;
+  text-decoration: none;
+}
+a.name-link:hover,
+.panel-body a:hover { text-decoration: underline; }
+
+/* === Pagination (overview 톤) === */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+.page-hint {
+  color: #6b7280;
+  font-size: 13px;
+}
+.pager { display: flex; gap: 6px; }
+.icon-btn, .page {
+  height: 36px; min-width: 36px; padding: 0 10px;
+  border: 1px solid #e5e7eb; background: #fff;
+  border-radius: 10px; cursor: pointer;
+}
+.page.is-current,
+.pagination .active {
+  border-color: #2563eb; color: #2563eb; font-weight: 700;
+}
+
+/* 숨김 유틸 */
 .hidden { display: none !important; }
-body.modal-open { overflow: hidden; }
 
-/* Header */
-.page-customers .page-header{
-  display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+/* === 반응형 === */
+@media (max-width: 1280px) {
+  .page-customers, .customers-page { padding: 32px 32px; }
 }
-.page-customers .breadcrumbs{ color:var(--muted); display:flex; gap:6px; align-items:center; }
-.page-customers .breadcrumbs a{ color:var(--accent); text-decoration:none; }
-.page-customers .btn-primary{
-  background:var(--brand); color:#fff; padding:10px 14px; border:none; border-radius:10px; cursor:pointer;
-}
-.page-customers .btn-primary:hover{ filter:brightness(.96); }
-
-/* KPIs */
-.page-customers .kpis{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:16px; }
-.page-customers .kpi-card{
-  display:flex; gap:12px; background:var(--panel); border:1px solid var(--line);
-  border-radius:14px; box-shadow:var(--shadow); padding:16px;
-}
-.page-customers .kpi-label{ color:var(--muted); font-weight:600; }
-.page-customers .kpi-value{ font-size:24px; font-weight:800; }
-.page-customers .kpi-trend.up{ color:#10b981; }
-.page-customers .kpi-trend.down{ color:#ef4444; }
-.page-customers .kpi-trend.neutral{ color:#9ca3af; }
-.page-customers .kpi-icon{ width:44px; height:44px; border-radius:12px; background:#f3f4f6; }
-
-/* Card / Table */
-.page-customers .card{
-  background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow);
-}
-.page-customers .card-head{
-  display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line);
-}
-.page-customers .table-tools{ display:flex; gap:10px; align-items:center; }
-
-/* Search */
-.page-customers .search{ position:relative; }
-.page-customers .search input{
-  height:40px; border:1px solid var(--line); border-radius:10px; padding:0 36px 0 12px; outline:none;
-}
-.page-customers .search input:focus{
-  box-shadow:0 0 0 3px rgba(59,130,246,.15); border-color:var(--accent);
-}
-.page-customers .search svg{
-  position:absolute; right:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:#9ca3af;
+@media (max-width: 768px) {
+  .page-customers, .customers-page { padding: 24px 20px; }
+  th, td { font-size: 13px; padding: 8px 10px; }
 }
 
-/* Dropdown (스코프!) */
-.page-customers .dropdown{ position:relative; }
-.page-customers .btn-ghost{
-  height:40px; padding:0 12px; border:1px solid var(--line); background:#fff; border-radius:10px; cursor:pointer;
-}
-.page-customers .dropdown .menu{
-  position:absolute; right:0; top:calc(100% + 6px);
-  min-width:180px; background:#fff; border:1px solid var(--line); border-radius:10px;
-  box-shadow:0 12px 28px rgba(0,0,0,.12); padding:6px; z-index:20;
-}
-.page-customers .dropdown .menu.hidden{ display:none; }
-.page-customers .dropdown .menu li{ padding:10px 12px; border-radius:8px; cursor:pointer; outline:none; }
-.page-customers .dropdown .menu li:hover,
-.page-customers .dropdown .menu li:focus{ background:#f3f4f6; }
-
-/* Table */
-.page-customers .table-wrapper{ width:100%; overflow:auto; }
-.page-customers .customers-table{ width:100%; border-collapse:separate; border-spacing:0; }
-.page-customers .customers-table thead th{
-  text-align:left; color:var(--muted); font-weight:700; padding:12px 16px; background:#f9fafb; border-bottom:1px solid var(--line);
-}
-.page-customers .customers-table tbody td{ padding:12px 16px; border-bottom:1px solid var(--line); }
-.page-customers .customers-table tbody tr.row-link{
-  cursor:pointer; transition: background .12s ease;
-}
-.page-customers .customers-table tbody tr.row-link:hover{ background:#f7fafc; }
-.page-customers .customers-table tbody tr.row-link:focus{ outline:2px solid var(--accent); outline-offset:-2px; }
-
-.page-customers .empty{ text-align:center; color:var(--muted); padding:28px 0; }
-
-/* Pagination */
-.page-customers .pagination{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; }
-.page-customers .pager{ display:flex; gap:6px; align-items:center; }
-.page-customers .icon-btn, .page-customers .page{
-  height:36px; min-width:36px; padding:0 10px; border:1px solid var(--line); background:#fff; border-radius:10px; cursor:pointer;
-}
-.page-customers .page.is-current{ border-color:var(--accent); color:var(--accent); font-weight:700; }
-
-/* Modal (전역: class 이름 충돌 없음) */
-.modal{
-  position:fixed; inset:0; background:rgba(0,0,0,.45);
-  display:none; place-items:center; z-index:1000; /* 드롭다운/헤더보다 확실히 위 */
-}
-.modal.hidden{ display:none; }
-.modal:not(.hidden){ display:grid; }
-
-.modal-panel{
-  width:560px; max-width:92vw; background:#fff; border:1px solid var(--line);
-  border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,.2);
-  animation: modalIn .14s ease-out;
-}
-@keyframes modalIn {
-  from { transform: translateY(6px); opacity:.6; }
-  to   { transform: translateY(0);  opacity:1; }
+/* === 모달 다이얼로그 (업그레이드 버전) === */
+/* 배경 스크롤 잠금 (:has 지원 브라우저 기준) */
+html:has(.modal:target),
+html:has(.modal.show) {
+  overflow: hidden;
 }
 
-.modal-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); }
-.modal-body{ padding:16px; }
-.modal-footer{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
-.icon-btn{ width:36px; height:36px; display:grid; place-items:center; border:1px solid var(--line); background:#fff; border-radius:8px; cursor:pointer; }
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* 기본은 숨김 (visibility로 포인터 차단까지) */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .18s ease, visibility 0s linear .18s;
+  z-index: 1000;
+}
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, .45); /* #111827, 45% */
+  backdrop-filter: blur(2px);
+  transition: opacity .18s ease;
+  opacity: 0;
+}
 
-.form-row{ display:grid; gap:6px; margin-bottom:12px; }
-.form-row input, .form-row select{
-  height:40px; border:1px solid var(--line); border-radius:10px; padding:0 10px; outline:none;
+/* 열림 상태 (:target or .show) */
+.modal.show,
+.modal:target {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .18s ease;
 }
-.form-row input:focus, .form-row select:focus{
-  box-shadow:0 0 0 3px rgba(16,185,129,.15); border-color:var(--brand);
+.modal.show::before,
+.modal:target::before {
+  opacity: 1;
 }
-.btn-ghost{ border:1px solid var(--line); background:#fff; border-radius:10px; padding:8px 12px; cursor:pointer; }
-.btn-primary{ background:#10b981; color:#fff; border:none; border-radius:10px; padding:8px 12px; cursor:pointer; }
-.btn-primary:hover{ filter: brightness(.96); }
-/* 모달이 어떤 오버레이/바 위에서도 항상 최상단으로 */
-.modal{ z-index:2147483000 !important; }
-.modal .modal-panel{ position:relative; z-index:1; }
-.modal, .modal *{ pointer-events:auto !important; }
 
-/* 모달 열렸을 때, 페이지 쪽에 깔린 오버레이/바가 클릭을 가로채지 못하게 */
-body.modal-open #bottomBar,
-body.modal-open .admin-nav,
-body.modal-open .admin-overlay,
-body.modal-open .drawer,
-body.modal-open [data-overlay],
-body.modal-open .layout-overlay {
-  pointer-events: none !important;
+/* 패널 */
+.modal-panel {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  width: 520px;
+  max-width: 92vw;
+  max-height: 90vh;
+  padding: 22px 24px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25);
+  overflow: auto;
+  transform: translateY(6px) scale(.98);
+  transition: transform .18s ease, opacity .18s ease;
+  opacity: .98;
 }
+
+/* 열릴 때 패널 애니메이션 */
+.modal.show .modal-panel,
+.modal:target .modal-panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* 헤더 */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 닫기 버튼 (아이콘 버튼) */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6d28d9;               /* 포인트 컬러 */
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.icon-btn:hover {
+  background: #f9f5ff;          /* 연보라 배경 */
+  border-color: #ddd6fe;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, .12);
+}
+
+/* 바디/폼 */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.form-row > label {
+  font-weight: 600;
+  color: #111827;
+}
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.modal-body textarea {
+  height: auto;
+  min-height: 100px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+/* 푸터(액션 버튼) */
+.modal-actions,
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+.modal-actions .btn,
+.modal-footer .btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .modal-panel { padding: 18px 16px; }
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .form-row > label { font-size: 13px; }
+}
+/* 모달 패널: 가로 스크롤 방지 */
+.modal-panel {
+  overflow-y: auto;
+  overflow-x: hidden;     /* ✅ 가로 스크롤 끔 */
+  max-width: 560px;       /* 살짝 여유 */
+  width: 520px;           /* 기존 값 유지해도 OK */
+  box-sizing: border-box; /* 패딩 포함 폭 계산 */
+}
+
+/* 혹시 내부 요소가 넘치더라도 잘라냄(안전장치) */
+.modal-panel * {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* 크롬 등에서 가로 스크롤바 자체 숨김(보이는 경우 대비) */
+.modal-panel::-webkit-scrollbar:horizontal { height: 0; }

@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminPageController {
 
-    @GetMapping("/customers")
-    public String customersPage() {
-        // templates/admin/customers.html 을 렌더링
-        return "admin/customer/customers";
-    }
     
     @ModelAttribute("currentPath")
     public String currentPath(HttpServletRequest request) {

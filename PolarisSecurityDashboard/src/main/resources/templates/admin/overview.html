@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin_layout}">
 <head>
+  <meta charset="UTF-8" />
+  <title>Polaris Admin Dashboard</title>
   <th:block layout:fragment="pageStyle">
     <link rel="stylesheet" th:href="@{/css/overview.css}">
   </th:block>
@@ -10,12 +13,14 @@
 
 <body>
 <div layout:fragment="content" class="overview-page">
-  <!-- 페이지 헤더 -->
+
+  <!-- Breadcrumb -->
   <div class="breadcrumb">
-    <a th:href="@{/admin/overview}">Dashboard</a> / <strong>Overview</strong>
+    <a th:href="@{/admin/overview}">Dashboard</a> /
+    <strong>Overview</strong>
   </div>
 
-  <!-- KPI 카드 -->
+  <!-- KPI Section -->
   <section class="kpi-section">
     <div class="kpi-card total">
       <div class="icon">👥</div>
@@ -45,7 +50,7 @@
     </div>
   </section>
 
-  <!-- 도메인별 테이블 -->
+  <!-- 도메인별 통계 -->
   <section class="panel">
     <div class="panel-header">
       <h3>도메인별 통계</h3>
@@ -84,18 +89,17 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="c : ${recentCustomers}">
-          <td th:text="${c.customerName}">폴라리스</td>
+			<tr th:each="c : ${recentCustomers}">
+			  <td th:text="${c['customerName']}">폴라리스</td>
+			  <td th:text="${c['connectedCompanyName'] != null ? c['connectedCompanyName'] : '-'}">-</td>
+			  <td th:text="${c['createAt']}">2025-09-16</td>
+			</tr>
 
-          <!-- ✅ 안전한 타입 검사 + null 처리 -->
-          <td th:text="${c.connectedCompany != null ? (c.connectedCompany instanceof T(com.polarisoffice.security.model.Customer) ? c.connectedCompany.customerName : c.connectedCompany) : '-'}">-</td>
-
-          <td th:text="${c.createAt}">2025-09-16</td>
-        </tr>
         </tbody>
       </table>
     </div>
   </section>
+
 </div>
 </body>
 </html>

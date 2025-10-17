@@ -8,81 +8,34 @@
 </head>
 
 <body>
-  <nav class="admin-nav" th:fragment="nav">
-    <!-- 스크롤 가능한 상단 영역 -->
-    <div class="nav-scroll">
-      <div class="nav-top">
-        <h1 class="nav-logo">Polaris Security</h1>
+ <nav class="admin-nav" th:fragment="nav">
+  <div class="nav-scroll">
+    <div class="nav-top">
+      <h1 class="nav-logo">Polaris Security</h1>
 
-        <ul class="nav-menu">
-          <li>
-            <a th:href="@{/admin/overview}"
-               th:classappend="${currentPath.startsWith('/admin/overview')} ? 'active' : ''">
-              <i>📈</i> Overview
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/admin/customers}"
-               th:classappend="${currentPath.startsWith('/admin/customers')} ? 'active' : ''">
-              <i>🔗</i> Customer Manage
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/admin/license}"
-               th:classappend="${currentPath.startsWith('/admin/license')} ? 'active' : ''">
-              <i>🧾</i> License Manage
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/admin/secuone}"
-               th:classappend="${currentPath.startsWith('/admin/secuone')} ? 'active' : ''">
-              <i>🛡️</i> Polaris Secuone
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/admin/vguard}"
-               th:classappend="${currentPath.startsWith('/admin/vguard')} ? 'active' : ''">
-              <i>💻</i> V-Guard
-            </a>
-          </li>
-        </ul>
+      <ul class="nav-menu">
+        <li><a th:href="@{/admin/overview}" th:classappend="${currentPath.startsWith('/admin/overview')} ? 'active' : ''">📈 Overview</a></li>
+        <li><a th:href="@{/admin/customers}" th:classappend="${currentPath.startsWith('/admin/customers')} ? 'active' : ''">🔗 Customers</a></li>
+        <li><a th:href="@{/admin/license}" th:classappend="${currentPath.startsWith('/admin/license')} ? 'active' : ''">🧾 Licenses</a></li>
+        <li><a th:href="@{/admin/secuone}" th:classappend="${currentPath.startsWith('/admin/secuone')} ? 'active' : ''">🛡️ SecuOne</a></li>
+        <li><a th:href="@{/admin/vguard}" th:classappend="${currentPath.startsWith('/admin/vguard')} ? 'active' : ''">💻 V-Guard</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-bottom">
+    <div class="profile">
+      <div class="avatar"
+           th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">A</div>
+      <div class="info">
+        <div class="name" th:text="${#strings.substringBefore(#authentication.name, '@')}">관리자</div>
+        <div class="email" th:text="${#authentication.name}">admin@polarisoffice.com</div>
+        <span class="role">ADMIN</span>
       </div>
     </div>
+    <a th:href="@{/logout}" class="logout">로그아웃</a>
+  </div>
+</nav>
 
-    <!-- 고정된 하단 프로필 -->
-    <div class="nav-bottom">
-      <div class="profile">
-        <!-- ✅ 로그인한 유저 첫 글자 -->
-        <div class="avatar"
-             th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">
-          A
-        </div>
-
-        <div class="info">
-          <!-- ✅ 이메일 앞부분을 이름처럼 표시 -->
-          <div class="name"
-               th:text="${#strings.substringBefore(#authentication.name, '@')}">
-            관리자
-          </div>
-
-          <!-- ✅ 로그인된 이메일 전체 -->
-          <div class="email" th:text="${#authentication.name}">
-            admin@polarisoffice.com
-          </div>
-       
-                  <!-- ✅ 권한 표시 -->
-	        <span class="role"
-	              th:text="${#lists.contains(#authentication.authorities.?[authority=='ADMIN'], true) ? 'ADMIN' : 'USER'}">
-	          ADMIN
-	        </span>
-        </div>
-
-
-      </div>
-
-      <!-- 로그아웃 버튼 -->
-      <a th:href="@{/logout}" class="logout">로그아웃</a>
-    </div>
-  </nav>
 </body>
 </html>
