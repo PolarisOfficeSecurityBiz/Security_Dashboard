@@ -7,237 +7,154 @@
   <meta charset="UTF-8"/>
   <title th:text="${customer.customerName} + ' - 고객사 상세'">고객사 상세</title>
 
-  <!-- ✅ 이 페이지 한정 임시 CSP (서버가 CSP 헤더를 내보내면 이 메타는 무시됨)
-       - 서버 CSP 헤더가 없다면, 이 메타로 inline/외부(self) 스크립트를 허용 -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
-
-  <!-- 레이아웃의 pageStyle 슬롯 사용 -->
+  <!-- 페이지 전용 스타일 -->
   <th:block layout:fragment="pageStyle">
-    <link rel="stylesheet" th:href="@{/css/admin_common.css(v=${#dates.createNow().time})}" />
     <link rel="stylesheet" th:href="@{/css/customer_detail.css(v=${#dates.createNow().time})}" />
-    <style>
-      /* 진단용 배지 스타일 (보여야 하니까 inline로 둠) */
-      .js-status { display:inline-block; padding:4px 8px; border-radius:6px; font-size:12px; }
-      .js-status.bad { background:#ffe6e6; color:#b30000; }
-      .js-status.ok { background:#e6ffed; color:#006622; }
-    </style>
   </th:block>
 </head>
 
 <body data-page="customer-detail">
-  <div layout:fragment="content" class="customer-detail-page">
+<div layout:fragment="content" class="customer-detail-page">
 
-    <!-- JS 동작 상태 배지 (진단용) -->
-    <div style="margin:8px 0">
-      <span id="jsStatus" class="js-status bad">JS: BLOCKED</span>
-    </div>
-
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-      <a th:href="@{/admin/customers}">고객사 목록</a> /
-      <strong th:text="${customer.customerName}">고객사 상세</strong>
-    </div>
-
-    <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">고객사 상세</h2>
-        <p class="page-subtitle" th:text="${customer.customerName}">폴라리스 테스트</p>
-      </div>
-      <a href="/admin/customers" class="btn btn-ghost">← 목록으로</a>
-    </div>
-
-    <!-- 고객사 정보 -->
-    <section class="panel section">
-      <div class="panel-header">
-        <h3>고객사 정보</h3>
-        <button type="button" class="chevron-btn" aria-expanded="true" aria-controls="customerInfo">
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="accordion-panel show" id="customerInfo">
-        <form id="customerUpdateForm" class="form-grid"
-              th:action="@{|/admin/customers/${customer.customerId}/update|}" method="post">
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-
-          <label>고객사 ID</label>
-          <input class="form-control" th:value="${customer.customerId}" readonly disabled/>
-
-          <label>고객사명 *</label>
-          <input class="form-control" id="customerName" name="customerName" required
-                 th:value="${customer.customerName}" placeholder="고객사명"/>
-
-          <label>연결사</label>
-          <input class="form-control" id="connectedCompany" name="connectedCompany"
-                 th:value="${connectedCompanyName}" placeholder="연결사(선택)"/>
-
-          <label>생성일</label>
-          <input class="form-control" th:value="${customer.createAt}" readonly disabled/>
-
-          <div class="form-row-span-4 form-actions">
-            <button id="btnEditCustomer" class="btn btn-primary" type="button">수정</button>
-            <button id="btnDeleteCustomerInline" class="btn btn-danger" type="button">삭제</button>
-          </div>
-        </form>
-
-        <form id="formDeleteCustomerInline"
-              th:action="@{|/admin/customers/${customer.customerId}/delete|}"
-              method="post" hidden>
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-        </form>
-      </div>
-    </section>
-
-    <!-- 연결된 서비스 -->
-    <section class="panel section">
-      <div class="panel-header">
-        <h3>연결된 서비스</h3>
-        <button type="button" class="btn btn-primary btn-sm" id="btnOpenSvcCreate">+ 서비스 추가</button>
-      </div>
-
-      <div class="panel-body">
-        <table>
-          <thead>
-          <tr>
-            <th>서비스 명</th>
-            <th>도메인/pkg명</th>
-            <th>상품유형</th>
-            <th class="num-col">CPI</th>
-            <th class="num-col">RS Rate</th>
-            <th>라이선스키</th>
-            <th>생성일</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="s : ${services}" class="row-link"
-              th:attr="data-href=@{|/admin/customers/${customer.customerId}/services/${s.serviceId}|}">
-            <td class="strong" th:text="${s.serviceName}">서비스명</td>
-            <td class="mono" th:text="${s.domain != null ? s.domain : '-'}">-</td>
-            <td class="wrap" th:text="${s.productType != null ? s.productType : '-'}">-</td>
-            <td class="num-col" th:text="${s.cpiValue != null ? s.cpiValue : 0}">0</td>
-            <td class="num-col" th:text="${s.rsRate != null ? s.rsRate : 0}">0</td>
-            <td>
-              <span th:if="${s.licenseId != null}" class="code-chip" th:text="${s.licenseId}">000000</span>
-              <span th:if="${s.licenseId == null}" class="badge-muted">미발급</span>
-            </td>
-            <td class="mono" th:text="${s.createAt}">2025-09-23</td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(services)}">
-            <td colspan="7" class="empty">등록된 서비스가 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 서비스 추가 모달 -->
-    <div id="svcCreateModal" class="modal" aria-hidden="true">
-      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcCreateTitle">
-        <div class="modal-header">
-          <h3 id="svcCreateTitle">서비스 추가</h3>
-          <button type="button" class="icon-btn" data-close="svcCreateModal" aria-label="닫기">✕</button>
-        </div>
-        <form th:action="@{|/admin/customers/${customer.customerId}/services|}" method="post" class="modal-body">
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-
-          <div class="form-row"><label>서비스명 *</label><input name="serviceName" required/></div>
-          <div class="form-row"><label>도메인</label><input name="domain"/></div>
-          <div class="form-row">
-            <label>상품유형</label>
-            <select name="productType">
-              <option value="">-- 선택 --</option>
-              <option>V-Guard SDK2.0 - 일반버전</option>
-              <option>V-Guard SDK2.0 - RB버전</option>
-              <option>V-Guard SDK2.0 - iOS버전</option>
-              <option>V-Guard SDK3.0</option>
-              <option>Polaris SecuOne Web To App</option>
-              <option>Polaris SecuOne App To App</option>
-            </select>
-          </div>
-          <div class="form-row"><label>CPI</label><input name="cpiValue" type="number"/></div>
-          <div class="form-row"><label>RS Rate</label><input name="rsRate" type="number" step="0.01"/></div>
-
-          <div class="modal-actions">
-            <button type="button" class="btn btn-ghost" data-close="svcCreateModal">취소</button>
-            <button type="submit" class="btn btn-primary">추가</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ======================= JS PROBE/LOAD ZONE (content 내부 맨 아래) ======================= -->
-
-    <!-- 1) 인라인 프로브 (CSP가 inline 막으면 에러가 떠야 정상) -->
-    <script>
-      try {
-        console.log("✅ inline probe: content fragment 내부에서 실행됨");
-        var badge = document.getElementById('jsStatus');
-        if (badge) { badge.textContent = 'JS: OK (inline)'; badge.classList.remove('bad'); badge.classList.add('ok'); }
-      } catch(e) { /* ignore */ }
-    </script>
-
-    <!-- 2) 외부 스크립트 (일반) -->
-    <script th:src="@{/js/customer_detail.js(v=${#dates.createNow().time})}" defer></script>
-
-    <!-- 3) 외부 스크립트 (module) — 환경별 파서/순서 이슈 대비 -->
-    <script type="module">
-      // 모듈 영역에서도 간단히 찍어보기
-      console.log("✅ module probe: 실행됨");
-      const b = document.getElementById('jsStatus');
-      if (b && b.textContent.startsWith('JS: BLOCKED')) {
-        b.textContent = 'JS: OK (module)';
-        b.classList.remove('bad'); b.classList.add('ok');
-      }
-      // customer_detail.js가 로드되지 않았을 때 최소한의 핵심 동작 보강
-      (function fallback(){
-        // 행 클릭 네비
-        document.querySelectorAll('tr.row-link[data-href]').forEach(tr => {
-          if (tr.dataset._enhanced) return;
-          tr.dataset._enhanced = '1';
-          tr.addEventListener('click', () => {
-            const url = tr.getAttribute('data-href');
-            if (url) window.location.href = url;
-          });
-          tr.tabIndex = 0;
-          tr.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-              const url = tr.getAttribute('data-href');
-              if (url) window.location.href = url;
-            }
-          });
-        });
-        // 모달 열기
-        const btnOpen = document.getElementById('btnOpenSvcCreate');
-        if (btnOpen) {
-          btnOpen.addEventListener('click', (e) => {
-            e.preventDefault();
-            const m = document.getElementById('svcCreateModal');
-            if (m){ m.classList.add('show'); m.setAttribute('aria-hidden','false'); }
-          });
-        }
-        // 모달 닫기
-        document.querySelectorAll('[data-close]').forEach(b2 => {
-          b2.addEventListener('click', () => {
-            const id = b2.dataset.close;
-            const m = id ? document.getElementById(id) : b2.closest('.modal');
-            if (m){ m.classList.remove('show'); m.setAttribute('aria-hidden','true'); }
-          });
-        });
-      })();
-    </script>
-
-    <!-- 4) noscript 경고 -->
-    <noscript>
-      <div style="padding:.5rem 0; color:#b30000">⚠️ 이 페이지는 JavaScript가 필요합니다. 브라우저 설정을 확인하세요.</div>
-    </noscript>
-
-    <!-- ======================= /JS PROBE/LOAD ZONE ======================= -->
-
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a th:href="@{/admin/customers}">고객사 목록</a> /
+    <strong th:text="${customer.customerName}">고객사 상세</strong>
   </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">고객사 상세</h2>
+      <p class="page-subtitle" th:text="${customer.customerName}">폴라리스 테스트</p>
+    </div>
+  </div>
+
+  <!-- 고객사 정보 -->
+  <section class="panel section">
+    <div class="panel-header">
+      <h3>고객사 정보</h3>
+      <button type="button" class="chevron-btn" aria-expanded="true" aria-controls="customerInfo">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="accordion-panel show" id="customerInfo">
+      <form id="customerUpdateForm" class="form-grid"
+            th:action="@{|/admin/customers/${customer.customerId}/update|}" method="post">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+        <label>고객사 ID</label>
+        <input class="form-control" th:value="${customer.customerId}" readonly disabled/>
+
+        <label>고객사명 *</label>
+        <input class="form-control" id="customerName" name="customerName" required
+               th:value="${customer.customerName}" placeholder="고객사명"/>
+
+        <label>연결사</label>
+        <input class="form-control" id="connectedCompany" name="connectedCompany"
+               th:value="${connectedCompanyName}" placeholder="연결사(선택)"/>
+
+        <label>생성일</label>
+        <input class="form-control" th:value="${customer.createAt}" readonly disabled/>
+
+        <div class="form-row-span-4 form-actions">
+          <button id="btnEditCustomer" class="btn btn-primary" type="button">수정</button>
+          <button id="btnDeleteCustomerInline" class="btn btn-danger" type="button">삭제</button>
+        </div>
+      </form>
+
+      <form id="formDeleteCustomerInline"
+            th:action="@{|/admin/customers/${customer.customerId}/delete|}"
+            method="post" hidden>
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+      </form>
+    </div>
+  </section>
+
+  <!-- 연결된 서비스 -->
+  <section class="panel section">
+    <div class="panel-header">
+      <h3>연결된 서비스</h3>
+      <button type="button" class="btn btn-primary btn-sm" id="btnOpenSvcCreate">+ 서비스 추가</button>
+    </div>
+
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>서비스 명</th>
+          <th>도메인/pkg명</th>
+          <th>상품유형</th>
+          <th class="num-col">CPI</th>
+          <th class="num-col">RS Rate</th>
+          <th>라이선스키</th>
+          <th>생성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${services}" class="row-link"
+            th:attr="data-href=@{|/admin/customers/${customer.customerId}/services/${s.serviceId}|}">
+          <td class="strong" th:text="${s.serviceName}">서비스명</td>
+          <td class="mono" th:text="${s.domain != null ? s.domain : '-'}">-</td>
+          <td class="wrap" th:text="${s.productType != null ? s.productType : '-'}">-</td>
+          <td class="num-col" th:text="${s.cpiValue != null ? s.cpiValue : 0}">0</td>
+          <td class="num-col" th:text="${s.rsRate != null ? s.rsRate : 0}">0</td>
+          <td>
+            <span th:if="${s.licenseId != null}" class="code-chip" th:text="${s.licenseId}">000000</span>
+            <span th:if="${s.licenseId == null}" class="badge-muted">미발급</span>
+          </td>
+          <td class="mono" th:text="${s.createAt}">2025-09-23</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(services)}">
+          <td colspan="7" class="empty">등록된 서비스가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 서비스 추가 모달 -->
+  <div id="svcCreateModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcCreateTitle">
+      <div class="modal-header">
+        <h3 id="svcCreateTitle">서비스 추가</h3>
+      </div>
+
+      <form th:action="@{|/admin/customers/${customer.customerId}/services|}" method="post" class="modal-body">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+        <div class="form-row"><label>서비스명 *</label><input name="serviceName" required/></div>
+        <div class="form-row"><label>도메인</label><input name="domain"/></div>
+        <div class="form-row">
+          <label>상품유형</label>
+          <select name="productType">
+            <option value="">-- 선택 --</option>
+            <option>V-Guard SDK2.0 - 일반버전</option>
+            <option>V-Guard SDK2.0 - RB버전</option>
+            <option>V-Guard SDK2.0 - iOS버전</option>
+            <option>V-Guard SDK3.0</option>
+            <option>Polaris SecuOne Web To App</option>
+            <option>Polaris SecuOne App To App</option>
+          </select>
+        </div>
+        <div class="form-row"><label>CPI</label><input name="cpiValue" type="number"/></div>
+        <div class="form-row"><label>RS Rate</label><input name="rsRate" type="number" step="0.01"/></div>
+
+        <div class="modal-actions">
+          <!-- 닫기는 하나만: 하단 취소 -->
+          <a href="#" class="btn btn-ghost" data-close="svcCreateModal">취소</a>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS 로드 (content 내부, defer) -->
+  <script th:src="@{/js/customer_detail.js(v=${#dates.createNow().time})}" defer></script>
+</div>
 </body>
 </html>
