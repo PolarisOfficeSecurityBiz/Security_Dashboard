@@ -39,11 +39,22 @@
         </thead>
         <tbody>
         <tr th:each="sdk : ${sdkList}">
-          <td th:text="${sdk.sdkType}">VGuardSDK_iOS</td>
-          <td th:text="${#temporals.format(sdk.uploadedAt, 'yyyy-MM-dd HH:mm')}">2025-02-02</td>
-          <td th:text="${sdk.uploadedBy}">홍길동</td>
+          <!-- ✅ SDK 유형 클릭 시 히스토리 페이지로 이동 -->
           <td>
-            <a th:href="@{'/admin/vguard/download/' + ${sdk.id}}" class="download-icon">⬇</a>
+            <a th:href="@{'/admin/vguard/history/' + ${sdk.id}}"
+               class="sdk-type-link"
+               th:text="${sdk.sdkType}">VGuardSDK2.0</a>
+          </td>
+
+          <td th:text="${#temporals.format(sdk.uploadedAt, 'yyyy-MM-dd HH:mm')}">2025-10-20 14:55</td>
+          <td th:text="${sdk.uploadedBy}">홍길동</td>
+
+          <!-- SDK 파일명 및 다운로드 -->
+          <td>
+            <a th:href="@{'/admin/vguard/download/' + ${sdk.id}}"
+               th:text="${sdk.fileName}" class="download-name"></a>
+            <a th:href="@{'/admin/vguard/download/' + ${sdk.id}}"
+               class="download-icon" title="다운로드">⬇</a>
           </td>
         </tr>
         </tbody>
@@ -75,7 +86,7 @@
           <td>A고객사</td>
           <td>홍길동</td>
           <td>담당자변경</td>
-          <td>Secuone SDK</td>
+          <td>SecuOne SDK</td>
           <td>2025-09-23</td>
         </tr>
         </tbody>
@@ -139,6 +150,12 @@
       </form>
     </div>
   </div>
+
+  <!-- ✅ 업로드 완료 토스트 -->
+  <div id="toastMessage"
+       th:if="${toast}"
+       th:text="${toast}"
+       class="toast-message show"></div>
 
 </div>
 </html>

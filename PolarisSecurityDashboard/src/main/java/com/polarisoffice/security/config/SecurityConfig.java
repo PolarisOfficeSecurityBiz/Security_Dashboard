@@ -19,26 +19,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * ✅ 1) API 보안 체인 (/api/**, /admin/api/**)
-     *  - Ajax는 세션 사용, 인증 필요시 401 반환
-     */
+    /** ✅ 1) API 보안 체인 (/api/**, /admin/api/**) */
     @Bean
     @Order(1)
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http
-            .securityMatcher(new AntPathRequestMatcher("/api/**"))
-            .securityMatcher(new AntPathRequestMatcher("/admin/api/**"))
+            // 두 경로를 OR 매칭
+            .securityMatcher(new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/**"),
+                new AntPathRequestMatcher("/admin/api/**")
+            ))
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable()) // fetch/axios 편의
+            .csrf(csrf -> csrf.disable()) // API는 CSRF 미사용
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                // 공개 API (필요시만)
                 .requestMatchers(HttpMethod.GET,
                         "/api/v1/polar-notices/**",
                         "/api/v1/polar-letters/**",
@@ -46,37 +46,35 @@ public class SecurityConfig {
                         "/api/v1/direct-ads/**",
                         "/api/v1/overview"
                 ).permitAll()
-
-                // 관리자 API
                 .requestMatchers("/admin/api/**").hasRole("ADMIN")
-
-                // 나머지
                 .anyRequest().authenticated()
             )
-            .exceptionHandling(e -> e
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-            )
+            .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .formLogin(Customizer.withDefaults())
             .logout(Customizer.withDefaults());
 
         return http.build();
     }
 
-    /**
-     * ✅ 2) Web UI 체인 (Thymeleaf)
-     *  - GET /logout 는 우리의 자동 POST 뷰가 처리 → permitAll
-     *  - POST /logout 는 Security가 처리 → CSRF 토큰 또는 무시 예외 중 택1
-     */
+    /** ✅ 2) Web UI 체인 (Thymeleaf) */
     @Bean
     @Order(2)
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf
-                // Ajax/외부 처리 경로는 CSRF 제외 (이미 토큰 사용 중이라면 빼도 됨)
+                // Ajax/외부 처리 경로는 CSRF 제외
                 .ignoringRequestMatchers(
-                    "/login", "/logout", "/signup", "/admin/signup",
-                    "/admin/api/**", "/api/**"
+                    // 로그인/로그아웃 등
+                    new AntPathRequestMatcher("/login"),
+                    new AntPathRequestMatcher("/logout"),
+                    new AntPathRequestMatcher("/signup"),
+                    new AntPathRequestMatcher("/admin/signup"),
+                    // API는 별도 체인에서 disable 되었지만 혹시 몰라 예외 유지
+                    new AntPathRequestMatcher("/admin/api/**"),
+                    new AntPathRequestMatcher("/api/**"),
+                    // ✅ 릴리즈 노트 수정(모달 저장) CSRF 예외
+                    new AntPathRequestMatcher("/admin/vguard/history/*/note", "PATCH")
                 )
             )
             .authorizeHttpRequests(auth -> auth
@@ -86,16 +84,13 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**", "/favicon.ico",
                     "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                     "/actuator/health", "/actuator/info",
-                    "/logout" // ✅ GET /logout (자동 POST 제출 페이지) 허용
+                    "/logout" // GET /logout (자동 POST 페이지)
                 ).permitAll()
 
-                // 관리자 페이지
+                // 관리자/고객 영역
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                // 고객 페이지
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
 
-                // 기타
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -104,9 +99,7 @@ public class SecurityConfig {
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler((req, res, auth) -> {
-                    var roles = auth.getAuthorities().stream()
-                            .map(a -> a.getAuthority())
-                            .toList();
+                    var roles = auth.getAuthorities().stream().map(a -> a.getAuthority()).toList();
                     if (roles.contains("ROLE_ADMIN")) {
                         res.sendRedirect("/admin/overview");
                     } else if (roles.contains("ROLE_CUSTOMER")) {
@@ -119,7 +112,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")                 // 기본: POST /logout (필터가 처리)
+                .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
@@ -130,25 +123,19 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * ✅ 3) AuthenticationManager
-     */
+    /** ✅ 3) AuthenticationManager */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * ✅ 4) PasswordEncoder (Delegating → bcrypt 기본)
-     */
+    /** ✅ 4) PasswordEncoder (Delegating → bcrypt 기본) */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    /**
-     * ✅ 5) DaoAuthenticationProvider
-     */
+    /** ✅ 5) DaoAuthenticationProvider */
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(
             UserDetailsService userDetailsService,
