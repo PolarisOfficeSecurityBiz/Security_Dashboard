@@ -2,7 +2,6 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
 <head>
   <meta charset="UTF-8">
   <title>Polaris Customer</title>
@@ -11,20 +10,19 @@
   <link rel="stylesheet" th:href="@{/css/customer_layout.css}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
-
   <div class="layout">
-    <!-- 사이드바 -->
+    <!-- 사이드바 (레이아웃에서 한 번만 렌더링) -->
     <nav th:replace="~{fragments/customer_nav :: nav}"></nav>
 
-    <!-- 메인 콘텐츠 -->
+    <!-- 메인 콘텐츠 영역 (여기가 자식이 치환할 fragment 자리) -->
     <div class="layout-main">
-      <main class="main-content" layout:fragment="content">
-        <div class="content-body" layout:insert="~{::content}"></div>
+      <main class="main-content">
+        <div class="content-body" layout:fragment="content">
+          <!-- 기본 플레이스홀더 (자식에서 치환됨) -->
+        </div>
       </main>
     </div>
   </div>
-
 </body>
 </html>

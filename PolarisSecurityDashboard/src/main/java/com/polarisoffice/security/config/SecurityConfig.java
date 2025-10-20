@@ -1,3 +1,4 @@
+// src/main/java/com/polarisoffice/security/config/SecurityConfig.java
 package com.polarisoffice.security.config;
 
 import org.springframework.context.annotation.Bean;
@@ -24,31 +25,32 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     /**
-     * ✅ 1️⃣ 관리자/고객 공통 로그인 기반 — API 세션 접근 허용
-     * Ajax 요청(`/admin/api/**`, `/api/v1/**`)도 세션을 그대로 사용
+     * ✅ 1) API 보안 체인 (/api/**, /admin/api/**)
+     *  - Ajax는 세션 사용, 인증 필요시 401 반환
      */
     @Bean
     @Order(1)
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http
             .securityMatcher(new AntPathRequestMatcher("/api/**"))
-            .securityMatcher(new AntPathRequestMatcher("/admin/api/**")) // ✅ 관리자 Ajax API 포함
+            .securityMatcher(new AntPathRequestMatcher("/admin/api/**"))
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable()) // JS fetch를 위해 비활성화
+            .csrf(csrf -> csrf.disable()) // fetch/axios 편의
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                // 공개 API (대시보드용)
+                // 공개 API (필요시만)
                 .requestMatchers(HttpMethod.GET,
                         "/api/v1/polar-notices/**",
                         "/api/v1/polar-letters/**",
                         "/api/v1/secu-news/**",
                         "/api/v1/direct-ads/**",
-                        "/api/v1/overview").permitAll()
+                        "/api/v1/overview"
+                ).permitAll()
 
-                // 관리자용 API (세션 로그인 후 접근 가능)
+                // 관리자 API
                 .requestMatchers("/admin/api/**").hasRole("ADMIN")
 
-                // 나머지는 로그인 필요
+                // 나머지
                 .anyRequest().authenticated()
             )
             .exceptionHandling(e -> e
@@ -61,10 +63,9 @@ public class SecurityConfig {
     }
 
     /**
-     * ✅ 2️⃣ Web UI (Thymeleaf 페이지용)
-     *  - /admin/** → ADMIN
-     *  - /customer/** → CUSTOMER
-     *  - 나머지는 공개 접근 허용
+     * ✅ 2) Web UI 체인 (Thymeleaf)
+     *  - GET /logout 는 우리의 자동 POST 뷰가 처리 → permitAll
+     *  - POST /logout 는 Security가 처리 → CSRF 토큰 또는 무시 예외 중 택1
      */
     @Bean
     @Order(2)
@@ -72,9 +73,10 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf
+                // Ajax/외부 처리 경로는 CSRF 제외 (이미 토큰 사용 중이라면 빼도 됨)
                 .ignoringRequestMatchers(
                     "/login", "/logout", "/signup", "/admin/signup",
-                    "/admin/api/**", "/api/**" // ✅ Ajax 요청은 CSRF 제외
+                    "/admin/api/**", "/api/**"
                 )
             )
             .authorizeHttpRequests(auth -> auth
@@ -83,7 +85,8 @@ public class SecurityConfig {
                     "/", "/login", "/signup", "/admin/signup", "/after-login",
                     "/css/**", "/js/**", "/images/**", "/favicon.ico",
                     "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                    "/actuator/health", "/actuator/info"
+                    "/actuator/health", "/actuator/info",
+                    "/logout" // ✅ GET /logout (자동 POST 제출 페이지) 허용
                 ).permitAll()
 
                 // 관리자 페이지
@@ -92,7 +95,7 @@ public class SecurityConfig {
                 // 고객 페이지
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
 
-                // 기타 요청은 인증 필요
+                // 기타
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -101,7 +104,6 @@ public class SecurityConfig {
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler((req, res, auth) -> {
-                    // 로그인 성공 후 역할에 따라 분기
                     var roles = auth.getAuthorities().stream()
                             .map(a -> a.getAuthority())
                             .toList();
@@ -117,8 +119,11 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")
+                .logoutUrl("/logout")                 // 기본: POST /logout (필터가 처리)
                 .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .clearAuthentication(true)
                 .permitAll()
             );
 
@@ -126,7 +131,7 @@ public class SecurityConfig {
     }
 
     /**
-     * ✅ 3️⃣ AuthenticationManager — DelegatingPasswordEncoder 자동 사용
+     * ✅ 3) AuthenticationManager
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -134,7 +139,7 @@ public class SecurityConfig {
     }
 
     /**
-     * ✅ 4️⃣ PasswordEncoder (bcrypt 기본)
+     * ✅ 4) PasswordEncoder (Delegating → bcrypt 기본)
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -142,7 +147,7 @@ public class SecurityConfig {
     }
 
     /**
-     * ✅ 5️⃣ DaoAuthenticationProvider 등록
+     * ✅ 5) DaoAuthenticationProvider
      */
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider(

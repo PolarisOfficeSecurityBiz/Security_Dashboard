@@ -31,4 +31,10 @@ public interface ServiceContactRepository extends JpaRepository<ServiceContact, 
 
     /** 고객별 첫 담당자 조회 */
     Optional<ServiceContact> findFirstByCustomer_CustomerId(String customerId);
+    
+    Optional<ServiceContact> findTopByCustomer_CustomerIdOrderByCreateAtDesc(String customerId);
+    
+    Optional<ServiceContact> findTopByCustomer_CustomerIdAndServiceIdOrderByCreateAtDesc(String customerId, Integer serviceId);
+
+
 }

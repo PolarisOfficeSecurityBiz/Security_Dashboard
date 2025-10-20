@@ -5,6 +5,7 @@ import com.polarisoffice.security.repository.CustomerRepository;
 import com.polarisoffice.security.service.ServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
@@ -13,7 +14,6 @@ import java.util.*;
 import org.springframework.data.domain.Sort;
 
 // ▼ 라이선스
-import com.polarisoffice.security.model.License;
 import com.polarisoffice.security.service.LicenseService;
 import com.polarisoffice.security.service.LicenseHistoryService;
 
@@ -51,10 +51,12 @@ public class AdminCustomerController {
                 m.put("connectedCompanyName", connected);
 
                 var svc = serviceService.getServicesByCustomerId(c.getCustomerId());
-                m.put("serviceCount", svc != null ? svc.size() : 0);
+                m.put("serviceCount", (svc != null) ? svc.size() : 0);
 
                 String serviceNames = (svc != null && !svc.isEmpty())
-                        ? String.join(",", svc.stream().map(com.polarisoffice.security.model.Service::getServiceName).toList())
+                        ? String.join(",", svc.stream()
+                                              .map(com.polarisoffice.security.model.Service::getServiceName)
+                                              .toList())
                         : "";
                 m.put("services", serviceNames);
 
@@ -108,6 +110,8 @@ public class AdminCustomerController {
             Customer c = new Customer();
             c.setCustomerId(UUID.randomUUID().toString());
             c.setCustomerName(customerName);
+
+            // connectedCompany 값이 고객사 ID라고 가정
             if (connectedCompany != null && !connectedCompany.isBlank()) {
                 customerRepository.findById(connectedCompany).ifPresent(c::setConnectedCompany);
             }
@@ -135,6 +139,46 @@ public class AdminCustomerController {
             return "admin/customer/customer_detail";
         }
 
+        /* ---------------------------
+         * ✅ 고객사 정보 업데이트
+         * 폼 action: /admin/customers/{customerId}/update (POST)
+         * --------------------------- */
+        @PostMapping("/{id}/update")
+        public String updateCustomer(@PathVariable("id") String id,
+                                     @RequestParam("customerName") String customerName,
+                                     @RequestParam(value = "connectedCompany", required = false) String connectedCompany) {
+            Customer customer = customerRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("고객사 정보를 찾을 수 없습니다."));
+
+            // 이름 변경
+            customer.setCustomerName(customerName);
+
+            // 연결사 처리: 비어있으면 해제, 값이 있으면 해당 ID로 연결
+            if (connectedCompany == null || connectedCompany.isBlank()) {
+                customer.setConnectedCompany(null);
+            } else {
+                customerRepository.findById(connectedCompany)
+                        .ifPresentOrElse(customer::setConnectedCompany, () -> {
+                            // 못 찾으면 해제 (필요 시 기존 유지하도록 변경 가능)
+                            customer.setConnectedCompany(null);
+                        });
+            }
+
+            customerRepository.save(customer);
+            return "redirect:/admin/customers/" + id;
+        }
+
+        /* ---------------------------
+         * ✅ 고객사 삭제
+         * 폼 action: /admin/customers/{customerId}/delete (POST)
+         * --------------------------- */
+        @PostMapping("/{id}/delete")
+        public String deleteCustomer(@PathVariable("id") String id) {
+            // TODO: 서비스/담당자/라이선스 등 연관 데이터 삭제 정책 확인 (cascade/제약조건)
+            customerRepository.deleteById(id);
+            return "redirect:/admin/customers";
+        }
+
         /** 서비스 상세 페이지 */
         @GetMapping("/{customerId}/services/{serviceId}")
         public String viewServiceDetail(@PathVariable String customerId,
@@ -148,7 +192,7 @@ public class AdminCustomerController {
             com.polarisoffice.security.model.Service svc =
                     serviceService.getByIdAndCustomer(serviceId, customerId);
 
-            // 담당자 목록 (템플릿에서 contacts 사용)
+            // 담당자 목록
             var contacts = contactRepository
                     .findByCustomer_CustomerIdAndServiceIdOrderByCreateAtDesc(customerId, serviceId);
 
@@ -178,7 +222,7 @@ public class AdminCustomerController {
             com.polarisoffice.security.model.Service svc =
                     serviceService.getByIdAndCustomer(serviceId, customerId);
 
-            // 발급 처리 (서비스-라이선스 1:1, issueForService 내부에서 service 매핑/저장)
+            // 발급 처리
             licenseService.issueForService(svc, expiryDate, usageLimit, licenseType, licenseVersion);
 
             return "redirect:/admin/customers/" + customerId + "/services/" + serviceId + "/license";
@@ -211,5 +255,46 @@ public class AdminCustomerController {
                     })
                     .orElse("redirect:/admin/customers/" + customerId + "/services/" + serviceId + "?open=license");
         }
+        
+     // 고객사별 서비스 목록 페이지
+        @GetMapping("/{customerId}/services")
+        public String viewCustomerServices(@PathVariable String customerId, Model model) {
+            // 고객사 정보를 조회
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new IllegalArgumentException("고객사 정보를 찾을 수 없습니다."));
+
+            // 고객사에 연결된 서비스 리스트 조회
+            var services = serviceService.getServicesByCustomerId(customerId);
+
+            model.addAttribute("customer", customer);
+            model.addAttribute("services", services);
+
+            // 서비스 페이지를 렌더링 (admin/customer/services 페이지로)
+            return "admin/customer/services";
+        }
+        
+        // 서비스 추가 처리
+        @PostMapping("/{customerId}/services")
+        public String addService(@PathVariable String customerId,
+                                 @RequestParam String serviceName,
+                                 @RequestParam(required = false) String domain,
+                                 @RequestParam String productType,
+                                 @RequestParam(required = false) Integer cpiValue,
+                                 @RequestParam(required = false) Double rsRate,
+                                 RedirectAttributes redirectAttributes) {
+            
+            // 고객사 정보 확인
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new IllegalArgumentException("고객사 정보를 찾을 수 없습니다."));
+
+            // 서비스 추가
+            serviceService.createService(customerId, serviceName, domain, productType, cpiValue, rsRate);
+
+            // 성공 메시지 추가 후 리다이렉트
+            redirectAttributes.addFlashAttribute("toast", "서비스가 성공적으로 추가되었습니다.");
+            return "redirect:/admin/customers/" + customerId;
+        }
     }
+    
+
 }

@@ -1,80 +1,110 @@
 package com.polarisoffice.security.controller;
 
+import com.polarisoffice.security.dto.MetricsDto;
+import com.polarisoffice.security.model.edit.EditRequest;
+import com.polarisoffice.security.model.edit.EditRequestStatus;
+import com.polarisoffice.security.model.edit.EditTargetType;
+import com.polarisoffice.security.repository.CustomerRepository;
+import com.polarisoffice.security.service.EditRequestService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/**
- * 관리자 대시보드 개요 페이지 컨트롤러
- * URL: /admin/overview
- * View: templates/admin/overview.html
- */
 @Controller
+@RequiredArgsConstructor
 public class AdminOverviewController {
+
+    private final CustomerRepository customerRepository;
+    private final EditRequestService editRequestService;
 
     @GetMapping("/admin/overview")
     public String overview(Model model) {
 
-        // ✅ 1. 상단 메트릭 (KPI 카드)
-        Map<String, Object> metrics = new HashMap<>();
-        metrics.put("totalCustomers", 14);
-        metrics.put("vguard", 6);
-        metrics.put("secuone", 8);
+        var latest = editRequestService.getLatestTop20();
+        List<Map<String, Object>> reqView = new ArrayList<>();
+
+        // KPI (예시 값)
+        long totalCustomers = customerRepository.count();
+        MetricsDto metrics = new MetricsDto(totalCustomers, 100, 50);
+
+        long pending = 0L, inProgress = 0L, resolved = 0L;
+
+        for (EditRequest r : latest) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", r.getId());
+
+            // createdAt -> 문자열
+            String formattedDate;
+            if (r.getCreateAt() != null) {
+                try {
+                    formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                            .format(r.getCreateAt().atZone(ZoneOffset.UTC).toLocalDateTime());
+                } catch (Exception e) {
+                    formattedDate = "Invalid Date";
+                }
+            } else {
+                formattedDate = "No Date Available";
+            }
+            m.put("createdAt", formattedDate);
+
+            // 요청자
+            m.put("requester", firstNonNull(r.getRequesterName(), r.getRequesterEmail(), "-"));
+            m.put("requesterEmail", r.getRequesterEmail());
+
+            // 타입/타겟
+            String type = r.getTargetType() != null ? r.getTargetType().name() : "-";
+            m.put("type", type);
+            m.put("target", "SERVICE".equals(type)
+                    ? "서비스 #" + (r.getServiceId() != null ? r.getServiceId() : 0)
+                    : "회사 정보");
+
+            // ✅ 여기 추가: 링크에 쓸 식별자들
+            m.put("customerId", r.getCustomerId());      // <-- 고객사 상세로 갈 때 사용
+            m.put("serviceId", r.getServiceId());        // (필요시 서비스 상세 링크에도 사용 가능)
+
+            // 상태/내용
+            EditRequestStatus status = Optional.ofNullable(r.getStatus())
+                    .orElse(EditRequestStatus.PENDING);
+            m.put("status", status.name());
+            m.put("snippet", summarize(r.getContent(), 120));
+
+            reqView.add(m);
+
+            // 카운트
+            switch (status) {
+                case PENDING -> pending++;
+                case IN_PROGRESS -> inProgress++;
+                case RESOLVED -> resolved++;
+            }
+        }
+
+        Map<String, Long> reqCounts = Map.of(
+                "pending", pending,
+                "in_progress", inProgress,
+                "resolved", resolved
+        );
+
         model.addAttribute("metrics", metrics);
+        model.addAttribute("requests", reqView);
+        model.addAttribute("reqCounts", reqCounts);
 
-        // ✅ 2. 로그 통계 (최근 7일 그래프 + 도메인별 로그)
-        Map<String, Object> logsSummary = new HashMap<>();
-        logsSummary.put("total", 68);
-        logsSummary.put("malware", 12);
-        logsSummary.put("remote", 5);
-        logsSummary.put("rooting", 4);
-        logsSummary.put("byDayCsv", "3,5,8,10,12,18,12");
+        return "admin/overview";
+    }
 
-        List<Map<String, Object>> byDomain = new ArrayList<>();
-        byDomain.add(Map.of("domain", "corp.polaris.com", "count", 23));
-        byDomain.add(Map.of("domain", "secure.demo.net", "count", 18));
-        byDomain.add(Map.of("domain", "alpha.client.kr", "count", 12));
-        logsSummary.put("byDomain", byDomain);
+    private static String summarize(String s, int max) {
+        if (s == null) return "";
+        String t = s.trim().replaceAll("\\s+", " ");
+        return t.length() > max ? t.substring(0, max) + "…" : t;
+    }
 
-        model.addAttribute("logsSummary", logsSummary);
-
-        // ✅ 3. 최근 등록 고객사
-        List<Map<String, Object>> recentCustomers = new ArrayList<>();
-        recentCustomers.add(Map.of("customerName", "폴라리스테스트", "connectedCompany", "PolarisSoft", "createAt", "2025-09-16"));
-        recentCustomers.add(Map.of("customerName", "비전시큐리티", "connectedCompany", "VisionSecu", "createAt", "2025-09-18"));
-        recentCustomers.add(Map.of("customerName", "알파테크", "connectedCompany", "AlphaTech", "createAt", "2025-10-01"));
-        model.addAttribute("recentCustomers", recentCustomers);
-
-        // ✅ 4. 최근 보안 로그
-        List<Map<String, Object>> recentLogs = new ArrayList<>();
-        recentLogs.add(Map.of(
-                "id", 1,
-                "createdAt", "2025-09-25 11:39",
-                "domain", "kr.co.sample.vguard2",
-                "logType", "MALWARE",
-                "osVersion", "16",
-                "appVersion", "2.0"
-        ));
-        recentLogs.add(Map.of(
-                "id", 2,
-                "createdAt", "2025-09-25 11:45",
-                "domain", "kr.co.demo.app",
-                "logType", "REMOTE",
-                "osVersion", "15",
-                "appVersion", "3.1"
-        ));
-        recentLogs.add(Map.of(
-                "id", 3,
-                "createdAt", "2025-09-26 09:21",
-                "domain", "secure.polaris.co.kr",
-                "logType", "ROOTING",
-                "osVersion", "17",
-                "appVersion", "3.3"
-        ));
-        model.addAttribute("recentLogs", recentLogs);
-
-        return "admin/overview"; // ✅ templates/admin/overview.html
+    private static String firstNonNull(String a, String b, String fallback) {
+        if (a != null && !a.isBlank()) return a;
+        if (b != null && !b.isBlank()) return b;
+        return fallback;
     }
 }

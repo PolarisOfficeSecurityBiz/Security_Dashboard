@@ -37,14 +37,19 @@
     </li>
   </ul>
 
-   <div class="customer-footer">
+  <div class="customer-footer">
     <div class="user-info-box">
-<p th:text="${#authentication.principal.username + '님'}"></p>
-<p class="user-email" th:text="${#authentication.principal.username}">user@polarisoffice.com</p>
-
+      <p th:text="${#authentication.principal.username + '님'}"></p>
+      <p class="user-email" th:text="${#authentication.principal.username}">user@polarisoffice.com</p>
     </div>
-    <a th:href="@{/logout}" class="logout-link">
-      <i class="fa fa-sign-out-alt"></i> 로그아웃
-    </a>
+
+    <!-- ✅ POST 로그아웃 (CSRF 포함) -->
+    <form th:action="@{/logout}" method="post" class="logout-form">
+      <input type="hidden" th:if="${_csrf != null}"
+             th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <button type="submit" class="logout-link">
+        <i class="fa fa-sign-out-alt"></i> 로그아웃
+      </button>
+    </form>
   </div>
 </nav>

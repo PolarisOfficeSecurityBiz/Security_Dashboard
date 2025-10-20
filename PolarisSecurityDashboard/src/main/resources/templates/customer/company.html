@@ -6,13 +6,23 @@
 <head>
   <meta charset="UTF-8">
   <title>회사 정보 관리</title>
+
+  <!-- CSRF 메타 (fetch POST 시 사용) -->
+  <meta name="_csrf" th:content="${_csrf?.token}">
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}">
+
   <link rel="stylesheet" th:href="@{/css/company.css}">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- ✅ 페이지 전용 JS (캐시 버스팅) -->
+  <script defer th:src="@{/js/company.js(v=${#dates.createNow().time})}"></script>
 </head>
 
 <body>
-<main layout:fragment="content" class="company-container">
+<main layout:fragment="content"
+      class="company-container"
+      id="companyPage"
+      th:attr="data-customer-id=${customer.customerId}">
 
   <!-- 🧭 경로 표시 -->
   <div class="breadcrumb">
@@ -23,36 +33,47 @@
   </div>
 
   <!-- 🏢 고객사 정보 -->
-  <section class="info-card">
+  <section class="info-card" id="companyCard">
     <h3>고객사 정보</h3>
-    <form>
+
+    <form id="companyForm" autocomplete="off">
       <div class="form-group">
         <label>고객사 명</label>
-        <input type="text" th:value="${customer.customerName}" readonly>
-      </div>
-      <div class="form-group">
-        <label>연결사</label>
-        <!-- 🔹 연결사 이름 표시 (UUID 대신 회사명) -->
-        <input type="text" th:value="${connectedCompanyName}" readonly>
-      </div>
-      <div class="form-group">
-        <label>생성일</label>
-        <input type="text" th:value="${#temporals.format(customer.createAt, 'yyyy-MM-dd')}" readonly>
-      </div>
-      <div class="form-group">
-        <label>등록 담당자</label>
-        <input type="text" th:value="${contact.username}" readonly>
-      </div>
-      <div class="form-group">
-        <label>이메일</label>
-        <input type="text" th:value="${contact.email}" readonly>
+        <input type="text" name="customerName"
+               th:value="${customer.customerName}" data-editable readonly>
       </div>
 
-      <!-- ✅ 고객사 정보 수정요청 버튼 -->
+      <div class="form-group">
+        <label>연결사</label>
+        <input type="text" name="connectedCompanyName"
+               th:value="${connectedCompanyName}" data-editable readonly>
+      </div>
+
+      <div class="form-group">
+        <label>생성일</label>
+        <input type="text"
+               th:value="${#temporals.format(customer.createAt, 'yyyy-MM-dd')}" readonly>
+      </div>
+
+      <div class="form-group">
+        <label>등록 담당자</label>
+        <input type="text" name="contactName"
+               th:value="${contact?.username}" data-editable readonly>
+      </div>
+
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="text" name="contactEmail"
+               th:value="${contact?.email}" data-editable readonly>
+      </div>
+
+      <!-- 액션 -->
       <div class="form-actions">
         <button type="button" class="btn-green" id="requestCompanyEdit">
           <i class="fa fa-pen-to-square"></i> 수정요청
         </button>
+        <button type="submit" class="btn-primary save-btn" id="companySaveBtn" hidden>저장</button>
+        <button type="button" class="btn-gray cancel-btn" id="companyCancelBtn" hidden>취소</button>
       </div>
     </form>
   </section>
@@ -65,49 +86,59 @@
       <p>등록된 서비스가 없습니다.</p>
     </div>
 
-    <div th:each="service : ${services}" class="service-block">
-      <form class="service-form">
+    <div th:each="service : ${services}" class="service-block" th:with="sid=${service.serviceId}">
+      <form class="service-form" th:attr="data-sid=${sid}" autocomplete="off">
         <div class="form-group">
           <label>서비스 명</label>
-          <input type="text" th:value="${service.serviceName}" readonly>
-        </div>
-        <div class="form-group">
-          <label>도메인</label>
-          <input type="text" th:value="${service.domain}" readonly>
-        </div>
-        <div class="form-group">
-          <label>상품유형</label>
-          <input type="text" th:value="${service.productType}" readonly>
-        </div>
-        <div class="form-group">
-          <label>CPI</label>
-          <input type="text" th:value="${service.cpiValue}" readonly>
-        </div>
-        <div class="form-group">
-          <label>RS Rate</label>
-          <input type="text" th:value="${service.rsRate}" readonly>
+          <input type="text" name="serviceName"
+                 th:value="${service.serviceName}" data-editable readonly>
         </div>
 
-        <!-- ✅ 서비스 수정요청 버튼 -->
+        <div class="form-group">
+          <label>도메인</label>
+          <input type="text" name="domain"
+                 th:value="${service.domain}" data-editable readonly>
+        </div>
+
+        <div class="form-group">
+          <label>상품유형</label>
+          <input type="text" name="productType"
+                 th:value="${service.productType}" data-editable readonly>
+        </div>
+
+        <div class="form-group">
+          <label>CPI</label>
+          <input type="text" name="cpiValue"
+                 th:value="${service.cpiValue}" data-editable readonly>
+        </div>
+
+        <div class="form-group">
+          <label>RS Rate</label>
+          <input type="text" name="rsRate"
+                 th:value="${service.rsRate}" data-editable readonly>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn-green requestServiceEdit">
             <i class="fa fa-pen-to-square"></i> 수정요청
           </button>
+          <button type="submit" class="btn-primary save-btn" hidden>저장</button>
+          <button type="button" class="btn-gray cancel-btn" hidden>취소</button>
         </div>
       </form>
     </div>
   </section>
 
-  <!-- ✨ 수정요청 모달 (추후 JS에서 연결) -->
-  <div id="editRequestModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h3>수정요청</h3>
+  <!-- ✨ 수정요청 모달 -->
+  <div id="editRequestModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editReqTitle">
+      <button class="close" type="button" data-close aria-label="닫기">&times;</button>
+      <h3 id="editReqTitle">수정요청</h3>
       <p>수정 요청할 내용을 입력해주세요.</p>
-      <textarea placeholder="예: 회사명 변경, 도메인 수정 등"></textarea>
+      <textarea id="editRequestText" placeholder="예: 회사명 변경, 도메인 수정 등"></textarea>
       <div class="modal-actions">
-        <button class="btn-green">요청 제출</button>
-        <button class="btn-gray close">취소</button>
+        <button class="btn-green" id="editRequestSubmit">요청 제출</button>
+        <button class="btn-gray" type="button" data-close>취소</button>
       </div>
     </div>
   </div>
