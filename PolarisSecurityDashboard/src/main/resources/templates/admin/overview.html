@@ -69,10 +69,11 @@
         </tr>
         </thead>
         <tbody>
+        <!-- ✅ DTO(RecentCustomerRow) 프로퍼티 접근 사용 -->
         <tr th:each="c : ${recentCustomers}">
-          <td th:text="${c['customerName']}">폴라리스</td>
-          <td th:text="${c['connectedCompanyName'] != null ? c['connectedCompanyName'] : '-'}">-</td>
-          <td th:text="${c['createAt']}">2025-09-16</td>
+          <td th:text="${c.customerName}">폴라리스</td>
+          <td th:text="${c.connectedCompanyName != null ? c.connectedCompanyName : '-'}">-</td>
+          <td th:text="${c.createAt}">2025-09-16</td>
         </tr>
 
         <tr th:if="${#lists.isEmpty(recentCustomers)}">

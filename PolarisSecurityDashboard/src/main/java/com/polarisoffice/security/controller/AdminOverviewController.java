@@ -1,10 +1,12 @@
 package com.polarisoffice.security.controller;
 
 import com.polarisoffice.security.dto.MetricsDto;
+import com.polarisoffice.security.dto.RecentCustomerRow;
 import com.polarisoffice.security.model.edit.EditRequest;
 import com.polarisoffice.security.model.edit.EditRequestStatus;
-import com.polarisoffice.security.model.edit.EditTargetType;
+import com.polarisoffice.security.repository.CompanyServiceRepository;
 import com.polarisoffice.security.repository.CustomerRepository;
+import com.polarisoffice.security.service.CompanyServiceService;
 import com.polarisoffice.security.service.EditRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -20,54 +22,47 @@ import java.util.*;
 public class AdminOverviewController {
 
     private final CustomerRepository customerRepository;
+    private final CompanyServiceRepository customerServiceRepository;  // 수정된 리포지토리
     private final EditRequestService editRequestService;
+    private final CompanyServiceService companyService;
 
     @GetMapping("/admin/overview")
     public String overview(Model model) {
 
+        // KPI: 고객사 총 수와 서비스별 고객사 수 (중복 제거)
+        long totalCustomers = customerRepository.count();
+        long vguardCount  = customerServiceRepository.countDistinctCustomerByServiceName("V-Guard");
+        long secuoneCount = customerServiceRepository.countDistinctCustomerByServiceName("SecuOne");
+
+        MetricsDto metrics = new MetricsDto(totalCustomers, vguardCount, secuoneCount);
+
+        // 최근 수정 요청
         var latest = editRequestService.getLatestTop20();
         List<Map<String, Object>> reqView = new ArrayList<>();
-
-        // KPI (예시 값)
-        long totalCustomers = customerRepository.count();
-        MetricsDto metrics = new MetricsDto(totalCustomers, 100, 50);
-
         long pending = 0L, inProgress = 0L, resolved = 0L;
 
         for (EditRequest r : latest) {
             Map<String, Object> m = new HashMap<>();
             m.put("id", r.getId());
 
-            // createdAt -> 문자열
-            String formattedDate;
-            if (r.getCreateAt() != null) {
-                try {
-                    formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                            .format(r.getCreateAt().atZone(ZoneOffset.UTC).toLocalDateTime());
-                } catch (Exception e) {
-                    formattedDate = "Invalid Date";
-                }
-            } else {
-                formattedDate = "No Date Available";
-            }
+            String formattedDate = (r.getCreateAt() != null)
+                    ? DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                      .format(r.getCreateAt().atZone(ZoneOffset.UTC).toLocalDateTime())
+                    : "No Date Available";
             m.put("createdAt", formattedDate);
 
-            // 요청자
             m.put("requester", firstNonNull(r.getRequesterName(), r.getRequesterEmail(), "-"));
             m.put("requesterEmail", r.getRequesterEmail());
 
-            // 타입/타겟
             String type = r.getTargetType() != null ? r.getTargetType().name() : "-";
             m.put("type", type);
             m.put("target", "SERVICE".equals(type)
                     ? "서비스 #" + (r.getServiceId() != null ? r.getServiceId() : 0)
                     : "회사 정보");
 
-            // ✅ 여기 추가: 링크에 쓸 식별자들
-            m.put("customerId", r.getCustomerId());      // <-- 고객사 상세로 갈 때 사용
-            m.put("serviceId", r.getServiceId());        // (필요시 서비스 상세 링크에도 사용 가능)
+            m.put("customerId", r.getCustomerId());
+            m.put("serviceId", r.getServiceId());
 
-            // 상태/내용
             EditRequestStatus status = Optional.ofNullable(r.getStatus())
                     .orElse(EditRequestStatus.PENDING);
             m.put("status", status.name());
@@ -75,7 +70,6 @@ public class AdminOverviewController {
 
             reqView.add(m);
 
-            // 카운트
             switch (status) {
                 case PENDING -> pending++;
                 case IN_PROGRESS -> inProgress++;
@@ -89,9 +83,14 @@ public class AdminOverviewController {
                 "resolved", resolved
         );
 
+        // 최근 3개월 등록 고객사
+        List<RecentCustomerRow> recent = companyService.getRecentCustomers3Months();
+
+        // 모델 바인딩
         model.addAttribute("metrics", metrics);
         model.addAttribute("requests", reqView);
         model.addAttribute("reqCounts", reqCounts);
+        model.addAttribute("recentCustomers", recent);
 
         return "admin/overview";
     }
