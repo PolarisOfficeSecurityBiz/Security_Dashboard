@@ -1,14 +1,14 @@
 package com.polarisoffice.security.model;
 
 import java.time.LocalDate;
-
 import org.hibernate.annotations.Comment;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="service")
+@Table(name = "service")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
@@ -54,6 +54,20 @@ public class Service {
     @Comment("Customer FK (varchar64)")
     private String customerId;
 
-    @Column(name = "license_id")
+    @Column(name = "license_id", nullable = true)
     private Integer licenseId; // 필요 시 다른 테이블 FK
+
+    // Customer 엔티티와의 관계 설정
+    @ManyToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", insertable = false, updatable = false)
+    private Customer customer; // ManyToOne 관계로 설정
+
+    // contactName을 추가 (예시로 직접 추가하는 방식)
+    @Column(name = "contact_name", length = 200)
+    private String contactName; // contactName을 추가
+
+    // customerName을 직접 가져오는 메소드 추가
+    public String getCustomerName() {
+        return customer != null ? customer.getCustomerName() : null;
+    }
 }

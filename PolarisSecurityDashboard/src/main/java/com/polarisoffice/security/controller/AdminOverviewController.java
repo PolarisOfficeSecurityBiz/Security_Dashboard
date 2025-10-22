@@ -2,10 +2,11 @@ package com.polarisoffice.security.controller;
 
 import com.polarisoffice.security.dto.MetricsDto;
 import com.polarisoffice.security.dto.RecentCustomerRow;
+import com.polarisoffice.security.model.CustomerService;
 import com.polarisoffice.security.model.edit.EditRequest;
 import com.polarisoffice.security.model.edit.EditRequestStatus;
-import com.polarisoffice.security.repository.CompanyServiceRepository;
 import com.polarisoffice.security.repository.CustomerRepository;
+import com.polarisoffice.security.repository.CompanyServiceRepository;  // 수정된 리포지토리
 import com.polarisoffice.security.service.CompanyServiceService;
 import com.polarisoffice.security.service.EditRequestService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.*;
 public class AdminOverviewController {
 
     private final CustomerRepository customerRepository;
-    private final CompanyServiceRepository customerServiceRepository;  // 수정된 리포지토리
+    private final CompanyServiceRepository companyServiceRepository;  // 수정된 리포지토리
     private final EditRequestService editRequestService;
     private final CompanyServiceService companyService;
 
@@ -31,8 +32,8 @@ public class AdminOverviewController {
 
         // KPI: 고객사 총 수와 서비스별 고객사 수 (중복 제거)
         long totalCustomers = customerRepository.count();
-        long vguardCount  = customerServiceRepository.countDistinctCustomerByServiceName("V-Guard");
-        long secuoneCount = customerServiceRepository.countDistinctCustomerByServiceName("SecuOne");
+        long vguardCount  = companyServiceRepository.countDistinctCustomerByServiceName("V-Guard");
+        long secuoneCount = companyServiceRepository.countDistinctCustomerByServiceName("SecuOne");
 
         MetricsDto metrics = new MetricsDto(totalCustomers, vguardCount, secuoneCount);
 

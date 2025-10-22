@@ -2,7 +2,7 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/customer_layout}">
+      layout:decorate="~{layout/admin_layout}">
 
 <head>
   <meta charset="UTF-8"/>
@@ -30,11 +30,11 @@
         <label>도메인</label>
         <input type="text" th:value="${service != null ? service.domain : '-'}" readonly />
 
-		<label>라이선스 키</label>
-		<div class="input-group">
-		  <input type="text" th:value="${service != null ? service.licenseId : '-'}" id="licenseKey" readonly />
-		  <button id="downloadKeyBtn" title="라이선스 파일 다운로드">⭳</button>
-		</div>
+<label>라이선스 키</label>
+<div class="input-group">
+  <input type="text" th:value="${service != null ? service.licenseId : '-'}" id="licenseKey" readonly />
+  <button id="downloadKeyBtn" title="라이선스 파일 다운로드">⭳</button>
+</div>
 
         <label>라이선스 만료일</label>
         <div class="input-group">
@@ -50,9 +50,8 @@
       </div>
     </section>
   </main>
-  <script th:src="@{/js/license.js}"></script>
 </div>
 
-
+<script th:src="@{/js/license.js}"></script>
 </body>
 </html>

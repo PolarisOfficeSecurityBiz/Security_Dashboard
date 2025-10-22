@@ -16,10 +16,11 @@ public class AdminPageController {
         return request.getRequestURI();
     }
 
-    @GetMapping("/license")
-    public String license() {
-        return "admin/license/admin_license";
-    }
+//    // 기존 경로인 /license를 그대로 사용
+//    @GetMapping("/license")
+//    public String license() {
+//        return "admin/license/admin_license"; // "admin/license/admin_license" 템플릿 반환
+//    }
 
 //    @GetMapping("/vguard")
 //    public String vguard() {

@@ -3,6 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin_layout}">
+
 <head>
   <meta charset="UTF-8" />
   <title>License Manage</title>
@@ -41,7 +42,7 @@
     <button id="searchBtn">조회</button>
   </section>
 
-  <!-- 이하 기존 테이블 패널들 동일 -->
+  <!-- 발급 요청란 -->
   <section class="panel" data-type="issue">
     <div class="panel-header">
       <h3>발급 요청란</h3>
@@ -71,6 +72,7 @@
     </div>
   </section>
 
+  <!-- 수정 요청란 -->
   <section class="panel" data-type="update">
     <div class="panel-header">
       <h3>수정 요청란</h3>
@@ -120,14 +122,19 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>C서비스</td>
-            <td>C고객사</td>
-            <td>이별잉</td>
-            <td class="date">2025-09-22</td>
-          </tr>
+            <tr th:each="service : ${services}">
+				<td>
+				  <a th:href="@{/admin/customers/{customerId}/services/{serviceId}(customerId=${service.customerId}, serviceId=${service.serviceId})}" 
+				     th:text="${service.serviceName}">서비스명</a>
+				</td>
+
+              <td th:text="${service.customerName}">고객사명</td>
+              <td th:text="${service.contactName}">담당자명</td>
+              <td th:text="${service.createAt != null ? service.createAt : 'N/A'}">생성일자</td>
+            </tr>
           </tbody>
         </table>
+        <p th:unless="${services != null and services.size() > 0}">미발급 서비스가 없습니다.</p>
       </div>
     </div>
 
@@ -158,6 +165,7 @@
       </div>
     </div>
   </section>
+
 </div>
 </body>
 </html>
