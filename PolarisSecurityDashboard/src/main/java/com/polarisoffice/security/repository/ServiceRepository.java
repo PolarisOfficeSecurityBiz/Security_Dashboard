@@ -4,6 +4,7 @@ package com.polarisoffice.security.repository;
 import com.polarisoffice.security.model.Service;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,5 +28,7 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
     	       "LEFT JOIN ServiceContact sc ON s.serviceId = sc.serviceId " +
     	       "WHERE s.licenseId IS NULL")
     	List<Object[]> findUnissuedServices();
+   
 
+ 
 }

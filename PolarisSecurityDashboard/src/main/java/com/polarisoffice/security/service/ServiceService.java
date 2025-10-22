@@ -1,14 +1,10 @@
-// src/main/java/com/polarisoffice/security/service/ServiceService.java
 package com.polarisoffice.security.service;
 
-import com.polarisoffice.security.model.Customer;
 import com.polarisoffice.security.model.Service;
 import com.polarisoffice.security.repository.ServiceRepository;
 
 import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,8 +13,10 @@ public class ServiceService {
 
     @Autowired
     private ServiceRepository serviceRepository;
-
+    
+    // 수정: assignedTo 필드를 사용하지 않고 customerId로 서비스 목록을 조회
     public List<Service> getServicesByCustomerId(String customerId) {
+        // 이제 customerId만 사용하여 서비스를 조회
         return serviceRepository.findByCustomerId(customerId);
     }
 
@@ -55,4 +53,12 @@ public class ServiceService {
 
         return serviceRepository.save(newService);
     }
+    
+ // ServiceService.java 에 추가
+    public List<Service> getByIds(List<Integer> ids) {
+        return ids == null || ids.isEmpty()
+                ? List.of()
+                : serviceRepository.findAllById(ids);
+    }
+
 }

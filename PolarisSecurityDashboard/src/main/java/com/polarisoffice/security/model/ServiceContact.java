@@ -37,11 +37,16 @@ public class ServiceContact {
     @Column(name = "memo", length = 500)
     private String memo;
 
-    // ❌ 기존 String customerId → ✅ JPA 관계 매핑
+    // 기존 String customerId → JPA 관계 매핑
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     private Customer customer;
 
     @Column(name = "service_id", nullable = false)
     private Integer serviceId;
+
+    // Service와의 관계를 추가합니다
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id", referencedColumnName = "service_id", insertable = false, updatable = false)
+    private Service service;
 }

@@ -1,8 +1,9 @@
 package com.polarisoffice.security.repository;
 
 import com.polarisoffice.security.model.ServiceContact;
-import com.polarisoffice.security.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,10 +32,23 @@ public interface ServiceContactRepository extends JpaRepository<ServiceContact, 
 
     /** 고객별 첫 담당자 조회 */
     Optional<ServiceContact> findFirstByCustomer_CustomerId(String customerId);
-    
+
+    /** 고객별 가장 최신 담당자 조회 */
     Optional<ServiceContact> findTopByCustomer_CustomerIdOrderByCreateAtDesc(String customerId);
-    
+
+    /** 특정 고객-서비스별 담당자 조회 */
     Optional<ServiceContact> findTopByCustomer_CustomerIdAndServiceIdOrderByCreateAtDesc(String customerId, Integer serviceId);
 
-
+    /** 서비스 담당자와 그에 연결된 고객 및 서비스 정보를 가져오는 쿼리 */
+    @Query("SELECT sc FROM ServiceContact sc " +
+           "JOIN FETCH sc.customer c " +
+           "JOIN FETCH sc.service s " +
+           "WHERE c.customerId = :customerId AND sc.email = :username")
+    List<ServiceContact> findByCustomer_CustomerIdAndUsername(@Param("customerId") String customerId, @Param("username") String username);
+    
+    @Query("SELECT sc FROM ServiceContact sc " +
+           "JOIN FETCH sc.customer c " +
+           "JOIN FETCH sc.service s " +
+           "WHERE sc.serviceId = :serviceId AND sc.email = :email")
+    List<ServiceContact> findServiceContactByServiceIdAndEmail(@Param("serviceId") Integer serviceId, @Param("email") String email);
 }
