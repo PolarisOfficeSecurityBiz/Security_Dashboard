@@ -2,7 +2,7 @@
   <link rel="stylesheet" th:href="@{/css/customer_nav.css}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- 상단 로고 -->
+  <!-- 로고 -->
   <div class="brand">
     <img th:src="@{/images/bi_logo.png}" alt="Polaris Customer" class="brand-logo">
     <span class="brand-name">Polaris Customer</span>
@@ -43,7 +43,7 @@
       <p class="user-email" th:text="${#authentication.principal.username}">user@polarisoffice.com</p>
     </div>
 
-    <!-- ✅ POST 로그아웃 (CSRF 포함) -->
+    <!-- 로그아웃 -->
     <form th:action="@{/logout}" method="post" class="logout-form">
       <input type="hidden" th:if="${_csrf != null}"
              th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

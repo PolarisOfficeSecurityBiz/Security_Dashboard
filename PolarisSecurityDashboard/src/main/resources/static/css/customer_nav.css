@@ -1,17 +1,17 @@
 /* 전체 네비게이션 영역 */
 .customer-nav {
-  width: 220px;
+  width: 260px; /* 사이드바 폭 */
   height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
-  background-color: #1f2937; /* 진한 네이비 */
+  background-color: #0b1d38;
   color: #f1f5f9;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: hidden; /* 스크롤 안생기게 */
+  overflow: hidden;
   box-shadow: 2px 0 5px rgba(0,0,0,0.2);
 }
 
@@ -42,12 +42,7 @@
   padding: 0;
   margin: 0;
   flex-grow: 1;
-  overflow-y: auto; /* 메뉴 많아질 때 스크롤 */
-  scrollbar-width: none;
-}
-
-.nav-menu::-webkit-scrollbar {
-  display: none;
+  overflow-y: auto;
 }
 
 .nav-menu li {
@@ -63,12 +58,6 @@
   text-decoration: none;
   transition: 0.2s ease;
   gap: 10px;
-}
-
-.nav-menu a i {
-  font-size: 14px;
-  width: 18px;
-  text-align: center;
 }
 
 .nav-menu a:hover {
@@ -126,34 +115,62 @@
   color: #fecaca;
   text-decoration: underline;
 }
-/* 사이드바가 fixed라면 main을 오른쪽으로 밀어줘야 함 */
-.main-content {
-  margin-left: 240px; /* 사이드바 너비와 동일하게 설정 */
-  padding: 20px;
+
+/* 메인 콘텐츠 */
+.layout {
+  display: flex;
+  width: 100%;
   min-height: 100vh;
-  background-color: #f9f9fb;
-  box-sizing: border-box;
+  background-color: #f5f6fa;
+  overflow: hidden;
 }
 
-/* body 전체가 잘리지 않게 */
-body {
-  display: flex;
-  flex-direction: row;
-  min-height: 100vh;
+.layout-main {
+  flex: 1;
+  margin-left: 260px; /* 사이드바 너비 */
+  padding: 20px;
+  background-color: #f8f9fc;
+  box-sizing: border-box;
   overflow-x: hidden;
 }
 
-/* 사이드바 고정 */
-.customer-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
-  height: 100%;
-  background-color: #0b1d38;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  z-index: 100;
+/* 전체 콘텐츠 영역 */
+.main-content {
+  width: 100%;
+  max-width: 100%; /* 화면에 맞게 유동적 */
+  margin: 0 auto;
+  background: var(--bg-body);
+  box-sizing: border-box;
 }
+
+/* 반응형 */
+@media (max-width: 1280px) {
+  .layout-main {
+    margin-left: 220px; /* 사이드바 좁힘 */
+  }
+}
+
+@media (max-width: 768px) {
+  /* 모바일 화면에서 사이드바 숨기기 */
+  .layout-main {
+    margin-left: 0;
+    padding: 20px;
+  }
+  .customer-nav {
+    position: absolute;
+    top: 0;
+    left: -260px; /* 사이드바 숨기기 */
+    transition: 0.3s ease;
+  }
+  .customer-nav.open {
+    left: 0; /* 사이드바 열기 */
+  }
+}
+
+/* 모바일 메뉴 */
+@media (max-width: 600px) {
+  .nav-menu a {
+    font-size: 12px; /* 메뉴 글자 크기 줄이기 */
+  }
+}
+

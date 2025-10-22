@@ -1,4 +1,4 @@
-/* 전체 화면 컨테이너 */
+/* 전체 레이아웃 */
 .layout {
   display: flex;
   width: 100%;
@@ -7,61 +7,51 @@
   overflow: hidden;
 }
 
-/* 사이드바 (왼쪽 고정) */
+/* 사이드바 (고정) */
 .customer-nav {
   position: fixed;
   top: 0;
   left: 0;
-  width: 220px; /* 사이드바 폭 */
+  width: 260px;
   height: 100vh;
   background-color: #0b1d38;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  z-index: 20;
+  z-index: 100;
 }
 
 /* 메인 레이아웃 */
 .layout-main {
-  margin-left: 220px; /* 사이드바 넓이만큼 오른쪽으로 밀기 */
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  margin :0px;
+  padding: 0px;
   background-color: #f8f9fc;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* 메인 콘텐츠 */
 .main-content {
-  padding: 40px;
-  width: 100%;
-  max-width: 1280px;
+  padding: 0px;
   margin: 0 auto;
+  width: 100%; /* 화면의 폭을 100% 차지 */
+  max-width: 100%; /* 최대 폭을 100%로 설정 */
+  background: var(--bg-body);
   box-sizing: border-box;
 }
 
-/* 내부 본문 */
-.content-body {
-  width: 100%;
-}
-
-/* 반응형 조정 */
-@media (max-width: 1024px) {
-  .customer-nav {
-    width: 200px;
-  }
+/* 반응형 */
+@media (max-width: 1280px) {
   .layout-main {
-    margin-left: 200px;
+    margin-left: 220px;
   }
 }
 
 @media (max-width: 768px) {
-  .customer-nav {
-    position: absolute;
-    transform: translateX(-100%);
-    transition: 0.3s ease;
-  }
   .layout-main {
     margin-left: 0;
+  }
+  .main-content {
+    padding: 20px; /* 모바일 화면에 여백을 줄여줌 */
   }
 }
