@@ -150,3 +150,21 @@ body.auth-body{
   .card{padding:28px 22px}
   .title{font-size:26px}
 }
+.alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.alert.info {
+  background: #e0f2fe;
+  color: #075985;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+

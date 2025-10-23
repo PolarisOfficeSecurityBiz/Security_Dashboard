@@ -1,41 +1,45 @@
-<nav class="admin-nav" th:fragment="nav">
-  <div class="brand">Polaris Admin</div>
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Admin Navigation</title>
+  <link rel="stylesheet" th:href="@{/css/admin_nav.css}">
+</head>
 
-  <!-- ${path} 는 NavModelAdvice 가 넣어준 현재 URI -->
-  <ul>
-    <li>
-      <a th:href="@{/admin/overview}"
-         th:classappend="${#strings.startsWith(path, '/admin/overview')} ? ' active' : ''">
-        Overview
-      </a>
-    </li>
-    <li>
-      <a th:href="@{/admin/customers}"
-         th:classappend="${#strings.startsWith(path, '/admin/customers')} ? ' active' : ''">
-        고객사 관리
-      </a>
-    </li>
-    <li>
-      <a th:href="@{/admin/logs}"
-         th:classappend="${#strings.startsWith(path, '/admin/logs')} ? ' active' : ''">
-        로그 관리
-      </a>
-    </li>
-        <li>
-      <a th:href="@{/admin/secuone}"
-         th:classappend="${#strings.startsWith(path, '/admin/secuone')} ? ' active' : ''">
-        시큐원 관리
-      </a>
-    </li>
-    <li>
-      <a th:href="@{/admin/settings}"
-         th:classappend="${#strings.startsWith(path, '/admin/settings')} ? ' active' : ''">
-        설정
-      </a>
-    </li>
-  </ul>
+<body>
+ <nav class="admin-nav" th:fragment="nav">
+  <div class="nav-scroll">
+    <div class="nav-top">
+      <h1 class="nav-logo">Polaris Security</h1>
 
-  <ul>
-    <li><a th:href="@{/logout}">로그아웃</a></li>
-  </ul>
+      <ul class="nav-menu">
+        <li><a th:href="@{/admin/overview}" th:classappend="${currentPath.startsWith('/admin/overview')} ? 'active' : ''">📈 Overview</a></li>
+        <li><a th:href="@{/admin/customers}" th:classappend="${currentPath.startsWith('/admin/customers')} ? 'active' : ''">🔗 Customers</a></li>
+        <li><a th:href="@{/admin/license}" th:classappend="${currentPath.startsWith('/admin/license')} ? 'active' : ''">🧾 Licenses</a></li>
+        <li><a th:href="@{/admin/secuone}" th:classappend="${currentPath.startsWith('/admin/secuone')} ? 'active' : ''">🛡️ SecuOne</a></li>
+        <li><a th:href="@{/admin/vguard}" th:classappend="${currentPath.startsWith('/admin/vguard')} ? 'active' : ''">💻 V-Guard</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-bottom">
+    <div class="profile">
+      <div class="avatar"
+           th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">A</div>
+      <div class="info">
+        <div class="name" th:text="${#strings.substringBefore(#authentication.name, '@')}">관리자</div>
+        <div class="email" th:text="${#authentication.name}">admin@polarisoffice.com</div>
+        <span class="role">ADMIN</span>
+      </div>
+    </div>
+    <form th:action="@{/logout}" method="post" style="display:inline">
+	  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	  <button type="submit" class="logout">로그아웃</button>
+	</form>
+
+  </div>
 </nav>
+
+</body>
+</html>

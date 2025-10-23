@@ -1,138 +1,136 @@
-:root{
-  --bg:#f6f8fb; --card:#fff; --text:#0f172a; --muted:#667085;
-  --primary:#2563eb; --primary-600:#1d4ed8; --ring:0 0 0 3px rgba(37,99,235,.18);
-  --radius-lg:16px; --radius-xl:18px; --radius-2xl:20px;
-  --shadow-xs:0 1px 2px rgba(2,8,23,.06);
-  --shadow-sm:0 4px 16px rgba(15,23,42,.06);
-  --shadow-md:0 10px 30px rgba(2,8,23,.10);
-  --grad-dark:linear-gradient(180deg,#0b0b0d 0%,#2b2b2f 70%);
+/* ==========================================
+   Polaris Admin - SecuOne Dashboard
+   (Overview, Customers, License와 폭·여백 완전 통일)
+   last updated: 2025-10-16
+========================================== */
+
+/* ====== 페이지 기본 ====== */
+.secuone-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-sizing: border-box;
+  background: #f9fafb;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{ background:var(--bg); color:var(--text); line-height:1.45; }
-
-.secuone{ max-width:1200px; margin-inline:auto; padding:32px 20px 56px; }
-
-/* ---------- 헤더 / 브레드크럼 ---------- */
-.page-head{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:20px; }
-.title{ font-size:24px; font-weight:800; letter-spacing:-.3px; }
-.muted{ color:var(--muted); font-size:14px; }
-
-.quick{ display:flex; flex-wrap:wrap; gap:10px; }
-.btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; background:#eef2ff; color:#3730a3; text-decoration:none; font-weight:600; transition:.15s ease;
-      box-shadow:var(--shadow-xs); }
-.btn:hover{ background:#e0e7ff; transform:translateY(-1px); }
-.icon-btn{ width:36px; height:36px; border-radius:12px; display:grid; place-items:center; border:1px solid #e5e7eb; background:#fff; cursor:pointer; transition:.15s ease; }
-.icon-btn:hover{ box-shadow:var(--shadow-sm); transform:translateY(-1px); }
-
-/* ---------- 그리드 ---------- */
-.grid{ display:grid; gap:16px; }
-.grid.metrics{ grid-template-columns:repeat(4, minmax(0,1fr)); margin-block:16px 28px; }
-.grid.lists{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-
-/* ---------- 카드 ---------- */
-.card{ background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:18px; }
-
-/* ---------- KPI 캡슐 ---------- */
-.kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
-.kpi-card{
-  border-radius:var(--radius-xl);
-  padding:18px 18px 16px;
-  background:var(--grad-dark);
-  color:#fff;
-  display:flex; justify-content:space-between; align-items:flex-end;
-  min-height:96px; box-shadow:var(--shadow-md);
+/* breadcrumb */
+.breadcrumb {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
 }
-.kpi-card div:last-child{ font-weight:800; font-size:28px; letter-spacing:-.5px; }
-.kpi-card > div:first-child{ font-size:14px; opacity:.9; }
-
-/* ---------- 리스트 박스 ---------- */
-.metric{ display:flex; align-items:flex-start; justify-content:space-between; }
-.metric h3{ font-size:13px; color:var(--muted); margin:0; font-weight:600; }
-.metric .value{ font-size:28px; font-weight:800; letter-spacing:-.5px; margin-top:6px; }
-.metric .tag{ font-size:12px; color:#16a34a; background:#e6f6ec; padding:4px 8px; border-radius:999px; font-weight:700; }
-
-.list h4{ font-size:16px; margin:0 0 12px; }
-.list ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
-
-.item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; border:1px solid #eef0f5; border-radius:12px; background:#fff; }
-.item .left{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-.item .title{ font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.item .sub{ font-size:12px; color:var(--muted); }
-.item a{ text-decoration:none; color:var(--primary-600); font-weight:700; }
-.more{ display:flex; justify-content:flex-end; margin-top:12px; }
-.more a{ color:var(--primary-600); text-decoration:none; font-weight:700; }
-
-/* ---------- 섹션 헤더 ---------- */
-.section-head{ display:flex; align-items:center; justify-content:space-between; margin-top:6px; margin-bottom:8px; }
-.section-head .label{ font-size:12px; color:var(--muted); }
-
-/* ---------- 심플 테이블 ---------- */
-.table-wrap{ overflow:auto; }
-.simple-table{ width:100%; border-collapse:collapse; font-size:14px; }
-.simple-table thead th{
-  text-align:left; padding:10px; background:#f3f4f6; color:#111827; font-weight:700;
+.breadcrumb a {
+  color: #2563eb;
+  text-decoration: none;
 }
-.simple-table tbody td{ padding:10px; border-bottom:1px solid #eef0f5; }
-.simple-table tr:last-child td{ border-bottom:none; }
-.simple-table th:first-child{ border-top-left-radius:8px; border-bottom-left-radius:8px; }
-.simple-table th:last-child{ border-top-right-radius:8px; border-bottom-right-radius:8px; }
-
-/* ---------- 캐러셀 섹션 ---------- */
-.carousel-section{
-  background:#f8fafc; border-radius:var(--radius-lg);
-  padding:16px; position:relative; box-shadow:var(--shadow-sm);
-}
-.carousel-section .icon-btn{ background:#fff; }
-.carousel{ overflow:hidden; }
-.carousel ul{ display:grid; grid-auto-flow:column; grid-auto-columns:calc(33.333% - 10px); gap:15px; list-style:none; padding:0; margin:0; }
-.letter-card .card-link,
-.news-card .card-link{
-  display:block; position:relative; border-radius:var(--radius-2xl);
-  overflow:hidden; background:#111; box-shadow:var(--shadow-md);
-}
-.letter-card img, .news-card img{ width:100%; height:160px; object-fit:cover; opacity:.92; }
-.card-link .overlay{
-  position:absolute; left:16px; bottom:16px; color:#fff;
-}
-.overlay .ttl{ font-weight:800; letter-spacing:-.2px; }
-.overlay .date{ font-size:12px; opacity:.9; margin-top:4px; }
-
-/* ---------- 반응형 ---------- */
-@media (max-width:1200px){
-  .kpis{ grid-template-columns:repeat(4,minmax(0,1fr)); }
-}
-@media (max-width:1024px){
-  .grid.metrics{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-  .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .carousel ul{ grid-auto-columns:calc(50% - 8px); }
-}
-@media (max-width:640px){
-  .grid.metrics, .grid.lists{ grid-template-columns:1fr; }
-  .kpis{ grid-template-columns:1fr; }
-  .carousel ul{ grid-auto-columns:100%; }
+.breadcrumb strong {
+  color: #111827;
 }
 
-/* ---------- 접근성/포커스 ---------- */
-:focus-visible{ outline:none; box-shadow:var(--ring); border-radius:10px; }
-/* 아이콘 버튼: 네모박스 제거 + 깔끔한 호버/포커스 */
-.icon-btn{
-  appearance:none;            /* 브라우저 기본 제거 */
-  -webkit-appearance:none;
-  background:transparent;     /* 배경 제거 */
-  border:0;                   /* 테두리 제거 */
-  padding:6px;                /* 터치 타겟 확보 */
-  line-height:1;
-  border-radius:10px;         /* 둥글게 (원하면 9999px) */
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+/* ==========================================
+   🧱 KPI Section
+========================================== */
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
 }
-.icon-btn > img,
-.icon-btn > svg{ width:18px; height:18px; display:block; }
+.kpi-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(180deg, #111 0%, #2b2b2b 70%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.kpi-card .icon {
+  font-size: 26px;
+}
+.kpi-card .label {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+}
+.kpi-card h3 {
+  margin: 4px 0;
+  font-size: 26px;
+  font-weight: 700;
+}
 
-.icon-btn:hover{ background:rgba(0,0,0,.06); }               /* 살짝 하이라이트 */
-.icon-btn:focus{ outline:none; }
-.icon-btn:focus-visible{ box-shadow:0 0 0 3px rgba(37,99,235,.18); } /* 접근성 링 */
+/* ==========================================
+   📦 Panel / Card
+========================================== */
+.panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ==========================================
+   📋 Table
+========================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+th {
+  color: #6b7280;
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+/* ==========================================
+   🎨 Hover / Active 효과
+========================================== */
+tbody tr:hover {
+  background: #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+/* ==========================================
+   📱 반응형
+========================================== */
+@media (max-width: 1280px) {
+  .secuone-page {
+    padding: 32px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .secuone-page {
+    padding: 24px 20px;
+  }
+  th,
+  td {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}

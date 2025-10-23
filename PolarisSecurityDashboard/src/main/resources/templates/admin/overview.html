@@ -1,314 +1,224 @@
-<!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin_layout}">
 <head>
   <meta charset="UTF-8"/>
-  <title>Dashboards · Overview</title>
+  <title>Polaris Admin Dashboard</title>
 
-  <!-- 페이지 전용 스타일 (레이아웃 CSS 로드 이후에 적용) -->
-  <style>
-    :root{
-      --bg:#f7f9fc; --panel:#fff; --line:#e9eef5;
-      --text:#0f172a; --muted:#64748b;
-      --brand:#2563eb; --green:#10b981; --red:#ef4444; --amber:#f59e0b;
-      --shadow:0 6px 16px rgba(15,23,42,.06);
-      --radius:16px;
-    }
-    body[data-theme="dark"] .overview { --panel:#0b1220; --line:#152033; --text:#e6edf6; --muted:#8aa0bf; }
-
-    .overview main{ padding: 8px; }
-    .ov-breadcrumb{ display:flex; align-items:center; gap:8px; color:var(--muted); margin: 2px 4px 16px; }
-    .ov-breadcrumb a{ color:var(--muted); text-decoration:none; }
-    .ov-breadcrumb strong{ color:var(--text); }
-
-    /* 카드 그리드 */
-    .grid{ display:grid; gap:16px; }
-    .grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
-    .grid.cols-4{ grid-template-columns: repeat(4, 1fr); }
-    .grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 1200px){ .grid.cols-4{ grid-template-columns: repeat(2, 1fr);} }
-    @media (max-width: 900px){ .grid.cols-3, .grid.cols-2{ grid-template-columns: 1fr;} }
-
-    .card{
-      background:var(--panel); border:1px solid var(--line);
-      border-radius:var(--radius); box-shadow:var(--shadow);
-    }
-    .card-head{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px; border-bottom:1px solid var(--line);
-    }
-    .card-body{ padding:16px; }
-
-    /* KPI 카드 */
-    .kpi{ display:flex; gap:12px; padding:16px; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel); box-shadow:var(--shadow); }
-    .kpi-icon{
-      width:44px; height:44px; border-radius:12px; display:grid; place-items:center; color:#fff; font-weight:800;
-      background:linear-gradient(135deg, var(--brand), #60a5fa);
-      box-shadow:0 8px 18px rgba(37,99,235,.25);
-    }
-    .kpi .label{ color:var(--muted); font-weight:700; font-size:12px; letter-spacing:.02em; text-transform:uppercase; }
-    .kpi .value{ font-size:28px; font-weight:800; color:var(--text); line-height:1.2; }
-    .kpi .meta{ margin-top:4px; font-size:12px; color:var(--muted); display:flex; gap:8px; align-items:center; }
-    .chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700; }
-    .chip.green{ background:#ecfdf5; color:#065f46; }
-    .chip.red{ background:#fef2f2; color:#7f1d1d; }
-    .chip.blue{ background:#eff6ff; color:#1e3a8a; }
-
-    /* 2열 패널 */
-    .panel{ border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); box-shadow:var(--shadow); }
-    .panel h3{ margin:0; font-size:16px; }
-    .panel .head{ display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--line); }
-    .panel .body{ padding:12px 16px; }
-
-    /* 테이블 */
-    .table-wrap{ overflow:auto; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; }
-    thead th{
-      text-align:left; padding:12px 14px; background:#f9fbff; color:var(--muted);
-      border-bottom:1px solid var(--line); font-weight:800; font-size:13px;
-    }
-    tbody td{ padding:12px 14px; border-bottom:1px solid var(--line); font-size:14px; }
-    tbody tr:hover{ background:rgba(2,6,23,.02); }
-    .mono{ font-family: ui-monospace, Menlo, Consolas, "SF Mono", monospace; }
-    .badge{ display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; }
-    .badge.type-MALWARE{ background:#fef2f2; color:#991b1b; }
-    .badge.type-REMOTE{ background:#eff6ff; color:#1e40af; }
-    .badge.type-ROOTING{ background:#fffbeb; color:#92400e; }
-
-    /* 작은 캔버스 차트 박스 */
-    .chart-box{ padding: 8px 8px 4px; }
-    .empty{ color:var(--muted); text-align:center; padding:20px 8px; }
-
-    /* 페이지 하단 구분 */
-    .foot{ margin:12px 2px; color:var(--muted); font-size:12px; }
-  </style>
+  <!-- 페이지 전용 스타일 -->
+  <th:block layout:fragment="pageStyle">
+    <link rel="stylesheet" th:href="@{/css/overview.css}"/>
+  </th:block>
 </head>
 
 <body>
-<div layout:fragment="content" class="overview">
-  <main>
-    <!-- Breadcrumb -->
-    <div class="ov-breadcrumb">
-      <a th:href="@{/admin}">Dashboards</a><span>/</span><strong>Overview</strong>
+<div layout:fragment="content" class="overview-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a th:href="@{/admin/overview}">Dashboard</a> /
+    <strong>Overview</strong>
+  </div>
+
+  <!-- KPI Section -->
+  <section class="kpi-section">
+    <div class="kpi-card total">
+      <div class="icon">👥</div>
+      <div>
+        <p class="label">Total Customers</p>
+        <h3 th:text="${metrics.totalCustomers}">0</h3>
+        <span class="delta up">▲ 16% this month</span>
+      </div>
     </div>
 
-    <!-- TOP KPIs -->
-    <section class="grid cols-4" style="margin-bottom:12px;">
-      <!-- Total Customers -->
-      <article class="kpi">
-        <div class="kpi-icon">👥</div>
-        <div>
-          <div class="label">Total Customers</div>
-          <div class="value" th:text="${metrics != null && metrics.totalCustomers != null ? metrics.totalCustomers : 0}">0</div>
-          <div class="meta">
-            <span class="chip green">▲ 16% MoM</span>
-            <span class="muted">전체 고객사 수</span>
-          </div>
-        </div>
-      </article>
+    <div class="kpi-card vguard">
+      <div class="icon">🛡️</div>
+      <div>
+        <p class="label">V-Guard</p>
+        <h3 th:text="${metrics.vguard}">0</h3>
+        <span class="delta down">▼ 1% this month</span>
+      </div>
+    </div>
 
-      <!-- V-Guard -->
-      <article class="kpi">
-        <div class="kpi-icon" style="background:linear-gradient(135deg,#0ea5e9,#60a5fa)">🛡️</div>
-        <div>
-          <div class="label">V-Guard</div>
-          <div class="value" th:text="${metrics != null && metrics.vguard != null ? metrics.vguard : 0}">0</div>
-          <div class="meta">
-            <span class="chip red">▼ 1% this month</span>
-            <span class="muted">활성 서비스</span>
-          </div>
-        </div>
-      </article>
+    <div class="kpi-card secuone">
+      <div class="icon">💻</div>
+      <div>
+        <p class="label">SecuOne</p>
+        <h3 th:text="${metrics.secuone}">0</h3>
+        <span class="delta same">— this month</span>
+      </div>
+    </div>
+  </section>
 
-      <!-- SecuOne -->
-      <article class="kpi">
-        <div class="kpi-icon" style="background:linear-gradient(135deg,#22c55e,#86efac)">💻</div>
-        <div>
-          <div class="label">SecuOne</div>
-          <div class="value" th:text="${metrics != null && metrics.secuone != null ? metrics.secuone : 0}">0</div>
-          <div class="meta">
-            <span class="chip blue">— this month</span>
-            <span class="muted">활성 서비스</span>
-          </div>
-        </div>
-      </article>
+  <!-- 최근 등록 고객사 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>최근 등록 고객사</h3>
+      <a th:href="@{/admin/customers}" class="more">전체 보기</a>
+    </div>
 
-      <!-- Logs Today (optional: 서버에서 todayLogs 전달) -->
-      <article class="kpi">
-        <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#facc15)">📈</div>
-        <div>
-          <div class="label">Logs (최근 24h)</div>
-          <div class="value" th:text="${logsSummary != null && logsSummary.total != null ? logsSummary.total : 0}">0</div>
-          <div class="meta">
-            <span class="chip blue" th:text="'M:' + (${logsSummary != null ? logsSummary.malware:0})">M:0</span>
-            <span class="chip blue" th:text="'R:' + (${logsSummary != null ? logsSummary.remote:0})">R:0</span>
-            <span class="chip blue" th:text="'Rt:' + (${logsSummary != null ? logsSummary.rooting:0})">Rt:0</span>
-          </div>
-        </div>
-      </article>
-    </section>
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>고객사명</th>
+          <th>연결사</th>
+          <th>생성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- ✅ DTO(RecentCustomerRow) 프로퍼티 접근 사용 -->
+        <tr th:each="c : ${recentCustomers}">
+          <td th:text="${c.customerName}">폴라리스</td>
+          <td th:text="${c.connectedCompanyName != null ? c.connectedCompanyName : '-'}">-</td>
+          <td th:text="${c.createAt}">2025-09-16</td>
+        </tr>
 
-    <!-- Charts + Top domains -->
-    <section class="grid cols-2" style="margin-bottom:12px;">
-      <!-- 최근 7일 그래프 -->
-      <div class="panel">
-        <div class="head"><h3>최근 7일 로그</h3></div>
-        <div class="body chart-box">
-          <canvas id="by-day-canvas" height="140"
-                  th:attr="data-points=${logsSummary != null ? logsSummary.byDayCsv : '0,0,0,0,0,0,0'}"></canvas>
-          <div class="empty" th:if="${logsSummary == null || logsSummary.total == 0}">최근 데이터가 없습니다.</div>
-        </div>
+        <tr th:if="${#lists.isEmpty(recentCustomers)}">
+          <td colspan="3" class="empty">최근 등록된 고객사가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 수정요청 인박스 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>수정요청 인박스</h3>
+      <a th:href="@{/admin/requests}" class="more">전체 보기</a>
+    </div>
+
+    <div class="panel-body">
+      <!-- 상태 배지 -->
+      <div class="inbox-filters" style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <span style="background:#eef2ff;color:#4338ca;padding:4px 8px;border-radius:999px;font-weight:700;">
+          대기 <span th:text="${reqCounts.pending}">0</span>
+        </span>
+        <span style="background:#ecfeff;color:#0e7490;padding:4px 8px;border-radius:999px;font-weight:700;">
+          진행 <span th:text="${reqCounts.in_progress}">0</span>
+        </span>
+        <span style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:999px;font-weight:700;">
+          완료 <span th:text="${reqCounts.resolved}">0</span>
+        </span>
       </div>
 
-      <!-- 도메인별 카운트 -->
-      <div class="panel">
-        <div class="head"><h3>고객사(도메인)별</h3></div>
-        <div class="body">
-          <div th:if="${logsSummary != null && logsSummary.byDomain != null && !#lists.isEmpty(logsSummary.byDomain)}">
-            <table>
-              <thead>
-              <tr><th>Domain</th><th style="width:120px">Count</th></tr>
-              </thead>
-              <tbody>
-              <tr th:each="d : ${logsSummary.byDomain}">
-                <td class="mono" th:text="${d.domain}">corp.example.com</td>
-                <td><strong th:text="${d.count}">0</strong></td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="empty" th:if="${logsSummary == null || logsSummary.byDomain == null || #lists.isEmpty(logsSummary.byDomain)}">
-            도메인 집계 데이터가 없습니다.
-          </div>
-        </div>
-      </div>
-    </section>
+      <!-- 수정요청 리스트 테이블 -->
+      <table>
+        <thead>
+        <tr>
+          <th style="width:120px">요청일</th>
+          <th style="width:90px">구분</th>
+          <th style="width:160px">대상</th>
+          <th>내용</th>
+          <th style="width:90px">상태</th>
+          <th style="width:180px">요청자</th>
+          <th style="width:260px">처리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${requests}">
+          <!-- 요청일: 컨트롤러에서 문자열로 내려옴 -->
+          <td class="mono" th:text="${r.createdAt}">2025-10-17 14:26</td>
 
-    <!-- 아래 목록 2개: 최근 고객사 / 최근 보안 로그 -->
-    <section class="grid cols-2">
-      <!-- 최근 등록 고객사 -->
-      <div class="card">
-        <div class="card-head">
-          <h3>최근 등록 고객사</h3>
-          <a th:href="@{/admin/customers}" class="chip blue" style="text-decoration:none;">전체 보기</a>
-        </div>
-        <div class="card-body table-wrap">
-          <table>
-            <thead>
-            <tr><th>고객사명</th><th>연결사</th><th>생성일</th></tr>
-            </thead>
-            <tbody>
-            <tr th:each="c : ${recentCustomers}">
-              <td class="mono" th:text="${c.customerName}">폴라리스 테스트</td>
-              <td th:text="${c.connectedCompany != null ? c.connectedCompany : '-'}">-</td>
-              <td th:text="${c.createAt}">2025-09-16</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(recentCustomers)}"><td colspan="3" class="empty">최근 등록 고객사가 없습니다.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+          <!-- 구분 -->
+          <td th:text="${r.type}">COMPANY</td>
 
-      <!-- 최근 보안 로그 -->
-      <div class="card">
-        <div class="card-head">
-          <h3>최근 보안 로그</h3>
-          <a th:href="@{/admin/logs}" class="chip blue" style="text-decoration:none;">로그 대시보드</a>
-        </div>
-        <div class="card-body table-wrap">
-          <table>
-            <thead>
-            <tr>
-              <th style="width:84px">ID</th>
-              <th>Created At</th>
-              <th>Domain</th>
-              <th style="width:120px">Type</th>
-              <th style="width:84px">OS</th>
-              <th style="width:84px">App</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="r : ${recentLogs}">
-              <td class="mono" th:text="${r.id}">1</td>
-              <td th:text="${r.createdAt}">2025-09-25 11:39</td>
-              <td class="mono" th:text="${r.domain}">kr.co.sample.vguard2</td>
-              <td>
-                <span class="badge"
-                      th:classappend="' type-' + ${r.logType}"
-                      th:text="${r.logType}">MALWARE</span>
-              </td>
-              <td class="mono" th:text="${r.osVersion}">16</td>
-              <td class="mono" th:text="${r.appVersion}">2</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(recentLogs)}"><td colspan="6" class="empty">최근 로그가 없습니다.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+          <!-- 대상 -->
+          <td>
+            <span th:text="${r.target}">회사 정보</span>
+            <small class="muted" th:if="${r['serviceId'] != null}"
+                  th:text="'#' + ${r['serviceId']}"></small>
+          </td>
 
-    <div class="foot">※ 집계는 서버에서 전달된 데이터를 기반으로 표시됩니다. (샘플: metrics, logsSummary, recentCustomers, recentLogs)</div>
-  </main>
+          <!-- 내용 요약 -->
+          <td>
+            <div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
+                 th:title="${r.snippet}"
+                 th:text="${r.snippet}">요청 내용</div>
+          </td>
 
-  <!-- 작은 바차트 전용 스크립트 (외부 라이브러리 X) -->
-  <script>
-    (function drawMiniBar(){
-      const el = document.getElementById('by-day-canvas');
-      if(!el) return;
-      const raw = (el.dataset.points || '0,0,0,0,0,0,0').split(',').map(n => +n || 0);
-      const dpr = window.devicePixelRatio || 1;
-      const ctx = el.getContext('2d');
-      const W = el.clientWidth, H = el.clientHeight;
-      el.width = W * dpr; el.height = H * dpr;
-      ctx.scale(dpr,dpr);
+          <!-- 상태 뱃지 -->
+          <td>
+            <span th:switch="${r.status}">
+              <span th:case="'PENDING'"
+                    style="background:#eef2ff;color:#4338ca;padding:4px 8px;border-radius:999px;font-weight:700;">대기</span>
+              <span th:case="'IN_PROGRESS'"
+                    style="background:#fff7ed;color:#92400e;padding:4px 8px;border-radius:999px;font-weight:700;">진행</span>
+              <span th:case="'RESOLVED'"
+                    style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:999px;font-weight:700;">완료</span>
+              <span th:case="*"
+                    style="background:#f3f4f6;color:#374151;padding:4px 8px;border-radius:999px;font-weight:700;">-</span>
+            </span>
+          </td>
 
-      // 배경
-      ctx.clearRect(0,0,W,H);
-      ctx.fillStyle = '#eff3fb';
-      ctx.fillRect(0,0,W,H);
+          <!-- 요청자 -->
+          <td>
+            <div th:text="${r.requester}">홍길동</div>
+            <small class="muted" th:if="${r['requesterEmail'] != null}"
+                  th:text="${r['requesterEmail']}">user@company.com</small>
+          </td>
 
-      // 축
-      ctx.strokeStyle = '#dbe5f3';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, H-20); ctx.lineTo(W, H-20);
-      ctx.stroke();
+          <!-- 처리 -->
+          <td>
+            <!-- COMPANY면 고객사 정보 변경 -->
+            <div th:if="${r.type == 'COMPANY'}" style="margin-bottom:6px;">
+              <a th:if="${r['companyId'] != null}"
+                 th:href="@{|/admin/customers/${r['companyId']}|}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                고객사 정보 변경
+              </a>
+              <a th:if="${r['companyId'] == null}"
+                 th:href="@{/admin/customers}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                고객사 정보 변경
+              </a>
+            </div>
 
-      const max = Math.max(1, ...raw);
-      const gap = 8;
-      const barW = (W - gap*(raw.length+1)) / raw.length;
-      for(let i=0;i<raw.length;i++){
-        const v = raw[i];
-        const h = Math.round((H-36) * (v / max));
-        const x = gap + i*(barW+gap);
-        const y = H - 20 - h;
+            <!-- SERVICE면 서비스 설정 변경 버튼도 제공 -->
+            <div th:if="${r.type == 'SERVICE'}" style="margin-bottom:6px;">
+              <a th:if="${r['companyId'] != null and r['serviceId'] != null}"
+                 th:href="@{|/admin/customers/${r['companyId']}/services/${r['serviceId']}|}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                서비스 설정 변경
+              </a>
+              <a th:if="${!(r['companyId'] != null and r['serviceId'] != null)}"
+                 th:href="@{/admin/customers}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                서비스 설정 변경
+              </a>
+            </div>
 
-        const grd = ctx.createLinearGradient(0,y,0,y+h);
-        grd.addColorStop(0, '#93c5fd');
-        grd.addColorStop(1, '#2563eb');
-        ctx.fillStyle = grd;
+            <!-- 상태 변경 폼(공통) -->
+            <form th:action="@{/admin/requests/{id}/status(id=${r.id})}" method="post"
+                  style="display:flex;gap:6px;align-items:center;">
+              <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
-        const r = 6; // 살짝 라운드
-        const w = barW;
-        // rounded rect
-        ctx.beginPath();
-        ctx.moveTo(x, y+r);
-        ctx.arcTo(x, y, x+r, y, r);
-        ctx.lineTo(x+w-r, y);
-        ctx.arcTo(x+w, y, x+w, y+r, r);
-        ctx.lineTo(x+w, y+h);
-        ctx.lineTo(x, y+h);
-        ctx.closePath();
-        ctx.fill();
-      }
+              <select name="status"
+                      style="height:30px;border:1px solid #e5e7eb;border-radius:8px;padding:0 6px;background:#fff;">
+                <option value="PENDING"     th:selected="${r.status=='PENDING'}">대기</option>
+                <option value="IN_PROGRESS" th:selected="${r.status=='IN_PROGRESS'}">진행</option>
+                <option value="RESOLVED"    th:selected="${r.status=='RESOLVED'}">완료</option>
+              </select>
 
-      // 최대값 텍스트
-      ctx.fillStyle = '#64748b';
-      ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto';
-      ctx.fillText('max ' + max, 8, 14);
-    })();
-  </script>
+              <button type="submit"
+                      style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;">
+                상태 변경
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(requests)}">
+          <td colspan="7" class="empty">최근 접수된 수정요청이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
 </div>
 </body>
 </html>

@@ -8,282 +8,276 @@
   <meta charset="UTF-8"/>
   <title th:text="${service.serviceName} + ' - 서비스 상세'">서비스 상세</title>
 
-  <th:block layout:fragment="head">
+  <!-- 고객사 상세와 동일하게 pageStyle 슬롯만 사용 -->
+  <th:block layout:fragment="pageStyle">
     <link rel="stylesheet" th:href="@{/css/service_detail.css(v=${#dates.createNow().time})}"/>
-    <script defer th:src="@{/js/service_detail.js(v=${#dates.createNow().time})}"></script>
   </th:block>
 </head>
 
 <body data-page="service-detail">
-<div layout:fragment="content">
-  <main class="service-detail" role="main">
+<div layout:fragment="content" class="service-detail-page">
 
-    <!-- 브레드크럼 -->
-    <div class="page-breadcrumbs">
-      <a class="btn btn-ghost btn-pill icon-back"
-         aria-label="뒤로가기"
-         th:href="@{|/admin/customers/${customer.customerId}|}">←</a>
-      <div class="crumbs">
-        <span class="crumb">서비스 상세</span>
-        <span class="sep">/</span>
-        <strong class="current" th:text="${service.serviceName}">서비스명</strong>
+  <!-- Breadcrumb (고객사 상세와 톤 일치) -->
+  <div class="breadcrumb">
+    <a th:href="@{|/admin/customers/${customer.customerId}|}"
+       th:text="${customer.customerName}">고객사</a> /
+    <strong th:text="${service.serviceName}">서비스 상세</strong>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title" th:text="${service.serviceName}">서비스명</h2>
+      <p class="page-subtitle" th:text="${customer.customerName}">고객사명</p>
+    </div>
+  </div>
+
+  <!-- =========== 서비스 정보 =========== -->
+  <section class="panel section">
+    <div class="panel-header">
+      <h3>서비스 정보</h3>
+      <div class="head-actions" id="svcToolbar">
+        <button type="button" id="btnSvcEdit" class="btn btn-ghost btn-sm">수정</button>
+
+        <form class="inline" id="deleteForm"
+              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/delete|}"
+              method="post">
+          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+          <button id="btnSvcDelete" type="submit" class="btn btn-danger btn-sm"
+                  onclick="return confirm('서비스를 삭제할까요?');">삭제</button>
+        </form>
+
+        <button type="submit" form="svcForm" id="btnSvcSave" class="btn btn-primary btn-sm" hidden>저장</button>
+        <button type="button" id="btnSvcCancel" class="btn btn-ghost btn-sm" hidden>취소</button>
       </div>
     </div>
 
-    <!-- =========== 서비스 정보 =========== -->
-    <section class="card card-elev section">
-      <div class="card-head">
-        <h3>서비스 정보</h3>
+    <div class="accordion-panel show">
+      <form id="svcForm" class="form-grid" data-mode="view"
+            th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/update|}"
+            method="post" th:object="${service}">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
-        <div class="head-actions" id="svcToolbar">
-          <button type="button" id="btnSvcEdit"   class="btn btn-ghost btn-sm">수정</button>
+        <!-- 1) 서비스 ID -->
+        <label class="form-label">서비스 ID</label>
+        <input class="form-control" th:value="${service.serviceId}" disabled/>
 
-          <form class="inline" id="deleteForm"
-                th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/delete|}"
-                method="post">
-            <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-            <button id="btnSvcDelete" type="submit" class="btn btn-danger btn-sm"
-                    onclick="return confirm('서비스를 삭제할까요?');">삭제</button>
-          </form>
+        <!-- 2) 서비스명 -->
+        <label class="form-label">서비스명 *</label>
+        <input class="form-control" name="serviceName" required data-editable
+               th:value="${service.serviceName}" disabled/>
 
-          <button type="submit" form="svcForm" id="btnSvcSave"   class="btn btn-primary btn-sm" hidden>저장</button>
-          <button type="button"               id="btnSvcCancel" class="btn btn-ghost   btn-sm" hidden>취소</button>
+        <!-- 3) 도메인 -->
+        <label class="form-label">도메인</label>
+        <input class="form-control" name="domain" data-editable
+               th:value="${service.domain}" disabled/>
+
+        <!-- 4) 상품유형 -->
+        <label class="form-label">상품유형</label>
+        <select class="form-control" data-editable disabled th:field="*{productType}">
+          <option value="">-- 선택 --</option>
+          <option value="V-Guard SDK2.0 - 일반버전">V-Guard SDK2.0 - 일반버전</option>
+          <option value="V-Guard SDK2.0 - RB 포함버전">V-Guard SDK2.0 - RB 포함버전</option>
+          <option value="V-Guard SDK2.0 - iOS 포함버전">V-Guard SDK2.0 - iOS 포함버전</option>
+          <option value="V-Guard SDK3.0 - 일반버전">V-Guard SDK3.0 - 일반버전</option>
+          <option value="V-Guard SDK3.0 - RB 포함버전">V-Guard SDK3.0 - RB 포함버전</option>
+          <option value="V-Guard SDK3.0 - iOS 포함버전">V-Guard SDK3.0 - iOS 포함버전</option>
+          <option value="Polaris SecuOne Web To App">Polaris SecuOne Web To App</option>
+          <option value="Polaris SecuOne App To App">Polaris SecuOne App To App</option>
+        </select>
+
+        <!-- 5) 라이선스 키 -->
+        <label class="form-label">라이선스 키</label>
+        <div class="form-control input-addon">
+          <span class="grow"
+                th:classappend="${service.licenseId == null} ? 'muted' : ''"
+                th:text="${service.licenseId != null ? service.licenseId : '미발급'}">미발급</span>
+
+          <!-- 미발급 → 발급하기 버튼 -->
+          <th:block th:if="${service.licenseId == null}">
+            <button type="button" id="btnLicense" class="btn btn-primary btn-sm">발급하기</button>
+          </th:block>
+
+          <!-- 발급됨 → 상세보기 버튼 -->
+          <th:block th:if="${service.licenseId != null}">
+            <a id="btnLicenseView"
+               class="btn btn-ghost btn-sm"
+               th:href="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}">
+              ▶
+            </a>
+          </th:block>
         </div>
+
+        <!-- 6) CPI -->
+        <label class="form-label">CPI</label>
+        <input class="form-control" type="number" name="cpiValue" data-editable
+               th:value="${service.cpiValue}" min="0" step="1" disabled/>
+
+        <!-- 7) RS Rate -->
+        <label class="form-label">RS Rate</label>
+        <input class="form-control" type="number" name="rsRate" data-editable
+               th:value="${service.rsRate}" min="0" step="0.01" disabled/>
+      </form>
+
+      <!-- ▶ 라이선스 발급 POST용 별도 form -->
+      <form id="licenseIssueForm"
+            th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}"
+            method="post" hidden>
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+      </form>
+    </div>
+  </section>
+
+  <!-- =========== 담당자 =========== -->
+  <section class="panel section">
+    <div class="panel-header">
+      <h3>담당자</h3>
+      <div class="head-actions">
+        <button type="button" id="btnOpenContact" class="btn btn-primary btn-sm">담당자 추가</button>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr><th>이름</th><th>이메일</th><th>직책</th><th>메모</th><th>생성일</th><th>액션</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${contacts}">
+          <td th:text="${c.username}">홍길동</td>
+          <td th:text="${c.email}">name@company.com</td>
+          <td th:text="${c.role}">Manager</td>
+          <td th:text="${c.memo}">-</td>
+          <td th:text="${c.createAt}">2025-01-01</td>
+          <td class="row-actions">
+            <form th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/contacts/${c.id}/delete|}"
+                  method="post" class="inline">
+              <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+              <button class="btn btn-danger btn-sm" onclick="return confirm('삭제할까요?');">삭제</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(contacts)}">
+          <td colspan="6" class="empty">등록된 담당자가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========== 로그(도메인 자동 필터) =========== -->
+  <section id="logsSection" class="panel section"
+           th:attr="data-domain=${service.domain}" data-days="7">
+    <div class="panel-header">
+      <h3>로그</h3>
+      <div class="head-actions">
+        <select id="logsDays" class="form-control" style="width:110px">
+          <option value="7" selected>최근 7일</option>
+          <option value="14">최근 14일</option>
+          <option value="30">최근 30일</option>
+        </select>
+        <span id="logsResultInfo" class="badge-muted" style="margin-left:8px">0 rows</span>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <table class="log-table" id="logsTable">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Created At</th>
+          <th>Domain</th>
+          <th>Type</th>
+          <th>OS</th>
+          <th>App</th>
+          <th>Extra</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="empty-row">
+          <td colspan="7" class="empty">로그 데이터가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="pager" style="margin-top:10px">
+        <button id="logsPrev" class="btn btn-ghost btn-sm">이전</button>
+        <span id="logsPageInfo" class="muted" style="margin:0 8px">1 / 1</span>
+        <button id="logsNext" class="btn btn-ghost btn-sm">다음</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 담당자 추가 모달 ===== -->
+  <div id="contactModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <div class="modal-header">
+        <h3 id="contactTitle">담당자 추가</h3>
       </div>
 
-      <div class="accordion-panel show">
-        <form id="svcForm" class="form-grid" data-mode="view"
-              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/update|}"
-              method="post" th:object="${service}">
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+      <form class="modal-body"
+            th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/contacts|}"
+            method="post" autocomplete="off">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
-          <!-- 1) 서비스 ID -->
-          <label class="form-label">서비스 ID</label>
-          <input class="form-control" th:value="${service.serviceId}" disabled/>
+        <div class="form-row"><label>이름 *</label><input class="form-control" name="username" required/></div>
+        <div class="form-row"><label>이메일</label><input class="form-control" type="email" name="email" placeholder="name@company.com"/></div>
+        <div class="form-row"><label>직책</label><input class="form-control" name="role"/></div>
+        <div class="form-row"><label>메모</label><textarea class="form-control" name="memo" rows="3"></textarea></div>
 
-          <!-- 2) 서비스명 -->
-          <label class="form-label">서비스명 *</label>
-          <input class="form-control" name="serviceName" required data-editable
-                 th:value="${service.serviceName}" disabled/>
+        <div class="modal-actions">
+          <a href="#" class="btn btn-ghost" data-close="contactModal">취소</a>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          <!-- 3) 도메인 -->
-          <label class="form-label">도메인</label>
-          <input class="form-control" name="domain" data-editable
-                 th:value="${service.domain}" disabled/>
+  <!-- ===== 라이선스 발급 모달 ===== -->
+  <div id="licenseModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="licenseTitle">
+      <div class="modal-header">
+        <h3 id="licenseTitle">라이선스 발급</h3>
+      </div>
 
-          <!-- 4) 상품유형 -->
-          <label class="form-label">상품유형</label>
-          <select class="form-control" data-editable disabled th:field="*{productType}">
-            <option value="">-- 선택 --</option>
-            <option value="V-Guard SDK2.0 - 일반버전">V-Guard SDK2.0 - 일반버전</option>
-            <option value="V-Guard SDK2.0 - RB 포함버전">V-Guard SDK2.0 - RB 포함버전</option>
-            <option value="V-Guard SDK2.0 - iOS 포함버전">V-Guard SDK2.0 - iOS 포함버전</option>
-            <option value="V-Guard SDK3.0 - 일반버전">V-Guard SDK3.0 - 일반버전</option>
-            <option value="V-Guard SDK3.0 - RB 포함버전">V-Guard SDK3.0 - RB 포함버전</option>
-            <option value="V-Guard SDK3.0 - iOS 포함버전">V-Guard SDK3.0 - iOS 포함버전</option>
-            <option value="Polaris SecuOne Web To App">Polaris SecuOne Web To App</option>
-            <option value="Polaris SecuOne App To App">Polaris SecuOne App To App</option>
+      <form id="licenseForm" class="modal-body" autocomplete="off">
+        <div class="form-row">
+          <label for="licExpires">만료일 *</label>
+          <input id="licExpires" class="form-control" type="date" required />
+        </div>
+
+        <div class="form-row">
+          <label for="licMaxUses">사용제한수</label>
+          <input id="licMaxUses" class="form-control" type="number" min="1" step="1" value="2" />
+        </div>
+
+        <div class="form-row">
+          <label for="licType">라이선스 타입</label>
+          <select id="licType" class="form-control">
+            <option value="PROD">정식</option>
+            <option value="TEST">테스트</option>
           </select>
-
-          <!-- 5) 라이선스 키 (우측 액션) -->
-          <label class="form-label">라이선스 키</label>
-          <div class="form-control input-addon">
-            <span class="grow"
-                  th:classappend="${service.licenseId == null} ? 'muted' : ''"
-                  th:text="${service.licenseId != null ? service.licenseId : '미발급'}">미발급</span>
-
-            <!-- 미발급 → 발급하기 버튼 -->
-            <th:block th:if="${service.licenseId == null}">
-              <!-- JS가 모달을 띄움 -->
-              <button type="button" id="btnLicense" class="btn btn-primary btn-sm">발급하기</button>
-            </th:block>
-
-            <!-- 발급됨 → 상세보기 버튼 -->
-            <th:block th:if="${service.licenseId != null}">
-              <!-- 라우트는 필요에 맞게 수정: 아래는 상세 보기 페이지 예시 -->
-              <a id="btnLicenseView"
-                 class="btn btn-ghost btn-sm"
-                 th:href="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}">
-                상세보기
-              </a>
-            </th:block>
-          </div>
-
-          <!-- 6) CPI -->
-          <label class="form-label">CPI</label>
-          <input class="form-control" type="number" name="cpiValue" data-editable
-                 th:value="${service.cpiValue}" min="0" step="1" disabled/>
-
-          <!-- 7) RS Rate -->
-          <label class="form-label">RS Rate</label>
-          <input class="form-control" type="number" name="rsRate" data-editable
-                 th:value="${service.rsRate}" min="0" step="0.01" disabled/>
-        </form>
-
-        <!-- ▶ 라이선스 발급 POST용 별도 form -->
-        <form id="licenseIssueForm"
-              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/license|}"
-              method="post" hidden>
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-        </form>
-      </div>
-    </section>
-
-    <!-- =========== 담당자 =========== -->
-    <section class="card card-elev section">
-      <div class="card-head">
-        <h3>담당자</h3>
-        <div class="head-actions">
-          <button type="button" id="btnOpenContact" class="btn btn-primary btn-sm">담당자 추가</button>
         </div>
-      </div>
 
-      <div class="section-body">
-        <table class="table">
-          <thead>
-          <tr><th>이름</th><th>이메일</th><th>직책</th><th>메모</th><th>생성일</th><th>액션</th></tr>
-          </thead>
-          <tbody>
-          <tr th:each="c : ${contacts}">
-            <td th:text="${c.username}">홍길동</td>
-            <td th:text="${c.email}">name@company.com</td>
-            <td th:text="${c.role}">Manager</td>
-            <td th:text="${c.memo}">-</td>
-            <td th:text="${c.createAt}">2025-01-01</td>
-            <td class="row-actions">
-              <form th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/contacts/${c.id}/delete|}"
-                    method="post" class="inline">
-                <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-                <button class="btn btn-danger btn-sm" onclick="return confirm('삭제할까요?');">삭제</button>
-              </form>
-            </td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(contacts)}">
-            <td colspan="6" class="empty">등록된 담당자가 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- =========== 로그(도메인 자동 필터) =========== -->
-    <section
-      id="logsSection"
-      class="card card-elev section"
-      th:attr="data-domain=${service.domain}"
-      data-days="7">
-
-      <div class="card-head">
-        <h3>로그</h3>
-        <div class="head-actions">
-          <select id="logsDays" class="form-control" style="width:110px">
-            <option value="7" selected>최근 7일</option>
-            <option value="14">최근 14일</option>
-            <option value="30">최근 30일</option>
+        <div class="form-row">
+          <label for="licVersion">라이선스 버전</label>
+          <select id="licVersion" class="form-control">
+            <option value="SDK2">SDK 2.0</option>
+            <option value="SDK3" selected>SDK 3.0</option>
+            <option value="SECUONE">SecuOne</option>
           </select>
-          <span id="logsResultInfo" class="badge-muted" style="margin-left:8px">0 rows</span>
-        </div>
-      </div>
-
-      <div class="section-body">
-        <table class="table log-table" id="logsTable">
-          <thead>
-          <tr>
-            <th>ID</th>
-            <th>Created At</th>
-            <th>Domain</th>
-            <th>Type</th>
-            <th>OS</th>
-            <th>App</th>
-            <th>Extra</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="empty-row">
-            <td colspan="7" class="empty">로그 데이터가 없습니다.</td>
-          </tr>
-          </tbody>
-        </table>
-
-        <div class="pager" style="margin-top:10px">
-          <button id="logsPrev" class="btn btn-ghost btn-sm">이전</button>
-          <span id="logsPageInfo" class="muted" style="margin:0 8px">1 / 1</span>
-          <button id="logsNext" class="btn btn-ghost btn-sm">다음</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 담당자 추가 모달 ===== -->
-    <div id="contactModal" class="modal" aria-hidden="true">
-      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
-        <div class="modal-header">
-          <h3 id="contactTitle">담당자 추가</h3>
-          <button type="button" class="icon-btn" data-close="contactModal" aria-label="닫기">✕</button>
         </div>
 
-        <form class="modal-body"
-              th:action="@{|/admin/customers/${customer.customerId}/services/${service.serviceId}/contacts|}"
-              method="post" autocomplete="off">
-          <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
-
-          <div class="form-row"><label>이름 *</label><input class="form-control" name="username" required/></div>
-          <div class="form-row"><label>이메일</label><input class="form-control" type="email" name="email" placeholder="name@company.com"/></div>
-          <div class="form-row"><label>직책</label><input class="form-control" name="role"/></div>
-          <div class="form-row"><label>메모</label><textarea class="form-control" name="memo" rows="3"></textarea></div>
-
-          <div class="modal-actions">
-            <button type="button" class="btn btn-ghost" data-close="contactModal">취소</button>
-            <button type="submit" class="btn btn-primary">추가</button>
-          </div>
-        </form>
-      </div>
+        <div class="modal-actions">
+          <a href="#" class="btn btn-ghost" data-close="licenseModal">취소</a>
+          <button type="submit" class="btn btn-primary">발급</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- ===== 라이선스 발급 모달 ===== -->
-    <div id="licenseModal" class="modal" aria-hidden="true">
-      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="licenseTitle">
-        <div class="modal-header">
-          <h3 id="licenseTitle">라이선스 발급</h3>
-          <button type="button" class="icon-btn" data-close="licenseModal" aria-label="닫기">✕</button>
-        </div>
-
-        <form id="licenseForm" class="modal-body" autocomplete="off">
-          <div class="form-row">
-            <label for="licExpires">만료일 *</label>
-            <input id="licExpires" class="form-control" type="date" required />
-          </div>
-
-          <div class="form-row">
-            <label for="licMaxUses">사용제한수</label>
-            <input id="licMaxUses" class="form-control" type="number" min="1" step="1" value="2" />
-          </div>
-
-          <div class="form-row">
-            <label for="licType">라이선스 타입</label>
-            <select id="licType" class="form-control">
-              <option value="PROD">정식</option>
-              <option value="TEST">테스트</option>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <label for="licVersion">라이선스 버전</label>
-            <select id="licVersion" class="form-control">
-              <option value="SDK2">SDK 2.0</option>
-              <option value="SDK3" selected>SDK 3.0</option>
-              <option value="SECUONE">SecuOne</option>
-            </select>
-          </div>
-
-          <div class="modal-actions">
-            <button type="button" class="btn btn-ghost" data-close="licenseModal">취소</button>
-            <button type="submit" class="btn btn-primary">발급</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-  </main>
+  <!-- ✅ JS: 고객사 상세와 동일하게 content 하단 + defer 로딩 -->
+  <script th:src="@{/js/service_detail.js(v=${#dates.createNow().time})}" defer></script>
 </div>
 </body>
 </html>

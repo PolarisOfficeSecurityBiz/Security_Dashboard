@@ -1,26 +1,28 @@
-/* 아코디언 */
-(function () {
-  const init = () => {
-    document.querySelectorAll('.section').forEach(section => {
-      const btn = section.querySelector('.chevron-btn');
-      if (!btn) return;
-      const panel = section.querySelector('#' + btn.getAttribute('aria-controls'));
-      const setOpen = (open) => {
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        panel?.classList.toggle('show', open);
-      };
-      setOpen(btn.getAttribute('aria-expanded') !== 'false');
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        setOpen(!(btn.getAttribute('aria-expanded') === 'true'));
-      });
-    });
-  };
-  (document.readyState === 'loading') ? document.addEventListener('DOMContentLoaded', init) : init();
-})();
+document.addEventListener("DOMContentLoaded", function () {
+	console.log("✅ customer_detail.js 로드됨");
 
-/* 행 클릭 → 서비스 상세 이동 */
-(function () {
+  /* ---------------------------
+     1️⃣ 아코디언 (접기/펼치기)
+  --------------------------- */
+  document.querySelectorAll('.section, .panel').forEach(section => {
+    const btn = section.querySelector('.chevron-btn');
+    if (!btn) return;
+    const panel = section.querySelector('#' + btn.getAttribute('aria-controls'));
+    const setOpen = (open) => {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      panel?.classList.toggle('show', open);
+    };
+    setOpen(btn.getAttribute('aria-expanded') !== 'false');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      setOpen(!(btn.getAttribute('aria-expanded') === 'true'));
+    });
+  });
+
+
+  /* ---------------------------
+     2️⃣ 행 클릭 → 서비스 상세 이동
+  --------------------------- */
   document.querySelectorAll('tr.row-link[data-href]').forEach(tr => {
     tr.addEventListener('click', () => {
       const url = tr.getAttribute('data-href');
@@ -34,63 +36,96 @@
       }
     });
   });
-})();
 
-/* 고객사 수정 토글 (고객사명/연결사만 편집) */
-(function () {
+
+  /* ---------------------------
+     3️⃣ 고객사 수정 토글 (이름/연결사)
+  --------------------------- */
   const form = document.getElementById('customerUpdateForm');
-  const btn  = document.getElementById('btnEditCustomer');
-  if (!form || !btn) return;
+  const btnEdit = document.getElementById('btnEditCustomer');
+  if (form && btnEdit) {
+    const editable = Array.from(form.querySelectorAll('input[name="customerName"], input[name="connectedCompany"]'));
+    const setDisabled = (flag) => editable.forEach(el => el.disabled = flag);
 
-  const editable = ['customerName', 'connectedCompany']
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
+    // 기본은 비활성화
+    setDisabled(true);
+    btnEdit.dataset.mode = 'view';
 
-  const setDisabled = (flag) => editable.forEach(el => el.disabled = flag);
+    btnEdit.addEventListener('click', () => {
+      if (btnEdit.dataset.mode === 'view') {
+        setDisabled(false);
+        btnEdit.dataset.mode = 'edit';
+        btnEdit.textContent = '저장';
+      } else {
+        form.submit();
+      }
+    });
+  }
 
-  setDisabled(true);
-  btn.dataset.mode = 'view';
-  btn.addEventListener('click', () => {
-    if (btn.dataset.mode === 'view') {
-      setDisabled(false);
-      btn.dataset.mode = 'edit';
-      btn.textContent = '저장';
-    } else {
-      form.submit();
-    }
-  });
-})();
 
-/* 고객사 삭제 확인 */
-(function () {
-  const btn = document.getElementById('btnDeleteCustomerInline');
-  const form = document.getElementById('formDeleteCustomerInline');
-  if (!btn || !form) return;
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (confirm('고객사와 연결된 서비스/담당자 정보가 모두 삭제됩니다. 진행할까요?')) {
-      form.submit();
-    }
-  });
-})();
+  /* ---------------------------
+     4️⃣ 고객사 삭제 확인
+  --------------------------- */
+  const btnDelete = document.getElementById('btnDeleteCustomerInline');
+  const formDelete = document.getElementById('formDeleteCustomerInline');
+  if (btnDelete && formDelete) {
+    btnDelete.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('고객사와 연결된 서비스/담당자 정보가 모두 삭제됩니다. 진행할까요?')) {
+        formDelete.submit();
+      }
+    });
+  }
 
-/* 모달 열고닫기 (서비스 추가) */
-(function () {
-  const open = (id) => {
+
+  /* ---------------------------
+     5️⃣ 모달 열기 / 닫기
+  --------------------------- */
+  const openModal = (id) => {
     const m = document.getElementById(id);
     if (!m) return;
     m.classList.add('show');
     m.setAttribute('aria-hidden', 'false');
-    m.querySelector('input,select,textarea,button')?.focus();
+    const focusable = m.querySelector('input, select, textarea, button');
+    focusable && focusable.focus();
   };
-  const close = (id) => {
+
+  const closeModal = (id) => {
     const m = document.getElementById(id);
     if (!m) return;
     m.classList.remove('show');
     m.setAttribute('aria-hidden', 'true');
   };
-  document.getElementById('btnOpenSvcCreate')?.addEventListener('click', () => open('svcCreateModal'));
-  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => close(b.dataset.close)));
-  document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); }));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show')); });
-})();
+
+  // ✅ 버튼 클릭 → 모달 열기
+  const btnOpen = document.getElementById('btnOpenSvcCreate');
+  if (btnOpen) {
+    btnOpen.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log("✅ 서비스 추가 버튼 클릭됨");
+      openModal('svcCreateModal');
+    });
+  } else {
+    console.warn("⚠️ btnOpenSvcCreate 버튼을 찾을 수 없습니다.");
+  }
+
+  // 닫기 버튼
+  document.querySelectorAll('[data-close]').forEach(b => {
+    b.addEventListener('click', () => closeModal(b.dataset.close));
+  });
+
+  // 배경 클릭 시 닫기
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) closeModal(m.id);
+    });
+  });
+
+  // ESC 키로 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.show').forEach(m => closeModal(m.id));
+    }
+  });
+
+}); // DOMContentLoaded 끝

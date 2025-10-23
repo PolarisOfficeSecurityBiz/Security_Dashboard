@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>V-Guard 관리</title>
+  <link rel="stylesheet" th:href="@{/css/vguard.css}">
+  <script defer th:src="@{/js/vguard.js}"></script>
+</head>
+
+<!-- ✅ body나 main은 넣지 않음 -->
+<div layout:fragment="content" class="vguard-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a th:href="@{/admin/overview}">대시보드</a> /
+    <strong>V-Guard</strong>
+  </div>
+
+  <!-- 최신 SDK 목록 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>최신 SDK</h3>
+      <button class="upload-btn" type="button">업로드</button>
+    </div>
+
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>SDK 유형</th>
+          <th>마지막 변경일</th>
+          <th>마지막 변경자</th>
+          <th>SDK 명(다운로드)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sdk : ${sdkList}">
+          <!-- ✅ SDK 유형 클릭 시 히스토리 페이지로 이동 -->
+          <td>
+            <a th:href="@{'/admin/vguard/history/' + ${sdk.id}}"
+               class="sdk-type-link"
+               th:text="${sdk.sdkType}">VGuardSDK2.0</a>
+          </td>
+
+          <td th:text="${#temporals.format(sdk.uploadedAt, 'yyyy-MM-dd HH:mm')}">2025-10-20 14:55</td>
+          <td th:text="${sdk.uploadedBy}">홍길동</td>
+
+          <!-- SDK 파일명 및 다운로드 -->
+          <td>
+            <a th:href="@{'/admin/vguard/download/' + ${sdk.id}}"
+               th:text="${sdk.fileName}" class="download-name"></a>
+            <a th:href="@{'/admin/vguard/download/' + ${sdk.id}}"
+               class="download-icon" title="다운로드">⬇</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SDK 수정 요청 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>SDK 수정 요청</h3>
+      <button class="arrow-btn" type="button">›</button>
+    </div>
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>서비스명</th>
+          <th>고객사명</th>
+          <th>요청자명</th>
+          <th>요청사항</th>
+          <th>SDK 유형</th>
+          <th>요청일자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>A서비스</td>
+          <td>A고객사</td>
+          <td>홍길동</td>
+          <td>담당자변경</td>
+          <td>SecuOne SDK</td>
+          <td>2025-09-23</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- V-Guard 로그인 로그 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>V-Guard 로그인 집계</h3>
+      <button class="arrow-btn" type="button">›</button>
+    </div>
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>로그</th>
+          <th>서비스명</th>
+          <th>로그 일자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>C서비스</td>
+          <td>이별잉</td>
+          <td>2025-09-22</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ✅ 모달 다이얼로그 -->
+  <div id="uploadModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h3>SDK 업로드</h3>
+
+      <form id="uploadForm" th:action="@{/admin/vguard/upload}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="sdkType">SDK 유형</label>
+          <select id="sdkType" name="sdkType" required>
+            <option value="">-- 선택하세요 --</option>
+            <option value="VGuardSDK2.0">VGuardSDK2.0</option>
+            <option value="VGuardSDK2.0_RB">VGuardSDK2.0_RB</option>
+            <option value="VGuardSDK2.0_iOS">VGuardSDK2.0_iOS</option>
+            <option value="VGuardSDK3.0">VGuardSDK3.0</option>
+            <option value="SecuOneAuthSDK">SecuOneAuthSDK</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sdkFile">SDK 파일 업로드</label>
+          <input type="file" id="sdkFile" name="sdkFile" accept=".zip,.tar,.gz" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn">취소</button>
+          <button type="submit" class="upload-btn">업로드</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ 업로드 완료 토스트 -->
+  <div id="toastMessage"
+       th:if="${toast}"
+       th:text="${toast}"
+       class="toast-message show"></div>
+
+</div>
+</html>

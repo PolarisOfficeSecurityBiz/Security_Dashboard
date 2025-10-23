@@ -1,238 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin_layout}">
 <head>
-  <meta charset="UTF-8"/>
-  <title>고객사 관리</title>
+  <meta charset="UTF-8" />
+  <title>Polaris Admin - Customers</title>
 
-  <!-- 페이지 전용 CSS -->
-  <link rel="stylesheet" th:href="@{/css/customers.css}" href="/css/customers.css"/>
-
-  <!-- 최소 유틸 (CSS 미적용 대비) -->
-  <style>
-    .hidden{display:none!important}
-    body.modal-open{overflow:hidden}
-    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);z-index:1000}
-    .modal:not(.hidden){display:grid}
-    .modal-panel{background:#fff;border-radius:14px;max-width:92vw;width:560px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e5e7eb}
-    .modal-body{padding:16px}
-    .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;padding:0 16px 16px}
-  </style>
-
-  <th:block layout:fragment="head-scripts"></th:block>
+  <th:block layout:fragment="pageStyle">
+    <link rel="stylesheet" th:href="@{/css/customers.css}">
+  </th:block>
 </head>
+
 <body>
-  <!-- ✅ content 프래그먼트 내부 -->
-  <div layout:fragment="content">
-    <div class="page-customers">
+<div layout:fragment="content" class="customers-page">
 
-      <!-- 페이지 헤더 -->
-      <header class="page-header">
-        <div class="breadcrumbs">
-          <a th:href="@{/admin}">Dashboards</a>
-          <span>/</span>
-          <strong>Customers</strong>
-        </div>
-        <div class="page-actions">
-          <!-- 인라인 fallback: 외부 JS 없어도 열림 -->
-          <button id="btnOpenCreateModal"
-                  type="button"
-                  class="btn-primary"
-                  data-open="createCustomerModal"
-                  aria-haspopup="dialog"
-                  aria-expanded="false"
-                  onclick="(function(){var m=document.getElementById('createCustomerModal');if(!m)return;m.classList.remove('hidden');m.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');(m.querySelector('#customerName')||m).focus();document.getElementById('btnOpenCreateModal')?.setAttribute('aria-expanded','true');})();">
-            고객사 추가
-          </button>
-        </div>
-      </header>
+  <div class="breadcrumb">
+    <a th:href="@{/admin/overview}">Dashboard</a> /
+    <strong>Customers</strong>
+  </div>
 
-      <!-- KPI 카드 -->
-      <section class="kpis">
-        <article class="kpi-card">
-          <div class="kpi-icon users"></div>
-          <div>
-            <div class="kpi-label">Total Customers</div>
-            <div class="kpi-value"
-                 th:text="${metrics != null and metrics.totalCustomers != null ? metrics.totalCustomers : 0}">0</div>
-            <div class="kpi-trend up"><span>16%</span><small> this month</small></div>
-          </div>
-        </article>
+  <section class="panel">
+    <div class="panel-header">
+      <h3>고객사 목록</h3>
 
-        <article class="kpi-card">
-          <div class="kpi-icon vguard"></div>
-          <div>
-            <div class="kpi-label">V-Guard</div>
-            <div class="kpi-value"
-                 th:text="${metrics != null and metrics.vguard != null ? metrics.vguard : 0}">0</div>
-            <div class="kpi-trend down"><span>1%</span><small> this month</small></div>
-          </div>
-        </article>
-
-        <article class="kpi-card">
-          <div class="kpi-icon secuone"></div>
-          <div>
-            <div class="kpi-label">SecuOne</div>
-            <div class="kpi-value"
-                 th:text="${metrics != null and metrics.secuone != null ? metrics.secuone : 0}">0</div>
-            <div class="kpi-trend neutral"><span>—</span><small> this month</small></div>
-          </div>
-        </article>
-      </section>
-
-      <!-- 고객사 목록 -->
-      <section class="card">
-        <div class="card-head">
-          <div>
-            <h2>All Customers</h2>
-            <button class="link-btn" type="button">Active Members</button>
-          </div>
-
-          <div class="table-tools">
-            <label class="search">
-              <input id="searchInput" type="search" placeholder="Search"/>
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M21 21l-4.3-4.3m1.3-5A7 7 0 1 1 7 4a7 7 0 0 1 11 7Z"/>
-              </svg>
-            </label>
-
-            <div class="dropdown">
-              <button id="sortBtn" class="btn-ghost" type="button" aria-haspopup="true" aria-expanded="false">
-                Sort by : <strong id="sortLabel">Newest</strong>
-              </button>
-              <ul id="sortMenu" class="menu hidden" role="menu" aria-labelledby="sortBtn">
-                <li data-sort="new" role="menuitem" tabindex="0">Newest</li>
-                <li data-sort="name" role="menuitem" tabindex="0">Name (A→Z)</li>
-                <li data-sort="company" role="menuitem" tabindex="0">Company (A→Z)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="customers-table" id="customersTable">
-            <thead>
-            <tr>
-              <th style="width:28%">고객사ID</th>
-              <th style="width:28%">고객사명</th>
-              <th style="width:24%">연결사</th>
-              <th style="width:20%">생성일</th>
-            </tr>
-            </thead>
-            <tbody>
-              <tr class="row-link"
-                  th:each="c : ${customers}"
-                  th:data-href="@{|/admin/customers/${c.customerId}|}"
-                  th:onclick="|location.href='@{/admin/customers/{id}(id=${c.customerId})}'|"
-                  tabindex="0">
-                <td th:text="${c.customerId}">CID</td>
-                <td th:text="${c.customerName}">이름</td>
-
-                <!-- ✅ DTO의 connectedCompanyName 사용 -->
-                <td th:text="${c.connectedCompanyName != null ? c.connectedCompanyName : '—'}">연결사</td>
-
-                <td th:text="${c.createAt}">2025-01-01</td>
-              </tr>
-
-              <tr th:if="${#lists.isEmpty(customers)}" class="empty">
-                <td colspan="4" class="empty">등록된 고객사가 없습니다.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 페이징 (더미 UI) -->
-        <footer class="pagination">
-          <span class="page-hint"
-                th:text="${page != null ? 'Showing data ' + page.from + ' to ' + page.to + ' of ' + page.total + ' entries' : 'Showing data 0 to 0 of 0 entries'}">
-            Showing data 0 to 0 of 0 entries
-          </span>
-          <nav class="pager" aria-label="pagination">
-            <button class="icon-btn" data-page="prev" aria-label="이전 페이지">‹</button>
-            <button class="page is-current">1</button>
-            <button class="page">2</button>
-            <button class="page">3</button>
-            <button class="page">4</button>
-            <button class="page">…</button>
-            <button class="page">40</button>
-            <button class="icon-btn" data-page="next" aria-label="다음 페이지">›</button>
-          </nav>
-        </footer>
-      </section>
-
-      <!-- 🔵 모달: content 프래그먼트 내부에 위치 -->
-      <div id="createCustomerModal" class="modal hidden" aria-hidden="true">
-        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="createCustomerTitle">
-          <div class="modal-header">
-            <h3 id="createCustomerTitle">고객사 추가</h3>
-            <button type="button"
-                    id="btnCloseCreateModal"
-                    class="icon-btn"
-                    data-close="createCustomerModal"
-                    aria-label="닫기">✕</button>
-          </div>
-
-          <form th:action="@{/admin/customers}" method="post" class="modal-body">
-            <input type="hidden" name="_csrf" th:value="${_csrf != null ? _csrf.token : ''}" th:if="${_csrf != null}"/>
-
-            <div class="form-row">
-              <label for="customerName">고객사명 <span class="req">*</span></label>
-              <input id="customerName" name="customerName" type="text" required placeholder="예) 폴라리스 오피스"/>
-            </div>
-
-            <div class="form-row">
-              <label for="connectedCompany">연결사(선택)</label>
-              <select id="connectedCompany" name="connectedCompany">
-                <option value="">-- 선택 없음 --</option>
-                <option th:each="cc : ${connectedCompanies}"
-                        th:value="${cc.customerId}"
-                        th:text="${cc.customerName}">리셀러A</option>
-              </select>
-            </div>
-
-            <div class="modal-footer">
-              <button type="button"
-                      class="btn-ghost"
-                      id="btnCancelCreate"
-                      data-close="createCustomerModal">취소</button>
-              <button type="submit" class="btn-primary">저장</button>
-            </div>
-          </form>
-        </div>
+      <div class="actions">
+        <form class="search-form" method="get" th:action="@{/admin/customers}">
+          <!-- ✅ JS가 찾는 id 부여 -->
+          <input id="searchInput" type="text" name="q" th:value="${q}" placeholder="고객사명/연결사 검색" />
+          <button type="submit" class="btn">검색</button>
+          <a class="btn btn-ghost" th:href="@{/admin/customers}">초기화</a>
+        </form>
+        <a href="#custCreateModal" class="btn btn-primary">+ 고객사 추가</a>
       </div>
-      <!-- /모달 -->
+    </div>
 
-      <!-- 인라인 폴백: 외부 JS 없어도 닫힘/배경/ESC 동작 -->
-      <script>
-        (function(){
-          const qs=(s,r=document)=>r.querySelector(s);
-          function closeModalById(id){
-            const m=document.getElementById(id); if(!m)return;
-            m.classList.add('hidden'); m.setAttribute('aria-hidden','true');
-            document.body.classList.remove('modal-open');
-            const opener=qs('#btnOpenCreateModal'); opener?.setAttribute('aria-expanded','false'); opener?.focus();
-          }
-          document.addEventListener('click',function(e){
-            const closeBtn=e.target.closest('[data-close]');
-            if(closeBtn){ e.preventDefault(); return closeModalById(closeBtn.getAttribute('data-close')||'createCustomerModal'); }
-            const modal=e.target.closest('.modal');
-            if(modal && e.target===modal){ return closeModalById(modal.id); }
-          },{capture:true});
-          document.addEventListener('keydown',function(e){
-            if(e.key==='Escape'){
-              const open=document.querySelector('.modal:not(.hidden)');
-              if(open) closeModalById(open.id);
-            }
-          },{capture:true});
-        })();
-      </script>
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>고객사명</th>
+          <th>연결사</th>
+          <th>생성일</th>
+        </tr>
+        </thead>
+        <!-- ✅ JS가 채워넣을 타겟 tbody -->
+        <tbody id="customersTbody">
+          <tr><td colspan="3" class="empty">불러오는 중…</td></tr>
+        </tbody>
+      </table>
 
-      <!-- 외부 JS (캐시버스터: #dates 사용 / T() 금지) -->
-      <script th:src="@{/js/customers.js(v=${#dates.createNow().time})}" src="/js/customers.js"></script>
-    </div><!-- /.page-customers -->
-  </div><!-- /layout:fragment content -->
+      <!-- 페이지네이션은 Ajax 방식이면 숨겨두거나 서버 렌더에 맞춰 사용 -->
+      <div class="pagination hidden" th:if="${page != null and page.totalPages > 1}">
+        <a th:if="${!page.first}"
+           th:href="@{/admin/customers(page=${page.number-1}, size=${page.size}, q=${q})}">이전</a>
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages-1)}"
+              th:classappend="${i==page.number} ? 'active'">
+          <a th:if="${i != page.number}"
+             th:text="${i+1}"
+             th:href="@{/admin/customers(page=${i}, size=${page.size}, q=${q})}">1</a>
+          <span th:if="${i == page.number}" th:text="${i+1}">1</span>
+        </span>
+        <a th:if="${!page.last}"
+           th:href="@{/admin/customers(page=${page.number+1}, size=${page.size}, q=${q})}">다음</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 고객사 추가 모달 -->
+  <div id="custCreateModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="custCreateTitle">
+      <div class="modal-header">
+        <h3 id="custCreateTitle">고객사 추가</h3>
+      </div>
+
+      <form th:action="@{/admin/customers}" method="post" class="modal-body">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+        <div class="form-row">
+          <label>고객사명 *</label>
+          <input name="customerName" required placeholder="예: 폴라리스"/>
+        </div>
+
+        <div class="form-row">
+          <label>연결사</label>
+          <select name="connectedCompany" id="connectedCompany">
+            <option value="">-- 선택 --</option>
+            <option th:each="co : ${allCustomers}"
+                    th:value="${co.customerId}"
+                    th:text="${co.customerName}">
+              회사이름
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <a href="#" class="btn btn-ghost">취소</a>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ JS 로딩: content 내부 맨 아래 + defer -->
+  <script th:src="@{/js/customers.js(v=${#dates.createNow().time})}" defer></script>
+</div>
 </body>
 </html>

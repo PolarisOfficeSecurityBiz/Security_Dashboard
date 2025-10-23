@@ -8,6 +8,7 @@
   <meta charset="UTF-8"/>
   <title th:text="${customer.customerName} + ' / 라이선스 관리'">라이선스 관리</title>
 
+  <!-- 페이지 전용 리소스 (layout의 head slot) -->
   <th:block layout:fragment="head">
     <link rel="stylesheet" th:href="@{/css/license_detail.css(v=${#dates.createNow().time})}"/>
     <script defer th:src="@{/js/license_detail.js(v=${#dates.createNow().time})}"></script>
@@ -17,14 +18,16 @@
 <body data-page="license-detail">
 <div layout:fragment="content">
   <main class="license-detail" role="main">
-    <!-- Breadcrumbs -->
-    <div class="page-breadcrumbs">
-      <div class="crumbs">
+
+    <!-- Breadcrumbs (overview/customer_detail 톤) -->
+    <div class="breadcrumb" style="justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
         <a class="btn btn-ghost btn-pill" aria-label="뒤로가기"
            th:href="@{|/admin/customers/${customer.customerId}|}">←</a>
-        <span class="crumb" th:text="${customer.customerName}">고객명</span>
-        <span class="sep">/</span>
-        <strong class="current">라이선스 관리</strong>
+        <a th:href="@{|/admin/customers/${customer.customerId}|}"
+           th:text="${customer.customerName}">고객명</a>
+        <span> / </span>
+        <strong>라이선스 관리</strong>
       </div>
       <div class="top-actions">
         <button class="icon-btn" title="새로고침" onclick="location.reload()">⟲</button>
@@ -32,8 +35,8 @@
     </div>
 
     <!-- ===== 전체 정보 ===== -->
-    <section class="card section">
-      <div class="card-head">
+    <section class="panel section">
+      <div class="panel-header">
         <h3>전체 정보</h3>
         <div class="head-actions">
           <button type="button" id="btnEdit"   class="btn btn-ghost btn-sm">수정</button>
@@ -51,7 +54,7 @@
         </div>
       </div>
 
-      <div class="section-body">
+      <div class="panel-body">
         <form id="licForm" class="form-grid" data-mode="view"
               th:action="@{|/admin/licenses/${license.licenseId}/update|}"
               method="post" th:object="${license}">
@@ -59,17 +62,17 @@
 
           <!-- 라이선스ID (읽기전용) -->
           <label class="form-label">라이선스ID</label>
-          <input class="form-control" th:value="${license.licenseId}" value="2dfb36ea-1a05-4a5b-831d-d794ed46119a" disabled/>
+          <input class="form-control" th:value="${license.licenseId}" disabled/>
 
           <!-- 만료일 -->
           <label class="form-label" for="expiryDate">지정 만료일</label>
           <input id="expiryDate" name="expiryDate" class="form-control" type="date" data-editable
-                 th:value="${#dates.format(license.expiryDate, 'yyyy-MM-dd')}" value="2025-09-22" disabled/>
+                 th:value="${#dates.format(license.expiryDate, 'yyyy-MM-dd')}" disabled/>
 
           <!-- 사용 제한수 -->
           <label class="form-label" for="usageLimit">사용 제한수</label>
           <input id="usageLimit" name="usageLimit" class="form-control" type="number" min="1" step="1" data-editable
-                 th:value="${license.usageLimit}" value="2" disabled/>
+                 th:value="${license.usageLimit}" disabled/>
 
           <!-- 라이선스 타입 -->
           <label class="form-label" for="licenseType">라이선스 타입</label>
@@ -90,21 +93,21 @@
 
           <!-- 생성일 (읽기전용) -->
           <label class="form-label">생성일</label>
-          <input class="form-control" th:value="${#dates.format(license.createdAt, 'yyyy-MM-dd')}" value="2025-08-12" disabled/>
+          <input class="form-control" th:value="${#dates.format(license.createdAt, 'yyyy-MM-dd')}" disabled/>
         </form>
       </div>
     </section>
 
     <!-- ===== 히스토리 ===== -->
-    <section class="card section">
-      <div class="card-head">
+    <section class="panel section">
+      <div class="panel-header">
         <h3>라이선스 히스토리</h3>
         <div class="head-actions">
           <button type="button" id="btnAddService" class="btn btn-primary btn-sm">+ 서비스 추가</button>
         </div>
       </div>
 
-      <div class="section-body">
+      <div class="panel-body">
         <table class="table" id="histTable">
           <thead>
           <tr>
@@ -130,16 +133,16 @@
       </div>
     </section>
 
-    <!-- ===== 서비스 추가 모달 ===== -->
+    <!-- ===== 서비스 추가 모달 (헤더 X 버튼 제거, 하단 취소만 유지) ===== -->
     <div id="svcModal" class="modal" aria-hidden="true">
       <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="svcTitle">
         <div class="modal-header">
           <h3 id="svcTitle">서비스 추가</h3>
-          <button type="button" class="icon-btn" data-close="svcModal" aria-label="닫기">✕</button>
         </div>
 
         <form id="svcForm" class="modal-body"
-              th:action="@{|/admin/licenses/${license.licenseId}/services|}" method="post" autocomplete="off">
+              th:action="@{|/admin/licenses/${license.licenseId}/services|}"
+              method="post" autocomplete="off">
           <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
 
           <div class="form-row">
