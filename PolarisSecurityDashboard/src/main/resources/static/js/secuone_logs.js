@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let allData = [];
-  let currentFilter = null; // 현재 클릭된 필터 (유입경로 or 기능명)
+  let currentFilter = null; // 현재 클릭된 필터
   let chartChannel = null;
   let chartFeature = null;
 
@@ -32,24 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   searchBtn.addEventListener('click', fetchLogs);
 
-  // 🧩 로그 데이터 불러오기
+  // ===============================
+  // 📡 로그 데이터 불러오기
+  // ===============================
   async function fetchLogs() {
-    // eventType 없이 전체 로그 조회
-    const url = `/admin/secuone/logs/api`;
-    const now = new Date();
-    let from, to;
-
+    let days = 7;
     switch (dateRange.value) {
-      case '1d': from = new Date(now - 86400000); break;
-      case '7d': from = new Date(now - 7 * 86400000); break;
-      case '30d': from = new Date(now - 30 * 86400000); break;
-      case 'custom':
-        from = fromDate.value ? new Date(fromDate.value) : null;
-        to = toDate.value ? new Date(toDate.value) : null;
-        break;
-      default: from = new Date(now - 7 * 86400000);
+      case '1d': days = 1; break;
+      case '7d': days = 7; break;
+      case '30d': days = 30; break;
+      default: days = 7;
     }
 
+    const url = `/api/logs/report?days=${days}`;
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">📡 불러오는 중...</td></tr>`;
 
     try {
@@ -57,15 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      // 날짜 필터
-      allData = data.filter(log => {
-        const t = new Date(log.eventTime);
-        return (!from || t >= from) && (!to || t <= to);
-      });
+      allData = data || [];
 
       renderChannelChart(allData);
       renderFeatureChart(allData);
-	  updateSummaryCards(allData);
+      updateSummaryCards(allData);
+
       tableSection.style.display = 'none';
       currentFilter = null;
 
@@ -75,15 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===============================
+  // 📊 요약 카드 업데이트
+  // ===============================
+  function updateSummaryCards(data) {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayLogs = data.filter(l => (l.createdAt || '').startsWith(today));
+
+    const total = data.length;
+    const malware = data.filter(l => l.type === 'MALWARE').length;
+    const remote = data.filter(l => l.type === 'REMOTE').length;
+    const rooting = data.filter(l => l.type === 'ROOTING').length;
+    const todayCount = todayLogs.length;
+
+    document.getElementById('todayCount')?.textContent = todayCount;
+    document.getElementById('featureCount')?.textContent = malware + remote + rooting;
+    document.getElementById('totalCount')?.textContent = total;
+  }
 
   // ===============================
-  // 🔹 유입경로별 차트
+  // 📈 유입경로별 차트
   // ===============================
   function renderChannelChart(data) {
-    const filtered = data.filter(d => d.eventType === "acquisition");
     const counts = {};
-    filtered.forEach(log => {
-      const ch = log.acqChannel || '기타';
+    data.forEach(log => {
+      const ch = log.domain || '기타';
       counts[ch] = (counts[ch] || 0) + 1;
     });
 
@@ -105,14 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
       options: {
         plugins: {
           legend: { display: false },
-          title: { display: true, text: '📈 유입경로별 유입 수' }
+          title: { display: true, text: '📈 도메인(유입경로)별 로그 수' }
         },
         scales: { y: { beginAtZero: true } },
         onClick: (evt, elements) => {
           if (elements.length > 0) {
             const index = elements[0].index;
             const selected = labels[index];
-            toggleFilter("channel", selected);
+            toggleFilter("domain", selected);
           }
         }
       }
@@ -120,14 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===============================
-  // ⚙️ 주요 기능별 차트
+  // ⚙️ 로그 타입별 차트 (MALWARE/REMOTE/ROOTING)
   // ===============================
   function renderFeatureChart(data) {
-    const filtered = data.filter(d => d.eventType === "feature_click");
     const counts = {};
-    filtered.forEach(log => {
-      const feature = log.featureName || '기타';
-      counts[feature] = (counts[feature] || 0) + 1;
+    data.forEach(log => {
+      const type = log.type || '기타';
+      counts[type] = (counts[type] || 0) + 1;
     });
 
     const labels = Object.keys(counts);
@@ -140,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels,
         datasets: [{
-          label: '기능 사용 횟수',
+          label: '발생 수',
           data: values,
           backgroundColor: ['#1890FF', '#52C41A', '#FAAD14', '#F759AB', '#13C2C2', '#722ED1']
         }]
@@ -148,14 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
       options: {
         plugins: {
           legend: { display: false },
-          title: { display: true, text: '⚙️ 주요 기능별 사용 횟수' }
+          title: { display: true, text: '⚙️ 로그 타입별 발생 수' }
         },
         scales: { y: { beginAtZero: true } },
         onClick: (evt, elements) => {
           if (elements.length > 0) {
             const index = elements[0].index;
             const selected = labels[index];
-            toggleFilter("feature", selected);
+            toggleFilter("type", selected);
           }
         }
       }
@@ -163,43 +170,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===============================
-  // 🎯 차트 클릭 시 해당 로그만 표시
+  // 🎯 차트 클릭 시 테이블 필터링
   // ===============================
   function toggleFilter(type, value) {
     if (currentFilter && currentFilter.type === type && currentFilter.value === value) {
-      // 같은 항목 다시 클릭 → 닫기
       tableSection.style.display = 'none';
       currentFilter = null;
       return;
     }
 
     let filtered = [];
-    if (type === "channel") {
-      filtered = allData.filter(log => (log.acqChannel || '기타') === value);
-    } else if (type === "feature") {
-      filtered = allData.filter(log => (log.featureName || '기타') === value);
+    if (type === "domain") {
+      filtered = allData.filter(log => (log.domain || '기타') === value);
+    } else if (type === "type") {
+      filtered = allData.filter(log => (log.type || '기타') === value);
     }
 
     renderTable(filtered);
     tableSection.style.display = 'block';
     currentFilter = { type, value };
   }
-  function updateSummaryCards(data) {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const todayLogs = data.filter(l => l.eventTime.startsWith(todayStr));
 
-    const total = data.length;
-    const acquisitions = data.filter(l => l.eventType === 'acquisition').length;
-    const features = data.filter(l => l.eventType === 'feature_click').length;
-    const todayCount = todayLogs.length;
-
-    document.getElementById('todayCount').textContent = todayCount;
-    document.getElementById('featureCount').textContent = features;
-    document.getElementById('totalCount').textContent = total;
-  }
   // ===============================
-  // 📋 테이블 렌더링
+  // 📋 상세 로그 테이블 렌더링
   // ===============================
   function renderTable(data) {
     if (!data || data.length === 0) {
@@ -210,18 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML = data.map(log => `
       <tr>
         <td>${log.id}</td>
-        <td>${log.eventType === 'acquisition' ? '유입경로' : '기능 클릭'}</td>
+        <td>${log.type || '-'}</td>
         <td>${log.sessionId || '-'}</td>
         <td>${log.ip || '-'}</td>
-        <td>${log.acqChannel || log.featureName || '-'}</td>
-        <td>${log.extra || '-'}</td>
-        <td>${formatDate(log.eventTime)}</td>
+        <td>${log.domain || '-'}</td>
+        <td>${log.detail || '-'}</td>
+        <td>${formatDate(log.createdAt)}</td>
       </tr>
     `).join('');
   }
 
   // ===============================
-  // 🕒 날짜 포맷
+  // 🕒 날짜 포맷 함수
   // ===============================
   function formatDate(iso) {
     const d = new Date(iso);
