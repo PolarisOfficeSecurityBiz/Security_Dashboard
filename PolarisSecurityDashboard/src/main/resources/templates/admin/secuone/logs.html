@@ -15,11 +15,10 @@
 <div layout:fragment="content" class="secuone-log-page">
   <div class="header">
     <div>
-    <a th:href="@{/admin/secuone/secuone}">Polaris SecuOne</a> / 
-    <strong>Log</strong>
-  	</div>
+      <a th:href="@{/admin/secuone}">Polaris SecuOne</a> / 
+      <strong>로그 통계</strong>
+    </div>
   </div>
-
 
   <!-- 🔹 필터 영역 -->
   <div class="filter-bar">
@@ -34,14 +33,21 @@
     <button id="searchBtn">검색</button>
   </div>
 
-  <!-- 🔹 요약 차트 -->
+  <!-- 🔹 유입경로 통계 -->
   <section class="chart-section">
+    <h3>📈 유입경로별 유입 수</h3>
     <canvas id="channelChart" height="120"></canvas>
+  </section>
+
+  <!-- 🔹 주요 기능 사용률 통계 -->
+  <section class="chart-section">
+    <h3>⚙️ 주요 기능 사용률</h3>
+    <canvas id="featureChart" height="120"></canvas>
   </section>
 
   <!-- 🔹 상세 로그 테이블 -->
   <section class="table-section">
-    <h3>📋 로그 목록</h3>
+    <h3>📋 로그 상세 목록</h3>
     <table>
       <thead>
         <tr>
@@ -49,12 +55,14 @@
           <th>이벤트 유형</th>
           <th>세션ID</th>
           <th>IP</th>
-          <th>채널</th>
+          <th>채널 / 기능명</th>
           <th>추가정보</th>
           <th>시간</th>
         </tr>
       </thead>
-      <tbody id="logTbody"></tbody>
+      <tbody id="logTbody">
+        <tr><td colspan="7" style="text-align:center;">데이터를 불러오는 중...</td></tr>
+      </tbody>
     </table>
   </section>
 </div>

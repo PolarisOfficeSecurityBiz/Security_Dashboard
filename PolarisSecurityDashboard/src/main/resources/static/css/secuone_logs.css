@@ -74,11 +74,35 @@
   padding: 24px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   text-align: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chart-section:hover {
   transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.chart-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chart-section h3::before {
+  font-size: 20px;
+}
+
+.chart-section:nth-of-type(3) h3::before {
+  content: "📈";
+}
+
+.chart-section:nth-of-type(4) h3::before {
+  content: "⚙️";
 }
 
 .chart-section canvas {
@@ -93,6 +117,13 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   overflow: hidden;
   transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.table-section.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .table-section h3 {
@@ -121,7 +152,8 @@
   border-bottom: 2px solid #e3e8ef;
 }
 
-.table-section th, .table-section td {
+.table-section th, 
+.table-section td {
   padding: 10px 8px;
   text-align: center;
   font-size: 14px;
@@ -141,6 +173,13 @@
   transition: 0.2s;
 }
 
+/* ====== 로딩 / 상태 ====== */
+.table-section td[colspan="7"] {
+  color: #555;
+  font-style: italic;
+  padding: 20px 0;
+}
+
 /* ====== 반응형 ====== */
 @media (max-width: 768px) {
   .filter-bar {
@@ -156,6 +195,10 @@
 
   .chart-section canvas {
     max-height: 200px;
+  }
+
+  .chart-section h3 {
+    font-size: 16px;
   }
 
   .table-section table {
