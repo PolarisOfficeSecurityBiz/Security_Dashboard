@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ✅ 요소 선택 (안전 검사 포함)
+  // 안전하게 요소 선택
   const tbody = document.getElementById('logTbody');
   const searchBtn = document.getElementById('searchBtn');
   const dateRange = document.getElementById('dateRange');
@@ -7,40 +7,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const toDate = document.getElementById('toDate');
   const chartCanvas = document.getElementById('channelChart');
 
-  // ✅ 요소가 없으면 실행 중단 (layout 렌더링 문제 방지)
+  // 요소를 못 찾았을 때 실행 중단 (에러 방지)
   if (!tbody || !searchBtn || !dateRange || !chartCanvas) {
-    console.error("❌ secuone_logs.js: 필수 HTML 요소를 찾을 수 없습니다.");
+    console.error("❌ secuone_logs.js: HTML 요소를 찾지 못했습니다. ID 확인 필요");
     return;
   }
 
   const ctx = chartCanvas.getContext('2d');
   let chart = null;
 
-  // ✅ 날짜 필터 제어 (직접 선택 활성화)
+  // 날짜 선택 제어
   dateRange.addEventListener('change', () => {
     const custom = dateRange.value === 'custom';
     fromDate.disabled = toDate.disabled = !custom;
   });
 
-  // ✅ 검색 버튼 클릭 시 데이터 다시 불러오기
   searchBtn.addEventListener('click', fetchLogs);
 
-  // ✅ 메인 데이터 로드
   async function fetchLogs() {
     const url = `/admin/secuone/logs/api?eventType=acquisition`;
     const now = new Date();
     let from, to;
 
-    // 날짜 범위 설정
     switch (dateRange.value) {
       case '1d':
-        from = new Date(now - 86400000); // 하루
+        from = new Date(now - 86400000);
         break;
       case '7d':
-        from = new Date(now - 7 * 86400000); // 7일
+        from = new Date(now - 7 * 86400000);
         break;
       case '30d':
-        from = new Date(now - 30 * 86400000); // 30일
+        from = new Date(now - 30 * 86400000);
         break;
       case 'custom':
         from = fromDate.value ? new Date(fromDate.value) : null;
@@ -57,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      // ✅ 날짜 필터링
+      // 날짜 필터링
       const filtered = data.filter(log => {
         const t = new Date(log.eventTime);
         return (!from || t >= from) && (!to || t <= to);
@@ -67,11 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
       renderChart(filtered);
     } catch (err) {
       console.error('❌ 데이터 로드 실패:', err);
-      tbody.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">❌ 데이터 로드 실패</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red;">데이터 로드 실패</td></tr>`;
     }
   }
 
-  // ✅ 테이블 렌더링
   function renderTable(data) {
     if (!data || data.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">데이터 없음</td></tr>`;
@@ -91,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
   }
 
-  // ✅ 차트 렌더링
   function renderChart(data) {
     const counts = {};
     data.forEach(log => {
@@ -121,16 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
           title: { display: true, text: '유입경로별 유입 수' }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
-          }
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
         }
       }
     });
   }
 
-  // ✅ 날짜 포맷 함수
   function formatDate(iso) {
     const d = new Date(iso);
     if (isNaN(d)) return '-';
@@ -142,6 +133,5 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
   }
 
-  // ✅ 초기 실행
-  fetchLogs();
+  fetchLogs(); // 초기 실행
 });
