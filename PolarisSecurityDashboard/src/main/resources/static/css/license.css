@@ -1,3 +1,4 @@
+/* 전체 페이지의 기본 스타일 */
 body {
   font-family: 'Pretendard', sans-serif;
   background-color: #fafafa;
@@ -21,6 +22,7 @@ body {
   margin-bottom: 20px;
 }
 
+/* 카드 스타일 */
 .license-card {
   background: white;
   padding: 30px;
@@ -34,12 +36,14 @@ body {
   margin-bottom: 20px;
 }
 
+/* 폼 스타일 */
 .form label {
   display: block;
   margin: 10px 0 4px;
   font-weight: 500;
 }
 
+/* 텍스트 입력창 스타일 */
 input[type="text"] {
   width: 100%;
   padding: 10px;
@@ -49,13 +53,21 @@ input[type="text"] {
   font-size: 14px;
 }
 
+/* 입력창과 버튼을 감싸는 그룹 스타일 */
 .input-group {
   display: flex;
-  gap: 8px;
+  gap: 10px; /* 항목 사이 간격을 넉넉하게 설정 */
+  align-items: center; /* 수평 정렬 */
+  margin-bottom: 15px; /* 아래 간격 추가 */
 }
 
 .input-group input {
   flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f7f7f7;
+  font-size: 14px;
 }
 
 .input-group button,
@@ -64,11 +76,12 @@ input[type="text"] {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 14px;
   text-decoration: none;
   text-align: center;
   line-height: 36px;
+  height: 36px;
 }
 
 .input-group button:hover,
@@ -76,11 +89,35 @@ input[type="text"] {
   background-color: #ddd;
 }
 
+/* 연장요청 및 다운로드 버튼 스타일 */
 .btn-green {
   background-color: #19a974 !important;
   color: white;
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 36px;
+  text-align: center;
+  border-radius: 6px;
 }
 
 .btn-green:hover {
   background-color: #13895e !important;
+}
+
+/* 전체 입력 폼의 여백 및 정렬 */
+.license-card .form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 입력창의 최대 크기 제한 및 정렬 */
+input[type="text"] {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 잘못된 스타일로 인한 기본값 수정 */
+input[readonly] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
 }
