@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderChannelChart(allData);
       renderFeatureChart(allData);
+	  updateSummaryCards(allData);
       tableSection.style.display = 'none';
       currentFilter = null;
 
@@ -183,7 +184,20 @@ document.addEventListener('DOMContentLoaded', () => {
     tableSection.style.display = 'block';
     currentFilter = { type, value };
   }
+  function updateSummaryCards(data) {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    const todayLogs = data.filter(l => l.eventTime.startsWith(todayStr));
 
+    const total = data.length;
+    const acquisitions = data.filter(l => l.eventType === 'acquisition').length;
+    const features = data.filter(l => l.eventType === 'feature_click').length;
+    const todayCount = todayLogs.length;
+
+    document.getElementById('todayCount').textContent = todayCount;
+    document.getElementById('featureCount').textContent = features;
+    document.getElementById('totalCount').textContent = total;
+  }
   // ===============================
   // 📋 테이블 렌더링
   // ===============================

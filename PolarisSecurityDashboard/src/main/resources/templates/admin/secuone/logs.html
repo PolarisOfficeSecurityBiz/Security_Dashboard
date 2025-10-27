@@ -6,6 +6,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>SecuOne 로그 통계</title>
+
+  <!-- ✅ 스타일 -->
   <link rel="stylesheet" th:href="@{/css/secuone_logs.css}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer th:src="@{/js/secuone_logs.js}"></script>
@@ -13,6 +15,8 @@
 
 <body>
 <div layout:fragment="content" class="secuone-log-page">
+
+  <!-- 🔹 헤더 -->
   <div class="header">
     <div>
       <a th:href="@{/admin/secuone}">Polaris SecuOne</a> / 
@@ -33,19 +37,23 @@
     <button id="searchBtn">검색</button>
   </div>
 
-  <!-- 🔹 유입경로 통계 -->
+  <!-- ======================== 📊 차트 영역 ======================== -->
+
+  <!-- 🔹 유입경로별 유입 수 -->
   <section class="chart-section">
     <h3>📈 유입경로별 유입 수</h3>
-    <canvas id="channelChart" height="120"></canvas>
+    <canvas id="channelChart" height="140"></canvas>
+    <p class="chart-desc">앱 또는 외부 채널을 통해 유입된 사용자 수를 보여줍니다.</p>
   </section>
 
-  <!-- 🔹 주요 기능 사용률 통계 -->
+  <!-- 🔹 주요 기능 사용률 -->
   <section class="chart-section">
     <h3>⚙️ 주요 기능 사용률</h3>
-    <canvas id="featureChart" height="120"></canvas>
+    <canvas id="featureChart" height="140"></canvas>
+    <p class="chart-desc">SecuOne 주요 기능별 클릭 및 사용 빈도를 시각화합니다.</p>
   </section>
 
-  <!-- 🔹 상세 로그 테이블 -->
+  <!-- ======================== 📋 로그 상세 테이블 ======================== -->
   <section class="table-section">
     <h3>📋 로그 상세 목록</h3>
     <table>
@@ -61,10 +69,27 @@
         </tr>
       </thead>
       <tbody id="logTbody">
-        <tr><td colspan="7" style="text-align:center;">데이터를 불러오는 중...</td></tr>
+        <tr><td colspan="7" style="text-align:center;">📡 데이터를 불러오는 중...</td></tr>
       </tbody>
     </table>
   </section>
+
+  <!-- ======================== ℹ️ 요약 카드 ======================== -->
+  <div class="summary-cards">
+    <div class="card">
+      <h4>오늘 유입 수</h4>
+      <p id="todayCount">-</p>
+    </div>
+    <div class="card">
+      <h4>기능 사용 로그</h4>
+      <p id="featureCount">-</p>
+    </div>
+    <div class="card">
+      <h4>전체 이벤트</h4>
+      <p id="totalCount">-</p>
+    </div>
+  </div>
+
 </div>
 </body>
 </html>
