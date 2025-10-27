@@ -26,35 +26,44 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 public class SecurityConfig {
 
     /** ✅ 1) API 보안 체인 (/api/**, /admin/api/**) */
-    @Bean
-    @Order(1)
-    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
-        http
-            // 두 경로를 OR 매칭
-            .securityMatcher(new OrRequestMatcher(
-                new AntPathRequestMatcher("/api/**"),
-                new AntPathRequestMatcher("/admin/api/**")
-            ))
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable()) // API는 CSRF 미사용
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET,
-                        "/api/v1/polar-notices/**",
-                        "/api/v1/polar-letters/**",
-                        "/api/v1/secu-news/**",
-                        "/api/v1/direct-ads/**",
-                        "/api/v1/overview"
-                ).permitAll()
-                .requestMatchers("/admin/api/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .formLogin(Customizer.withDefaults())
-            .logout(Customizer.withDefaults());
+	/** ✅ 1) API 보안 체인 (/api/**, /admin/api/**) */
+	@Bean
+	@Order(1)
+	public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+	    http
+	        .securityMatcher(new OrRequestMatcher(
+	            new AntPathRequestMatcher("/api/**"),
+	            new AntPathRequestMatcher("/admin/api/**")
+	        ))
+	        .cors(Customizer.withDefaults())
+	        .csrf(csrf -> csrf.disable())
+	        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+	        .authorizeHttpRequests(auth -> auth
+	            // ✅ 기존 GET 허용 경로
+	            .requestMatchers(HttpMethod.GET,
+	                    "/api/v1/polar-notices/**",
+	                    "/api/v1/polar-letters/**",
+	                    "/api/v1/secu-news/**",
+	                    "/api/v1/direct-ads/**",
+	                    "/api/v1/overview"
+	            ).permitAll()
 
-        return http.build();
-    }
+	            // ✅ 추가: 로그 수집 API 완전 공개
+	            .requestMatchers("/api/log/**").permitAll()
+
+	            // ✅ Direct Ads Impression/Click 도 공개 (401 방지)
+	            .requestMatchers("/api/directads/**").permitAll()
+
+	            .requestMatchers("/admin/api/**").hasRole("ADMIN")
+	            .anyRequest().authenticated()
+	        )
+	        .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+	        .formLogin(Customizer.withDefaults())
+	        .logout(Customizer.withDefaults());
+
+	    return http.build();
+	}
+
 
     /** ✅ 2) Web UI 체인 (Thymeleaf) */
     @Bean
