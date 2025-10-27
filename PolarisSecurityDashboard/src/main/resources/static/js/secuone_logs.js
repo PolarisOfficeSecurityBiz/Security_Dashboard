@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 🧩 로그 데이터 불러오기
   async function fetchLogs() {
-    const url = `/api/log/events`; // 서버에서 모든 로그(acquisition + feature_click) 제공
+    // eventType 없이 전체 로그 조회
+    const url = `/admin/secuone/logs/api`;
     const now = new Date();
     let from, to;
 
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      // 날짜 필터 적용
+      // 날짜 필터
       allData = data.filter(log => {
         const t = new Date(log.eventTime);
         return (!from || t >= from) && (!to || t <= to);
@@ -64,14 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderChannelChart(allData);
       renderFeatureChart(allData);
-
       tableSection.style.display = 'none';
       currentFilter = null;
+
     } catch (err) {
       console.error('❌ 데이터 로드 실패:', err);
       tbody.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">데이터 로드 실패</td></tr>`;
     }
   }
+
 
   // ===============================
   // 🔹 유입경로별 차트
