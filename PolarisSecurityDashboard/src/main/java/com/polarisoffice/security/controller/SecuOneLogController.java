@@ -18,14 +18,15 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/log")
 public class SecuOneLogController {
 
     private final SecuOneLogService secuOneLogService;
     private final SecuOneLogEventRepository secuOneLogRepository;
 
+    /* -------------------- 1️⃣ 앱 로그 수집 API -------------------- */
+
     /** 사용자 유입 로그 */
-    @PostMapping("/acquisition")
+    @PostMapping("/api/log/acquisition")
     @ResponseBody
     public IdResponse logAcquisition(@Valid @RequestBody AcquisitionLogRequest reqDto,
                                      HttpServletRequest request) {
@@ -34,7 +35,7 @@ public class SecuOneLogController {
     }
 
     /** 주요 기능 클릭 로그 */
-    @PostMapping("/feature-click")
+    @PostMapping("/api/log/feature-click")
     @ResponseBody
     public IdResponse logFeatureClick(@Valid @RequestBody FeatureClickLogRequest reqDto,
                                       HttpServletRequest request) {
@@ -42,15 +43,19 @@ public class SecuOneLogController {
         return new IdResponse(id);
     }
 
-    /** 관리자용 로그 화면 */
+
+    /* -------------------- 2️⃣ 관리자 화면 -------------------- */
+
+    /** 로그 페이지 (Thymeleaf HTML) */
     @GetMapping("/admin/secuone/logs")
     public String showLogs(Model model) {
-        model.addAttribute("logs", secuOneLogRepository.findAll(Sort.by(Sort.Direction.DESC, "eventTime")));
-        return "admin/secuone/logs"; // templates/admin/secuone/logs.html
+        model.addAttribute("logs",
+                secuOneLogRepository.findAll(Sort.by(Sort.Direction.DESC, "eventTime")));
+        return "admin/secuone/logs";  // templates/admin/secuone/logs.html
     }
 
-    /** 로그 목록 API (AJAX용) */
-    @GetMapping("/events")
+    /** 로그 데이터 (AJAX용 JSON) */
+    @GetMapping("/admin/secuone/logs/api")
     @ResponseBody
     public List<SecuOneLogEvent> getAllLogs(
             @RequestParam(required = false) String eventType,
@@ -69,6 +74,6 @@ public class SecuOneLogController {
                 .toList();
     }
 
-    /** 내부용 ID 응답 */
+    /* 내부용 응답 DTO */
     private record IdResponse(Long id) {}
 }
