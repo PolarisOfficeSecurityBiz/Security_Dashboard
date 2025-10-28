@@ -9,17 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableSection = document.querySelector('.table-section');
 
   if (!tbody || !searchBtn || !dateRange || !channelCanvas || !featureCanvas || !tableSection) {
-    console.error("❌ secuone_logs.js: 필수 HTML 요소를 찾지 못했습니다.");
+    console.error("❌ 필수 HTML 요소를 찾지 못했습니다.");
     return;
   }
 
-  let allData = [];
-  let currentFilter = null; // 현재 클릭된 필터
-  let chartChannel = null;
-  let chartFeature = null;
-
   const ctxChannel = channelCanvas.getContext('2d');
   const ctxFeature = featureCanvas.getContext('2d');
+  let chartChannel = null;
+  let chartFeature = null;
+  let allSecuLogs = [];
+  let currentFilter = null;
 
   // 기본적으로 테이블 숨김
   tableSection.style.display = 'none';
@@ -30,40 +29,64 @@ document.addEventListener('DOMContentLoaded', () => {
     fromDate.disabled = toDate.disabled = !custom;
   });
 
-  searchBtn.addEventListener('click', fetchLogs);
+  searchBtn.addEventListener('click', loadAllData);
 
   // ===============================
-  // 📡 로그 데이터 불러오기
+  // 📡 전체 데이터 로드
   // ===============================
-  async function fetchLogs() {
-    let days = 7;
-    switch (dateRange.value) {
-      case '1d': days = 1; break;
-      case '7d': days = 7; break;
-      case '30d': days = 30; break;
-      default: days = 7;
-    }
+  async function loadAllData() {
+    const days = getSelectedDays();
 
-    const url = `/api/logs/report?days=${days}`;
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">📡 불러오는 중...</td></tr>`;
+    // 두 API 병렬 호출
+    Promise.all([
+      fetchSecuOneLogs(),      // /admin/secuone/logs/api
+      fetchSystemLogs(days)    // /api/logs/report
+    ]).then(([secuLogs, systemLogs]) => {
+      allSecuLogs = secuLogs || [];
 
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      allData = data || [];
-
-      renderChannelChart(allData);
-      renderFeatureChart(allData);
-      updateSummaryCards(allData);
-
+      // 1️⃣ SecuOne 로그 렌더링
+      renderChannelChart(allSecuLogs);
+      renderFeatureChart(allSecuLogs);
       tableSection.style.display = 'none';
       currentFilter = null;
 
-    } catch (err) {
+      // 2️⃣ 시스템 로그 카드 렌더링
+      updateSummaryCards(systemLogs || []);
+    }).catch(err => {
       console.error('❌ 데이터 로드 실패:', err);
       tbody.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;">데이터 로드 실패</td></tr>`;
+    });
+  }
+
+  // ===============================
+  // 🧩 API 1: SecuOne Logs
+  // ===============================
+  async function fetchSecuOneLogs() {
+    const url = `/admin/secuone/logs/api`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`SecuOneLogs HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  // ===============================
+  // 🧩 API 2: System Logs (MALWARE / REMOTE / ROOTING)
+  // ===============================
+  async function fetchSystemLogs(days) {
+    const url = `/api/logs/report?days=${days}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`SystemLogs HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  // ===============================
+  // 📅 날짜 필터
+  // ===============================
+  function getSelectedDays() {
+    switch (dateRange.value) {
+      case '1d': return 1;
+      case '7d': return 7;
+      case '30d': return 30;
+      default: return 7;
     }
   }
 
@@ -71,35 +94,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // 📊 요약 카드 업데이트
   // ===============================
   function updateSummaryCards(data) {
-    const today = new Date().toISOString().slice(0, 10);
-    const todayLogs = data.filter(l => (l.createdAt || '').startsWith(today));
-
     const total = data.length;
     const malware = data.filter(l => l.type === 'MALWARE').length;
     const remote = data.filter(l => l.type === 'REMOTE').length;
     const rooting = data.filter(l => l.type === 'ROOTING').length;
-    const todayCount = todayLogs.length;
 
-    document.getElementById('todayCount')?.textContent = todayCount;
-    document.getElementById('featureCount')?.textContent = malware + remote + rooting;
-    document.getElementById('totalCount')?.textContent = total;
+    document.getElementById('todayCount')?.textContent = malware;
+    document.getElementById('featureCount')?.textContent = remote;
+    document.getElementById('totalCount')?.textContent = rooting;
+
+    console.log("✅ System logs loaded:", { malware, remote, rooting });
   }
 
   // ===============================
   // 📈 유입경로별 차트
   // ===============================
   function renderChannelChart(data) {
+    const filtered = data.filter(d => d.eventType === "acquisition");
     const counts = {};
-    data.forEach(log => {
-      const ch = log.domain || '기타';
+    filtered.forEach(log => {
+      const ch = log.acqChannel || '기타';
       counts[ch] = (counts[ch] || 0) + 1;
     });
 
-    const labels = Object.keys(counts);
-    const values = Object.values(counts);
+    let labels = Object.keys(counts);
+    let values = Object.values(counts);
+    if (labels.length === 0) { labels = ['데이터 없음']; values = [0]; }
 
     if (chartChannel) chartChannel.destroy();
-
     chartChannel = new Chart(ctxChannel, {
       type: 'bar',
       data: {
@@ -111,16 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }]
       },
       options: {
-        plugins: {
-          legend: { display: false },
-          title: { display: true, text: '📈 도메인(유입경로)별 로그 수' }
-        },
+        plugins: { legend: { display: false } },
         scales: { y: { beginAtZero: true } },
         onClick: (evt, elements) => {
           if (elements.length > 0) {
             const index = elements[0].index;
             const selected = labels[index];
-            toggleFilter("domain", selected);
+            toggleFilter("channel", selected);
           }
         }
       }
@@ -128,41 +147,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===============================
-  // ⚙️ 로그 타입별 차트 (MALWARE/REMOTE/ROOTING)
+  // ⚙️ 주요 기능 사용률 차트
   // ===============================
   function renderFeatureChart(data) {
+    const filtered = data.filter(d => d.eventType === "feature_click");
     const counts = {};
-    data.forEach(log => {
-      const type = log.type || '기타';
-      counts[type] = (counts[type] || 0) + 1;
+    filtered.forEach(log => {
+      const feature = log.featureName || '기타';
+      counts[feature] = (counts[feature] || 0) + 1;
     });
 
-    const labels = Object.keys(counts);
-    const values = Object.values(counts);
+    let labels = Object.keys(counts);
+    let values = Object.values(counts);
+    if (labels.length === 0) { labels = ['데이터 없음']; values = [0]; }
 
     if (chartFeature) chartFeature.destroy();
-
     chartFeature = new Chart(ctxFeature, {
       type: 'bar',
       data: {
         labels,
         datasets: [{
-          label: '발생 수',
+          label: '기능 사용 횟수',
           data: values,
           backgroundColor: ['#1890FF', '#52C41A', '#FAAD14', '#F759AB', '#13C2C2', '#722ED1']
         }]
       },
       options: {
-        plugins: {
-          legend: { display: false },
-          title: { display: true, text: '⚙️ 로그 타입별 발생 수' }
-        },
+        plugins: { legend: { display: false } },
         scales: { y: { beginAtZero: true } },
         onClick: (evt, elements) => {
           if (elements.length > 0) {
             const index = elements[0].index;
             const selected = labels[index];
-            toggleFilter("type", selected);
+            toggleFilter("feature", selected);
           }
         }
       }
@@ -170,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===============================
-  // 🎯 차트 클릭 시 테이블 필터링
+  // 🎯 차트 클릭 시 로그 필터링
   // ===============================
   function toggleFilter(type, value) {
     if (currentFilter && currentFilter.type === type && currentFilter.value === value) {
@@ -180,10 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let filtered = [];
-    if (type === "domain") {
-      filtered = allData.filter(log => (log.domain || '기타') === value);
-    } else if (type === "type") {
-      filtered = allData.filter(log => (log.type || '기타') === value);
+    if (type === "channel") {
+      filtered = allSecuLogs.filter(log => (log.acqChannel || '기타') === value);
+    } else if (type === "feature") {
+      filtered = allSecuLogs.filter(log => (log.featureName || '기타') === value);
     }
 
     renderTable(filtered);
@@ -192,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===============================
-  // 📋 상세 로그 테이블 렌더링
+  // 📋 테이블 렌더링
   // ===============================
   function renderTable(data) {
     if (!data || data.length === 0) {
@@ -203,18 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
     tbody.innerHTML = data.map(log => `
       <tr>
         <td>${log.id}</td>
-        <td>${log.type || '-'}</td>
+        <td>${log.eventType === 'acquisition' ? '유입경로' : '기능 클릭'}</td>
         <td>${log.sessionId || '-'}</td>
         <td>${log.ip || '-'}</td>
-        <td>${log.domain || '-'}</td>
-        <td>${log.detail || '-'}</td>
-        <td>${formatDate(log.createdAt)}</td>
+        <td>${log.acqChannel || log.featureName || '-'}</td>
+        <td>${log.extra || '-'}</td>
+        <td>${formatDate(log.eventTime)}</td>
       </tr>
     `).join('');
   }
 
   // ===============================
-  // 🕒 날짜 포맷 함수
+  // 🕒 날짜 포맷
   // ===============================
   function formatDate(iso) {
     const d = new Date(iso);
@@ -228,5 +245,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 초기 실행
-  fetchLogs();
+  loadAllData();
 });

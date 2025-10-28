@@ -8,8 +8,12 @@
   <title>SecuOne 로그 통계</title>
 
   <!-- ✅ 스타일 -->
-  <link rel="stylesheet" th:href="@{/css/secuone_logs.css}">
+  <link rel="stylesheet" th:href="@{/css/secuone_logs.css}" />
+
+  <!-- ✅ Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- ✅ 외부 JS -->
   <script defer th:src="@{/js/secuone_logs.js}"></script>
 </head>
 
@@ -28,13 +32,29 @@
   <div class="filter-bar">
     <select id="dateRange">
       <option value="1d">하루</option>
-      <option value="7d">일주일</option>
+      <option value="7d" selected>일주일</option>
       <option value="30d">한 달</option>
       <option value="custom">직접 선택</option>
     </select>
-    <input type="date" id="fromDate" disabled>
-    <input type="date" id="toDate" disabled>
+    <input type="date" id="fromDate" disabled />
+    <input type="date" id="toDate" disabled />
     <button id="searchBtn">검색</button>
+  </div>
+
+  <!-- ======================== ℹ️ 요약 카드 ======================== -->
+  <div class="summary-cards">
+    <div class="card">
+      <h4>Malware 탐지</h4>
+      <p id="todayCount">-</p>
+    </div>
+    <div class="card">
+      <h4>Remote 감지</h4>
+      <p id="featureCount">-</p>
+    </div>
+    <div class="card">
+      <h4>Rooting 탐지</h4>
+      <p id="totalCount">-</p>
+    </div>
   </div>
 
   <!-- ======================== 📊 차트 영역 ======================== -->
@@ -69,26 +89,12 @@
         </tr>
       </thead>
       <tbody id="logTbody">
-        <tr><td colspan="7" style="text-align:center;">📡 데이터를 불러오는 중...</td></tr>
+        <tr>
+          <td colspan="7" style="text-align:center;">📡 데이터를 불러오는 중...</td>
+        </tr>
       </tbody>
     </table>
   </section>
-
-  <!-- ======================== ℹ️ 요약 카드 ======================== -->
-  <div class="summary-cards">
-    <div class="card">
-      <h4>오늘 유입 수</h4>
-      <p id="todayCount">-</p>
-    </div>
-    <div class="card">
-      <h4>기능 사용 로그</h4>
-      <p id="featureCount">-</p>
-    </div>
-    <div class="card">
-      <h4>전체 이벤트</h4>
-      <p id="totalCount">-</p>
-    </div>
-  </div>
 
 </div>
 </body>
