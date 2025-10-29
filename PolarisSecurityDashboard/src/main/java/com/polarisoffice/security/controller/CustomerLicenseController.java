@@ -109,7 +109,7 @@ public class CustomerLicenseController {
         Service service = serviceService.getPrimaryService(customer.getCustomerId());
 
         String content = (service != null && service.getLicenseId() != null)
-                ? service.getLicenseId()
+                ? service.getLicenseId().toString()
                 : "라이선스 키 없음";
 
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
