@@ -44,6 +44,7 @@ public class SecuOneLogController {
         return new IdResponse(id);
     }
 
+
     /* -------------------- 2️⃣ 관리자 화면 -------------------- */
 
     /** 관리자 로그 페이지 */
@@ -75,54 +76,52 @@ public class SecuOneLogController {
                 .toList();
     }
 
+
     /* -------------------- 3️⃣ 고객 전용 로그 -------------------- */
 
     /**
-     * utmSource가 'com.polarisoffice.vguardsecuone' 이 아닌 로그만 조회
-     * → 즉, 외부(고객사) 유입 로그
+     * 고객 로그 페이지
+     * 기본 도메인: com.polarisoffice.vguardsecuone
+     * 파라미터 ?domain=... 으로 utm_source 기준 필터링
      */
     @GetMapping("/customer/logs")
-    public String showCustomerLogs(Model model) {
-
-        // ✅ 로그 데이터 조회
+    public String showCustomerLogs(
+            @RequestParam(required = false, defaultValue = "com.polarisoffice.vguardsecuone") String domain,
+            Model model
+    ) {
+        // ✅ utmSource 기준으로 필터링
         List<SecuOneLogEvent> customerLogs = secuOneLogRepository.findAll().stream()
-                .filter(e -> e.getUtmSource() != null &&
-                             !e.getUtmSource().equalsIgnoreCase("com.polarisoffice.vguardsecuone"))
+                .filter(e -> e.getUtmSource() != null)
+                .filter(e -> e.getUtmSource().equalsIgnoreCase(domain))
                 .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
                 .collect(Collectors.toList());
 
-        // ✅ 도메인 하드코딩 or 동적 지정
-        model.addAttribute("domain", "m.yebyeol.co.kr");
-
-        // ✅ 로그 리스트 전달
+        model.addAttribute("domain", domain);
         model.addAttribute("logs", customerLogs);
 
-        // ✅ 디버깅용 로그
-        System.out.println("총 고객 로그 수: " + customerLogs.size());
-
+        System.out.printf("✅ [유입 로그] domain=%s, count=%d%n", domain, customerLogs.size());
         return "customer/customer_logs";
     }
 
     /**
-     * 고객 로그 JSON API (AJAX)
+     * 고객 로그 JSON API (AJAX용)
      * - 특정 utmSource(도메인) 기반 필터링 가능
-     * - 날짜 필터는 추후 확장 용도
+     * - 날짜 필터 확장 가능
      */
     @GetMapping("/customer/logs/api")
     @ResponseBody
-    public List<SecuOneLogEvent> getCustomerLogs(
-            @RequestParam(required = false) String utmSource,
+    public List<SecuOneLogEvent> getCustomerLogsApi(
+            @RequestParam(required = false, defaultValue = "com.polarisoffice.vguardsecuone") String domain,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to
     ) {
         return secuOneLogRepository.findAll().stream()
-                .filter(e -> e.getUtmSource() != null &&
-                             !e.getUtmSource().equalsIgnoreCase("com.polarisoffice.vguardsecuone"))
-                .filter(e -> (utmSource == null || e.getUtmSource().equalsIgnoreCase(utmSource)))
+                .filter(e -> e.getUtmSource() != null)
+                .filter(e -> e.getUtmSource().equalsIgnoreCase(domain))
                 .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
                 .collect(Collectors.toList());
     }
 
-    /* 내부 응답 DTO */
+    /* -------------------- 내부용 DTO -------------------- */
     private record IdResponse(Long id) {}
 }

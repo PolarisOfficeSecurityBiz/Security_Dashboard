@@ -5,48 +5,86 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>고객사 로그</title>
+  <title th:text="${domain} + ' 요약 리포트'">도메인 요약 리포트</title>
   <link rel="stylesheet" th:href="@{/css/customer_logs.css}" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <div layout:fragment="content" class="layout">
-    <main class="content">
-      <header class="breadcrumb">
-        <span>Dashboards</span> / <span> 유입 로그 분석</span>
-      </header>
+<div layout:fragment="content" class="layout">
+  <main class="content">
+    <header class="breadcrumb">
+      <span>Dashboards</span> / <span> 도메인 요약 리포트</span>
+    </header>
 
-      <section class="log-card">
-        <h2 th:text="${domain} + ' 유입 로그'">m.yebyeol.co.kr 유입 로그</h2>
+    <section class="log-card">
+      <h2 th:text="${domain} + ' 요약 리포트'"></h2>
 
-        <section class="table-section">
-          <table>
-            <thead>
-              <tr>
-                <th>시간</th>
-                <th>IP</th>
-                <th>경로</th>
-                <th>User-Agent</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="log : ${logs}">
-                <td th:text="${#temporals.format(log.eventTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                <td th:text="${log.ip}"></td>
-                <td th:text="${log.featureName != null ? log.featureName : '-'}"></td>
-                <td th:text="${log.userAgent}"></td>
-              </tr>
-              <tr th:if="${#lists.isEmpty(logs)}">
-                <td colspan="4" class="empty">데이터가 없습니다.</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-      </section>
-    </main>
-  </div>
+      <!-- 도메인 선택 -->
+      <div class="filter">
+        <label>도메인 선택</label>
+        <input type="text" id="domainInput" th:value="${domain}" placeholder="예: m.yebyeol.co.kr" />
+        <button id="searchBtn">검색</button>
+      </div>
 
-  <script th:src="@{/js/customer_logs.js}"></script>
+      <!-- ✅ SecuOne 유입 사용자 수 -->
+      <div class="summary-box">
+        <p>
+          <strong th:text="${domain}"></strong> 으로 유입된 사용자:
+          <span class="highlight" th:text="${userCount} + '명'"></span>
+        </p>
+      </div>
+
+      <!-- ✅ 보안 로그 목록(LogEntry) -->
+      <h3>📋 보안 로그 목록 (LogEntry)</h3>
+      <table class="table-section">
+        <thead>
+        <tr>
+          <th>시간</th>
+          <th>유형</th>
+          <th>도메인</th>
+          <th>앱 버전</th>
+          <th>OS 버전</th>
+          <th>추가 정보</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${logEntries}">
+          <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+          <td th:text="${log.logType}"></td>
+          <td th:text="${log.domain}"></td>
+          <td th:text="${log.appVersion}"></td>
+          <td th:text="${log.osVersion}"></td>
+          <td th:text="${log.extra}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(logEntries)}">
+          <td colspan="6" class="empty">해당 도메인에 대한 보안 로그가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<script>
+  document.getElementById("searchBtn").addEventListener("click", () => {
+    const domain = document.getElementById("domainInput").value.trim();
+    if (domain) window.location.href = `/customer/domain-summary?domain=${domain}`;
+  });
+</script>
+
+<style>
+  .summary-box {
+    background: #f0f7f3;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    font-size: 18px;
+  }
+  .highlight {
+    color: #19a974;
+    font-weight: bold;
+  }
+</style>
+
 </body>
 </html>
