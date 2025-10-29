@@ -3,24 +3,22 @@ package com.polarisoffice.security.controller;
 import com.polarisoffice.security.auth.CustomUserDetails;
 import com.polarisoffice.security.dto.LogListItem;
 import com.polarisoffice.security.model.Customer;
+import com.polarisoffice.security.model.LogEntry;
 import com.polarisoffice.security.model.Service;
 import com.polarisoffice.security.model.ServiceContact;
 import com.polarisoffice.security.model.SecuOneLogEvent;
+import com.polarisoffice.security.repository.LogEntryRepository;
 import com.polarisoffice.security.repository.SecuOneLogEventRepository;
 import com.polarisoffice.security.service.CustomerInfoService;
 import com.polarisoffice.security.service.LogService;
 import com.polarisoffice.security.service.ServiceContactService;
 import com.polarisoffice.security.service.ServiceService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +29,7 @@ public class DomainLogSummaryController {
     private final ServiceService serviceService;
     private final ServiceContactService contactService;
     private final CustomerInfoService customerInfoService;
+    private final LogEntryRepository logEntryRepository;
 
     @GetMapping("/customer/domain-summary")
     public String showDomainSummary(Model model, Authentication auth) {
@@ -44,7 +43,7 @@ public class DomainLogSummaryController {
         String domain = (service != null) ? service.getDomain() : "-";
 
         // ✅ 시큐원 로그 수집 (utmSource 기준)
-        List<SecuOneLogEvent> secuLogs = secuOneLogRepository.findAll().stream()
+        List<SecuOneLogEvent> secuLogs = secuOneRepo.findAll().stream()
                 .filter(e -> e.getUtmSource() != null && e.getUtmSource().equalsIgnoreCase(domain))
                 .toList();
 
