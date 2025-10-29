@@ -51,7 +51,7 @@
           <label for="licenseExpiry">라이선스 만료일</label>
           <div class="input-group" th:if="${service != null}">
             <input type="text" id="licenseExpiry"
-                   th:value="${#dates.format(service.updateAt, 'yyyy-MM-dd')}" readonly />
+                   th:value="${service != null and service.updateAt != null ? #temporals.format(service.updateAt, 'yyyy-MM-dd') : '-'}" readonly />
             <button class="btn-green" id="extendBtn">연장요청</button>
           </div>
           <div class="input-group" th:if="${service == null}">
