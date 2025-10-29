@@ -2,14 +2,16 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/customer_layout}">
+
 <head>
   <meta charset="UTF-8" />
   <title>고객사 로그</title>
   <link rel="stylesheet" th:href="@{/css/customer_logs.css}" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-  <div class="layout">
+  <div layout:fragment="content" class="layout">
     <main class="content">
       <header class="breadcrumb">
         <span>Dashboards</span> / <span> 유입 로그 분석</span>
@@ -18,35 +20,25 @@
       <section class="log-card">
         <h2 th:text="${domain} + ' 유입 로그'">m.yebyeol.co.kr 유입 로그</h2>
 
-        <!-- 날짜 필터 -->
-        <div class="filter">
-          <label>기간</label>
-          <input type="date" id="fromDate" />
-          <span>~</span>
-          <input type="date" id="toDate" />
-          <button id="searchBtn">검색</button>
-        </div>
-
-        <!-- 요약 차트 -->
-        <div class="chart-section">
-          <canvas id="dailyChart"></canvas>
-        </div>
-
-        <!-- 로그 테이블 -->
         <section class="table-section">
           <table>
             <thead>
               <tr>
-                <th>날짜</th>
                 <th>시간</th>
-                <th>IP 주소</th>
-                <th>접속 페이지</th>
+                <th>IP</th>
+                <th>경로</th>
                 <th>User-Agent</th>
               </tr>
             </thead>
-            <tbody id="logTbody">
-              <tr>
-                <td colspan="5" class="empty">데이터를 불러오는 중...</td>
+            <tbody>
+              <tr th:each="log : ${logs}">
+                <td th:text="${#temporals.format(log.eventTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${log.ip}"></td>
+                <td th:text="${log.featureName != null ? log.featureName : '-'}"></td>
+                <td th:text="${log.userAgent}"></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(logs)}">
+                <td colspan="4" class="empty">데이터가 없습니다.</td>
               </tr>
             </tbody>
           </table>

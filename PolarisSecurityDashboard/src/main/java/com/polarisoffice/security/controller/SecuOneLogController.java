@@ -83,14 +83,24 @@ public class SecuOneLogController {
      */
     @GetMapping("/customer/logs")
     public String showCustomerLogs(Model model) {
+
+        // ✅ 로그 데이터 조회
         List<SecuOneLogEvent> customerLogs = secuOneLogRepository.findAll().stream()
                 .filter(e -> e.getUtmSource() != null &&
                              !e.getUtmSource().equalsIgnoreCase("com.polarisoffice.vguardsecuone"))
                 .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
                 .collect(Collectors.toList());
 
+        // ✅ 도메인 하드코딩 or 동적 지정
+        model.addAttribute("domain", "m.yebyeol.co.kr");
+
+        // ✅ 로그 리스트 전달
         model.addAttribute("logs", customerLogs);
-        return "customer/customer_logs";  // templates/customer/customer_logs.html
+
+        // ✅ 디버깅용 로그
+        System.out.println("총 고객 로그 수: " + customerLogs.size());
+
+        return "customer/customer_logs";
     }
 
     /**
