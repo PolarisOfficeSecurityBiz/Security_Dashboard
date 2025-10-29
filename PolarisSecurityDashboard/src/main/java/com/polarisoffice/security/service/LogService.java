@@ -115,4 +115,12 @@ public class LogService {
                 ))
                 .toList();
     }
+    /** 도메인 정확히 일치하는 로그만 조회 */
+    public List<LogListItem> getLogsByExactDomain(String domain) {
+        return logEntryRepo.findAll().stream()
+                .filter(log -> log.getDomain() != null &&
+                               log.getDomain().equalsIgnoreCase(domain))
+                .map(LogListItem::fromEntity) // DTO 변환
+                .toList();
+    }
 }

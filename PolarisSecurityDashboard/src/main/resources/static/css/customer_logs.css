@@ -1,0 +1,107 @@
+body {
+  font-family: 'Pretendard', sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  color: #222;
+}
+
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+/* 카드 */
+.log-card {
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  max-width: 1000px;
+}
+
+.log-card h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* 필터 */
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.filter input[type="date"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.filter button {
+  background-color: #19a974;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.filter button:hover {
+  background-color: #12895d;
+}
+
+/* 테이블 */
+.table-section {
+  margin-top: 30px;
+  overflow-x: auto;
+}
+
+.table-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-section th,
+.table-section td {
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.table-section th {
+  background-color: #f7f7f7;
+  font-weight: 600;
+}
+
+.table-section tr:hover {
+  background-color: #f9f9f9;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+/* 차트 */
+.chart-section {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+canvas {
+  width: 100%;
+  max-height: 300px;
+}

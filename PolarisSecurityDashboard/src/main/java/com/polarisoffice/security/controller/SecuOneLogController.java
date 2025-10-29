@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -43,10 +44,9 @@ public class SecuOneLogController {
         return new IdResponse(id);
     }
 
-
     /* -------------------- 2️⃣ 관리자 화면 -------------------- */
 
-    /** 로그 페이지 (Thymeleaf HTML) */
+    /** 관리자 로그 페이지 */
     @GetMapping("/admin/secuone/logs")
     public String showLogs(Model model) {
         model.addAttribute("logs",
@@ -54,7 +54,7 @@ public class SecuOneLogController {
         return "admin/secuone/logs";  // templates/admin/secuone/logs.html
     }
 
-    /** 로그 데이터 (AJAX용 JSON) */
+    /** 관리자 로그 API */
     @GetMapping("/admin/secuone/logs/api")
     @ResponseBody
     public List<SecuOneLogEvent> getAllLogs(
@@ -69,11 +69,50 @@ public class SecuOneLogController {
                 .filter(e -> (keyword == null ||
                         (e.getUserId() != null && e.getUserId().contains(keyword)) ||
                         (e.getFeatureName() != null && e.getFeatureName().contains(keyword)) ||
-                        (e.getAcqChannel() != null && e.getAcqChannel().contains(keyword))))
+                        (e.getAcqChannel() != null && e.getAcqChannel().contains(keyword)) ||
+                        (e.getUtmSource() != null && e.getUtmSource().contains(keyword))))
                 .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
                 .toList();
     }
 
-    /* 내부용 응답 DTO */
+    /* -------------------- 3️⃣ 고객 전용 로그 -------------------- */
+
+    /**
+     * utmSource가 'com.polarisoffice.vguardsecuone' 이 아닌 로그만 조회
+     * → 즉, 외부(고객사) 유입 로그
+     */
+    @GetMapping("/customer/logs")
+    public String showCustomerLogs(Model model) {
+        List<SecuOneLogEvent> customerLogs = secuOneLogRepository.findAll().stream()
+                .filter(e -> e.getUtmSource() != null &&
+                             !e.getUtmSource().equalsIgnoreCase("com.polarisoffice.vguardsecuone"))
+                .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
+                .collect(Collectors.toList());
+
+        model.addAttribute("logs", customerLogs);
+        return "customer/customer_logs";  // templates/customer/customer_logs.html
+    }
+
+    /**
+     * 고객 로그 JSON API (AJAX)
+     * - 특정 utmSource(도메인) 기반 필터링 가능
+     * - 날짜 필터는 추후 확장 용도
+     */
+    @GetMapping("/customer/logs/api")
+    @ResponseBody
+    public List<SecuOneLogEvent> getCustomerLogs(
+            @RequestParam(required = false) String utmSource,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
+        return secuOneLogRepository.findAll().stream()
+                .filter(e -> e.getUtmSource() != null &&
+                             !e.getUtmSource().equalsIgnoreCase("com.polarisoffice.vguardsecuone"))
+                .filter(e -> (utmSource == null || e.getUtmSource().equalsIgnoreCase(utmSource)))
+                .sorted(Comparator.comparing(SecuOneLogEvent::getEventTime).reversed())
+                .collect(Collectors.toList());
+    }
+
+    /* 내부 응답 DTO */
     private record IdResponse(Long id) {}
 }

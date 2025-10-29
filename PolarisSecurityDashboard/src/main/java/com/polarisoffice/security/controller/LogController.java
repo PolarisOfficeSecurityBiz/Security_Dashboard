@@ -10,18 +10,21 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/logs")
 @RequiredArgsConstructor
 @Tag(name = "Logs API", description = "로그 수집 및 분석 관련 API")
 public class LogController {
+
     private final LogService logService;
+
+    /* -------------------- 1️⃣ 로그 생성 -------------------- */
     @PostMapping("/v2")
     @Operation(
         summary = "로그 생성(원샷)",
@@ -31,12 +34,13 @@ public class LogController {
         Long id = logService.createLogWithDetail(req);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()               // /api/logs/v2
-                .replacePath("/api/logs/{id}")      // 리소스의 표준 경로로 교체 (원하면 바꿔도 됨)
+                .replacePath("/api/logs/{id}")      // /api/logs/{id}
                 .buildAndExpand(id)
                 .toUri();
-        return ResponseEntity.created(location).build();  // 201 + Location 헤더, 바디 없음
+        return ResponseEntity.created(location).build();
     }
-    
+
+    /* -------------------- 2️⃣ 리포트용 로그 조회 -------------------- */
     @GetMapping("/report")
     @Operation(summary = "최근 로그 조회(집계용 원본 목록)",
             description = """
@@ -54,5 +58,21 @@ public class LogController {
     ) {
         return ResponseEntity.ok(logService.getReport(days, type, domain));
     }
-    
+
+    /* -------------------- 3️⃣ 도메인 일치 로그 조회 -------------------- */
+    @GetMapping("/by-domain")
+    @Operation(
+        summary = "도메인별 로그 조회",
+        description = """
+            특정 도메인(utmSource 또는 domain 컬럼 기준)에 정확히 일치하는 로그만 반환합니다.  
+            예시: /api/logs/by-domain?domain=m.yebyeol.co.kr
+            """
+    )
+    public ResponseEntity<List<LogListItem>> getLogsByDomain(
+            @Parameter(description = "정확히 일치시킬 도메인 (예: m.yebyeol.co.kr)", required = true)
+            @RequestParam(name = "domain") String domain
+    ) {
+        List<LogListItem> logs = logService.getLogsByExactDomain(domain);
+        return ResponseEntity.ok(logs);
+    }
 }
