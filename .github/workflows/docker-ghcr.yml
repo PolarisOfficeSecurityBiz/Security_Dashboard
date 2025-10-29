@@ -31,8 +31,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/lily-b-lee/security_dashboard:latest
-            ghcr.io/lily-b-lee/security_dashboard:${{ github.sha }}
+            ghcr.io/PolarisOfficeSecurityBiz/security_dashboard:latest
+            ghcr.io/PolarisOfficeSecurityBiz/security_dashboard:${{ github.sha }}
 
   deploy:
     needs: build
@@ -56,7 +56,7 @@ jobs:
       - name: Check image exists (fail fast)
         run: |
           set -euxo pipefail
-          docker pull ghcr.io/lily-b-lee/security_dashboard:${IMAGE_TAG} || {
+          docker pull ghcr.io/PolarisOfficeSecurityBiz/security_dashboard:${IMAGE_TAG} || {
             echo "❌ Image tag not found: ${IMAGE_TAG}"
             echo "  - 확인: build job이 언더스코어 명으로 push 했는지"
             exit 1
