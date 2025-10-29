@@ -1,0 +1,330 @@
+/* ==========================================
+   Polaris Admin - V-Guard Page
+   (Overview / Customers / License / SecuOne와 통일)
+   last updated: 2025-10-16
+========================================== */
+
+/* ====== 페이지 기본 ====== */
+.vguard-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+/* ====== Breadcrumb ====== */
+.breadcrumb {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+}
+.breadcrumb a {
+  color: #2563eb;
+  text-decoration: none;
+}
+.breadcrumb strong {
+  color: #111827;
+}
+
+/* ==========================================
+   📦 Panel
+========================================== */
+.panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  width: 100%;
+  transition: all 0.2s ease;
+}
+.panel:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ==========================================
+   🎛 버튼
+========================================== */
+.upload-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+.upload-btn:hover {
+  background: #1e4ed8;
+}
+
+.arrow-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.arrow-btn:hover {
+  transform: translateX(3px);
+  color: #111;
+}
+
+/* ==========================================
+   📋 테이블
+========================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+th {
+  background: #f9fafb;
+  color: #6b7280;
+  font-weight: 600;
+}
+td {
+  color: #111827;
+}
+tbody tr:hover {
+  background: #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+/* 다운로드 아이콘 */
+.download-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  text-decoration: none;
+  color: #111827;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+.download-icon:hover {
+  background: #e5e7eb;
+}
+
+/* ==========================================
+   📤 모달
+========================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 500;
+}
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 420px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.25s ease-in-out;
+}
+.modal-content h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* 폼 */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+.form-group select,
+.form-group input[type="file"] {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.modal-actions button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+.cancel-btn:hover {
+  background: #d1d5db;
+}
+.upload-btn {
+  background: #2563eb;
+  color: #fff;
+}
+.upload-btn:hover {
+  background: #1e40af;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   📱 반응형
+========================================== */
+@media (max-width: 1280px) {
+  .vguard-page {
+    padding: 32px 32px;
+  }
+}
+@media (max-width: 768px) {
+  .vguard-page {
+    padding: 24px 20px;
+  }
+  th,
+  td {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}
+
+/* SDK 유형 클릭 스타일 */
+.sdk-type-link {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sdk-type-link:hover {
+  color: #0ea5e9;
+}
+
+/* ✅ Toast 메시지 */
+.toast-message {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  background: #323232;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+.toast-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ✅ 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-overlay.hidden {
+  display: none;
+}
+.modal-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+.cancel-btn {
+  background: #ddd;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.upload-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.upload-btn:hover {
+  background: #1d4ed8;
+}
+

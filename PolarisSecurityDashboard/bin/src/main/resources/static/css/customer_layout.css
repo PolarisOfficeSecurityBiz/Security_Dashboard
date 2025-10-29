@@ -1,0 +1,57 @@
+/* 전체 레이아웃 */
+.layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f6fa;
+  overflow: hidden;
+}
+
+/* 사이드바 (고정) */
+.customer-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: #0b1d38;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+/* 메인 레이아웃 */
+.layout-main {
+  flex: 1;
+  margin :0px;
+  padding: 0px;
+  background-color: #f8f9fc;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+  padding: 0px;
+  margin: 0 auto;
+  width: 100%; /* 화면의 폭을 100% 차지 */
+  max-width: 100%; /* 최대 폭을 100%로 설정 */
+  background: var(--bg-body);
+  box-sizing: border-box;
+}
+
+/* 반응형 */
+@media (max-width: 1280px) {
+  .layout-main {
+    margin-left: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-main {
+    margin-left: 0;
+  }
+  .main-content {
+    padding: 20px; /* 모바일 화면에 여백을 줄여줌 */
+  }
+}

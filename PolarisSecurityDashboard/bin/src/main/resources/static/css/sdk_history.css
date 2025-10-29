@@ -1,0 +1,318 @@
+/*******************************************
+ * 🔹 기본 페이지 스타일
+ *******************************************/
+.sdk-history-page {
+  padding: 1.5rem;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  color: #333;
+}
+
+.breadcrumb {
+  margin-bottom: 1rem;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #2b55ff;
+  text-decoration: none;
+}
+
+.breadcrumb strong {
+  color: #000;
+}
+
+/*******************************************
+ * 🔹 패널 영역
+ *******************************************/
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.panel-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+
+/*******************************************
+ * 🔹 검색 / 정렬 영역
+ *******************************************/
+.history-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#historySearch {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 220px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+#historySearch:focus {
+  border-color: #4a68ff;
+  outline: none;
+}
+
+#sortBtn {
+  padding: 6px 12px;
+  border: none;
+  background: #eef1ff;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+#sortBtn:hover {
+  background: #d7ddff;
+}
+
+/*******************************************
+ * 🔹 테이블 영역
+ *******************************************/
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.history-table th {
+  background: #f8f8f8;
+  font-weight: 600;
+  color: #444;
+}
+
+/*******************************************
+ * 🔹 작업 유형 태그
+ *******************************************/
+.action-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.action-tag.upload {
+  background: #eaf7eb;
+  color: #1c9a32;
+}
+
+.action-tag.download {
+  background: #f4f4f4;
+  color: #555;
+}
+
+/*******************************************
+ * 🔹 수정 버튼
+ *******************************************/
+.edit-btn {
+  margin-left: 8px;
+  background: #f1f3ff;
+  border: 1px solid #c3c9ff;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 3px 8px;
+  cursor: pointer;
+  color: #333;
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  background: #dbe1ff;
+}
+
+/*******************************************
+ * 🔹 뒤로가기 버튼
+ *******************************************/
+.back-area {
+  margin-top: 1.5rem;
+  text-align: right;
+}
+
+.back-btn {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  background: #eee;
+}
+
+/*******************************************
+ * 🔹 모달 오버레이 & 콘텐츠
+ *******************************************/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: none; /* 기본 숨김 */
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 18, 27, 0.45); /* 더 은은한 딤 */
+  backdrop-filter: blur(2px) saturate(120%);
+  -webkit-backdrop-filter: blur(2px) saturate(120%);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+
+.modal-overlay.show {
+  display: flex !important;
+  opacity: 1;
+}
+
+.modal-content {
+  width: min(560px, 92vw); /* 반응형 폭 */
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .18), 0 2px 10px rgba(0, 0, 0, .06);
+  animation: modalPop .16s ease-out;
+  overflow: hidden;
+}
+
+.modal-content h3 {
+  margin: 2px 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d2433;
+  letter-spacing: -0.2px;
+}
+
+#noteInput {
+  width: 100%;
+  min-height: 160px;
+  max-width: 100%;
+  resize: vertical;
+  border: 1px solid #d8dde7;
+  border-radius: 10px;
+  padding: 12px 12px 12px 14px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #222;
+  background: #fbfcff;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+#noteInput:focus {
+  outline: none;
+  border-color: #5b76ff;
+  box-shadow: inset 0 0 0 2px rgba(91, 118, 255, .6);
+  background: #fff;
+}
+
+/* 버튼 영역 */
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* 공통 버튼 */
+.modal-actions button {
+  appearance: none;
+  border: 0;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .02s ease, background .18s ease, box-shadow .18s ease;
+}
+
+/* 취소 */
+#cancelEdit {
+  background: #eef1f6;
+  color: #2f3747;
+}
+
+#cancelEdit:hover {
+  background: #e6eaf2;
+}
+
+#cancelEdit:active {
+  transform: translateY(1px);
+}
+
+/* 저장 (primary) */
+#saveEdit {
+  background: #5b76ff;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(91, 118, 255, .28);
+}
+
+#saveEdit:hover {
+  background: #4b64f0;
+  box-shadow: 0 3px 12px rgba(75, 100, 240, .32);
+}
+
+#saveEdit:active {
+  transform: translateY(1px);
+}
+
+/* 진입 애니메이션 */
+@keyframes modalPop {
+  from {
+    transform: translateY(4px) scale(.985);
+    opacity: .95;
+  }
+
+  to {
+    transform: translateY(0);
+    scale(1);
+    opacity: 1;
+  }
+}
+
+/* 작은 화면 최적화 */
+@media (max-width: 420px) {
+  .modal-content {
+    padding: 14px;
+  }
+
+  .modal-content h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  #noteInput {
+    min-height: 140px;
+    font-size: 13px;
+  }
+
+  .modal-actions button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

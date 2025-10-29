@@ -56,9 +56,9 @@ input[type="text"] {
 /* 입력창과 버튼을 감싸는 그룹 스타일 */
 .input-group {
   display: flex;
-  gap: 10px; /* 항목 간격 */
+  gap: 10px; /* 항목 사이 간격을 넉넉하게 설정 */
   align-items: center; /* 수평 정렬 */
-  margin-bottom: 15px; /* 아래 간격 */
+  margin-bottom: 15px; /* 아래 간격 추가 */
 }
 
 .input-group input {
@@ -70,7 +70,6 @@ input[type="text"] {
   font-size: 14px;
 }
 
-/* 기본 버튼 및 링크 스타일 */
 .input-group button,
 .input-group a {
   background-color: #eaeaea;
@@ -83,7 +82,6 @@ input[type="text"] {
   text-align: center;
   line-height: 36px;
   height: 36px;
-  transition: background-color 0.2s ease;
 }
 
 .input-group button:hover,
@@ -100,66 +98,26 @@ input[type="text"] {
   line-height: 36px;
   text-align: center;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
 }
 
 .btn-green:hover {
   background-color: #13895e !important;
 }
 
-/* 비활성화 상태 */
-button[disabled],
-a.disabled {
-  background-color: #ccc !important;
-  color: #888 !important;
-  cursor: not-allowed !important;
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-/* 전체 입력 폼 정렬 */
+/* 전체 입력 폼의 여백 및 정렬 */
 .license-card .form {
   display: flex;
   flex-direction: column;
 }
 
-/* 읽기 전용 입력창 스타일 */
+/* 입력창의 최대 크기 제한 및 정렬 */
+input[type="text"] {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 잘못된 스타일로 인한 기본값 수정 */
 input[readonly] {
   background-color: #f0f0f0;
   cursor: not-allowed;
-}
-
-/* ✅ 토스트 메시지 스타일 */
-.toast {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  opacity: 0;
-  animation: fadeInOut 3s ease forwards;
-  z-index: 9999;
-}
-
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  10% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  90% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
 }

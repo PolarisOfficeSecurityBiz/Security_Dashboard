@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+
+<!-- ❌ 레이아웃은 그대로 두고, 자식 본문(content) 안에서 CSS/JS를 직접 로드합니다. -->
+<div layout:fragment="content" class="sdk-history-page">
+
+  <!-- ✅ 페이지 전용 CSS 로드 (body 안에 두어도 로드됩니다) -->
+  <link rel="stylesheet" th:href="@{/css/sdk_history.css}"/>
+
+  <div class="breadcrumb">
+    <a th:href="@{/admin/vguard}">V-Guard</a> /
+    <strong th:text="${sdk.sdkType}">VGuardSDK2.0</strong> 히스토리
+  </div>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h3 th:text="${sdk.sdkType} + ' 이력 목록'">VGuardSDK2.0 이력 목록</h3>
+
+      <div class="history-controls">
+        <input type="text" id="historySearch" placeholder="검색 (버전, 작성자, 노트 등)">
+        <button id="sortBtn" type="button">최신순</button>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <table class="history-table">
+        <thead>
+        <tr>
+          <th>버전</th>
+          <th>작업 유형</th>
+          <th>등록자</th>
+          <th>등록일</th>
+          <th>릴리즈 노트</th>
+          <th>수정</th> <!-- 수정 버튼을 위한 칸 추가 -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="h : ${historyList}">
+          <td th:text="${h.version}">v1.0.1</td>
+          <td>
+            <span th:text="${h.actionType}"
+                  th:classappend="' action-tag ' + (${#strings.contains(h.actionType,'업로드')} ? 'upload' : 'download')">
+            </span>
+          </td>
+          <td th:text="${h.uploadedBy}">관리자</td>
+          <td th:text="${#temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm')}">2025-10-20</td>
+
+          <td class="release-note">
+            <span th:id="'note-' + ${h.id}" th:text="${h.releaseNote}">SDK 신규 업로드</span>
+          </td>
+
+          <td class="action-column">
+            <!-- 등록자가 현재 로그인 사용자일 때만 수정 버튼 노출 -->
+            <button class="edit-btn"
+                    type="button"
+                    th:if="${h.uploadedBy == currentUser}"
+                    th:attr="data-id=${h.id}">
+              수정
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="back-area">
+      <a th:href="@{/admin/vguard}" class="back-btn">← 목록으로</a>
+    </div>
+  </section>
+
+  <!-- 모달 -->
+  <div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-content">
+      <h3 id="editModalTitle">릴리즈 노트 수정</h3>
+      <textarea id="noteInput" rows="6" placeholder="릴리즈 노트를 입력하세요."></textarea>
+      <div class="modal-actions">
+        <button id="cancelEdit" type="button">취소</button>
+        <button id="saveEdit" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ 페이지 전용 JS 로드 (content 끝에서 로드) -->
+  <script defer th:src="@{/js/sdk_history.js}"></script>
+</div>
+</html>

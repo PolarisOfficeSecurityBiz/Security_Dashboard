@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <meta charset="UTF-8"/>
+  <title>로그 관리</title>
+
+  <!-- 부모 레이아웃의 <head> 뒤에 페이지 전용 리소스 주입 -->
+  <th:block layout:fragment="head">
+    <link rel="stylesheet" th:href="@{/css/logs.css(v=${#dates.createNow().time})}" href="/css/logs.css"/>
+    <script defer th:src="@{/js/logs.js(v=${#dates.createNow().time})}" src="/js/logs.js"></script>
+  </th:block>
+</head>
+<body>
+  <!-- ✅ 레이아웃의 layout:fragment="content" 를 채움 -->
+  <div layout:fragment="content">
+
+    <!-- 상단 브레드크럼: Dashboards / 로그관리 -->
+    <header class="page-header">
+      <div class="breadcrumbs">
+        <a th:href="@{/admin}">Dashboards</a>
+        <span>/</span>
+        <strong>로그관리</strong>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- Filters -->
+      <section class="panel filters">
+        <div class="row">
+          <label>
+            기간
+            <select id="range">
+              <option value="1">오늘</option>
+              <option value="7" selected>최근 7일</option>
+              <option value="14">최근 14일</option>
+              <option value="30">최근 30일</option>
+            </select>
+          </label>
+
+          <label>
+            LogType
+            <select id="type">
+              <option value="ALL" selected>전체</option>
+              <option value="MALWARE">MALWARE</option>
+              <option value="REMOTE">REMOTE</option>
+              <option value="ROOTING">ROOTING</option>
+            </select>
+          </label>
+
+          <label class="grow">
+            고객사(도메인)
+            <input id="domain" type="text" placeholder="예: corp.example.com" />
+          </label>
+
+          <button id="refresh" class="btn primary">적용</button>
+        </div>
+      </section>
+
+      <!-- KPI Cards -->
+      <section class="kpis">
+        <div class="kpi">
+          <div class="kpi-label">총 로그</div>
+          <div class="kpi-value" id="kpi-total">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">MALWARE</div>
+          <div class="kpi-value" id="kpi-malware">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">REMOTE</div>
+          <div class="kpi-value" id="kpi-remote">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">ROOTING</div>
+          <div class="kpi-value" id="kpi-rooting">0</div>
+        </div>
+      </section>
+
+      <!-- Grouped Summaries -->
+      <section class="grid-2">
+        <div class="panel">
+          <h3>날짜별(최근 7일)</h3>
+          <div class="chart-wrap">
+            <canvas id="by-day-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>고객사(도메인)별</h3>
+          <div id="by-domain" class="list"></div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="panel">
+        <div class="table-header">
+          <h3>로그 목록</h3>
+          <div class="right muted" id="result-info"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Created At</th>
+                <th>Domain</th>
+                <th>Type</th>
+                <th>OS</th>
+                <th>App</th>
+                <th>Extra</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+
+        <div class="pager">
+          <button id="prev" class="btn">이전</button>
+          <span id="page-info" class="muted">1 / 1</span>
+          <button id="next" class="btn">다음</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot muted">
+      Asia/Seoul 기준 · 클라이언트 집계(백엔드 응답 스키마: id, domain, logType, createdAt, osVersion, appVersion, extra)
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <title>Polaris Admin</title>
+
+  <!-- 공통 레이아웃/네비게이션 스타일 -->
+  <link rel="stylesheet" th:href="@{/css/admin_nav.css}">
+  <link rel="stylesheet" th:href="@{/css/admin_layout.css}">
+  
+  <!-- 개별 페이지에서 pageStyle fragment로 개별 CSS 삽입 -->
+  <th:block layout:fragment="pageStyle"></th:block>
+</head>
+
+<body>
+  <div class="layout">
+    <!-- ✅ 좌측 사이드 네비게이션 -->
+    <div th:replace="~{fragments/admin_nav :: nav}"></div>
+
+    <!-- ✅ 오른쪽 컨텐츠 -->
+    <main class="main-content">
+	  <div class="page-wrapper" layout:fragment="content"></div>
+	</main>
+  </div>
+</body>
+</html>

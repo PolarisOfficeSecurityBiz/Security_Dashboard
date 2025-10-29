@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <meta charset="UTF-8" />
+  <title>Polaris Admin - Customers</title>
+
+  <th:block layout:fragment="pageStyle">
+    <link rel="stylesheet" th:href="@{/css/customers.css}">
+  </th:block>
+</head>
+
+<body>
+<div layout:fragment="content" class="customers-page">
+
+  <div class="breadcrumb">
+    <a th:href="@{/admin/overview}">Dashboard</a> /
+    <strong>Customers</strong>
+  </div>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h3>고객사 목록</h3>
+
+      <div class="actions">
+        <form class="search-form" method="get" th:action="@{/admin/customers}">
+          <!-- ✅ JS가 찾는 id 부여 -->
+          <input id="searchInput" type="text" name="q" th:value="${q}" placeholder="고객사명/연결사 검색" />
+          <button type="submit" class="btn">검색</button>
+          <a class="btn btn-ghost" th:href="@{/admin/customers}">초기화</a>
+        </form>
+        <a href="#custCreateModal" class="btn btn-primary">+ 고객사 추가</a>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>고객사명</th>
+          <th>연결사</th>
+          <th>생성일</th>
+        </tr>
+        </thead>
+        <!-- ✅ JS가 채워넣을 타겟 tbody -->
+        <tbody id="customersTbody">
+          <tr><td colspan="3" class="empty">불러오는 중…</td></tr>
+        </tbody>
+      </table>
+
+      <!-- 페이지네이션은 Ajax 방식이면 숨겨두거나 서버 렌더에 맞춰 사용 -->
+      <div class="pagination hidden" th:if="${page != null and page.totalPages > 1}">
+        <a th:if="${!page.first}"
+           th:href="@{/admin/customers(page=${page.number-1}, size=${page.size}, q=${q})}">이전</a>
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages-1)}"
+              th:classappend="${i==page.number} ? 'active'">
+          <a th:if="${i != page.number}"
+             th:text="${i+1}"
+             th:href="@{/admin/customers(page=${i}, size=${page.size}, q=${q})}">1</a>
+          <span th:if="${i == page.number}" th:text="${i+1}">1</span>
+        </span>
+        <a th:if="${!page.last}"
+           th:href="@{/admin/customers(page=${page.number+1}, size=${page.size}, q=${q})}">다음</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 고객사 추가 모달 -->
+  <div id="custCreateModal" class="modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="custCreateTitle">
+      <div class="modal-header">
+        <h3 id="custCreateTitle">고객사 추가</h3>
+      </div>
+
+      <form th:action="@{/admin/customers}" method="post" class="modal-body">
+        <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+        <div class="form-row">
+          <label>고객사명 *</label>
+          <input name="customerName" required placeholder="예: 폴라리스"/>
+        </div>
+
+        <div class="form-row">
+          <label>연결사</label>
+          <select name="connectedCompany" id="connectedCompany">
+            <option value="">-- 선택 --</option>
+            <option th:each="co : ${allCustomers}"
+                    th:value="${co.customerId}"
+                    th:text="${co.customerName}">
+              회사이름
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <a href="#" class="btn btn-ghost">취소</a>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ✅ JS 로딩: content 내부 맨 아래 + defer -->
+  <script th:src="@{/js/customers.js(v=${#dates.createNow().time})}" defer></script>
+</div>
+</body>
+</html>

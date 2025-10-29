@@ -1,0 +1,111 @@
+/* ============================================
+   Polaris Admin Layout (2025-10 기준 최신 정렬 통일)
+   - 모든 페이지의 시작 여백/폭/정렬 완전 일치
+   - nav 고정 / main-content는 중앙 기준으로 통일
+============================================ */
+
+:root {
+  --nav-width: 260px;
+  --bg-body: #f9fafb;
+  --bg-card: #fff;
+  --border-color: #e5e7eb;
+}
+
+/* === 전체 레이아웃 === */
+.layout {
+  display: block;
+  min-height: 100vh;
+  background: var(--bg-body);
+  position: relative;
+}
+
+/* === 좌측 고정 내비게이션 === */
+.admin-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  background: #fff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+/* === 메인 콘텐츠 래퍼 === */
+.main-content {
+  margin-left: var(--nav-width);
+  background: var(--bg-body);
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
+}
+
+/* ✅ 내부 페이지 통일 기준 (Overview, Customers 등) */
+.main-content > [class$="-page"],
+.overview-page,
+.page-customers,
+.license-page,
+.vguard-page,
+.secuone-page {
+  width: 100%;
+  max-width: 1200px;         /* 중앙 정렬 기준 폭 */
+  margin: 0 auto;
+  padding: 40px;             /* 상하좌우 여백 균일 */
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: var(--bg-body);
+  box-sizing: border-box;
+}
+
+/* breadcrumb, page-header 상단 마진 정렬 */
+.breadcrumb,
+.page-header {
+  margin: 0 0 12px 0 !important;
+}
+
+/* === 공통 카드 및 패널 간격 === */
+.card,
+.table,
+.panel {
+  margin-bottom: 24px;
+}
+
+/* === 반응형 (아이패드 포함) === */
+@media (max-width: 1280px) {
+  :root {
+    --nav-width: 220px;
+  }
+  .main-content {
+    margin-left: var(--nav-width);
+  }
+  .main-content > [class$="-page"] {
+    padding: 32px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-width: 200px;
+  }
+  .admin-nav {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .admin-nav.open {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  .main-content > [class$="-page"] {
+    padding: 24px 20px;
+  }
+}

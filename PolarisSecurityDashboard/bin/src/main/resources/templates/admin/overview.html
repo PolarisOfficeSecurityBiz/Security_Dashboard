@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin_layout}">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Polaris Admin Dashboard</title>
+
+  <!-- 페이지 전용 스타일 -->
+  <th:block layout:fragment="pageStyle">
+    <link rel="stylesheet" th:href="@{/css/overview.css}"/>
+  </th:block>
+</head>
+
+<body>
+<div layout:fragment="content" class="overview-page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a th:href="@{/admin/overview}">Dashboard</a> /
+    <strong>Overview</strong>
+  </div>
+
+  <!-- KPI Section -->
+  <section class="kpi-section">
+    <div class="kpi-card total">
+      <div class="icon">👥</div>
+      <div>
+        <p class="label">Total Customers</p>
+        <h3 th:text="${metrics.totalCustomers}">0</h3>
+        <span class="delta up">▲ 16% this month</span>
+      </div>
+    </div>
+
+    <div class="kpi-card vguard">
+      <div class="icon">🛡️</div>
+      <div>
+        <p class="label">V-Guard</p>
+        <h3 th:text="${metrics.vguard}">0</h3>
+        <span class="delta down">▼ 1% this month</span>
+      </div>
+    </div>
+
+    <div class="kpi-card secuone">
+      <div class="icon">💻</div>
+      <div>
+        <p class="label">SecuOne</p>
+        <h3 th:text="${metrics.secuone}">0</h3>
+        <span class="delta same">— this month</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 최근 등록 고객사 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>최근 등록 고객사</h3>
+      <a th:href="@{/admin/customers}" class="more">전체 보기</a>
+    </div>
+
+    <div class="panel-body">
+      <table>
+        <thead>
+        <tr>
+          <th>고객사명</th>
+          <th>연결사</th>
+          <th>생성일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- ✅ DTO(RecentCustomerRow) 프로퍼티 접근 사용 -->
+        <tr th:each="c : ${recentCustomers}">
+          <td th:text="${c.customerName}">폴라리스</td>
+          <td th:text="${c.connectedCompanyName != null ? c.connectedCompanyName : '-'}">-</td>
+          <td th:text="${c.createAt}">2025-09-16</td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(recentCustomers)}">
+          <td colspan="3" class="empty">최근 등록된 고객사가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 수정요청 인박스 -->
+  <section class="panel">
+    <div class="panel-header">
+      <h3>수정요청 인박스</h3>
+      <a th:href="@{/admin/requests}" class="more">전체 보기</a>
+    </div>
+
+    <div class="panel-body">
+      <!-- 상태 배지 -->
+      <div class="inbox-filters" style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <span style="background:#eef2ff;color:#4338ca;padding:4px 8px;border-radius:999px;font-weight:700;">
+          대기 <span th:text="${reqCounts.pending}">0</span>
+        </span>
+        <span style="background:#ecfeff;color:#0e7490;padding:4px 8px;border-radius:999px;font-weight:700;">
+          진행 <span th:text="${reqCounts.in_progress}">0</span>
+        </span>
+        <span style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:999px;font-weight:700;">
+          완료 <span th:text="${reqCounts.resolved}">0</span>
+        </span>
+      </div>
+
+      <!-- 수정요청 리스트 테이블 -->
+      <table>
+        <thead>
+        <tr>
+          <th style="width:120px">요청일</th>
+          <th style="width:90px">구분</th>
+          <th style="width:160px">대상</th>
+          <th>내용</th>
+          <th style="width:90px">상태</th>
+          <th style="width:180px">요청자</th>
+          <th style="width:260px">처리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${requests}">
+          <!-- 요청일: 컨트롤러에서 문자열로 내려옴 -->
+          <td class="mono" th:text="${r.createdAt}">2025-10-17 14:26</td>
+
+          <!-- 구분 -->
+          <td th:text="${r.type}">COMPANY</td>
+
+          <!-- 대상 -->
+          <td>
+            <span th:text="${r.target}">회사 정보</span>
+            <small class="muted" th:if="${r['serviceId'] != null}"
+                  th:text="'#' + ${r['serviceId']}"></small>
+          </td>
+
+          <!-- 내용 요약 -->
+          <td>
+            <div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
+                 th:title="${r.snippet}"
+                 th:text="${r.snippet}">요청 내용</div>
+          </td>
+
+          <!-- 상태 뱃지 -->
+          <td>
+            <span th:switch="${r.status}">
+              <span th:case="'PENDING'"
+                    style="background:#eef2ff;color:#4338ca;padding:4px 8px;border-radius:999px;font-weight:700;">대기</span>
+              <span th:case="'IN_PROGRESS'"
+                    style="background:#fff7ed;color:#92400e;padding:4px 8px;border-radius:999px;font-weight:700;">진행</span>
+              <span th:case="'RESOLVED'"
+                    style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:999px;font-weight:700;">완료</span>
+              <span th:case="*"
+                    style="background:#f3f4f6;color:#374151;padding:4px 8px;border-radius:999px;font-weight:700;">-</span>
+            </span>
+          </td>
+
+          <!-- 요청자 -->
+          <td>
+            <div th:text="${r.requester}">홍길동</div>
+            <small class="muted" th:if="${r['requesterEmail'] != null}"
+                  th:text="${r['requesterEmail']}">user@company.com</small>
+          </td>
+
+          <!-- 처리 -->
+          <td>
+            <!-- COMPANY면 고객사 정보 변경 -->
+            <div th:if="${r.type == 'COMPANY'}" style="margin-bottom:6px;">
+              <a th:if="${r['companyId'] != null}"
+                 th:href="@{|/admin/customers/${r['companyId']}|}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                고객사 정보 변경
+              </a>
+              <a th:if="${r['companyId'] == null}"
+                 th:href="@{/admin/customers}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                고객사 정보 변경
+              </a>
+            </div>
+
+            <!-- SERVICE면 서비스 설정 변경 버튼도 제공 -->
+            <div th:if="${r.type == 'SERVICE'}" style="margin-bottom:6px;">
+              <a th:if="${r['companyId'] != null and r['serviceId'] != null}"
+                 th:href="@{|/admin/customers/${r['companyId']}/services/${r['serviceId']}|}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                서비스 설정 변경
+              </a>
+              <a th:if="${!(r['companyId'] != null and r['serviceId'] != null)}"
+                 th:href="@{/admin/customers}"
+                 style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:inline-block;text-decoration:none;">
+                서비스 설정 변경
+              </a>
+            </div>
+
+            <!-- 상태 변경 폼(공통) -->
+            <form th:action="@{/admin/requests/{id}/status(id=${r.id})}" method="post"
+                  style="display:flex;gap:6px;align-items:center;">
+              <input type="hidden" name="_csrf" th:if="${_csrf != null}" th:value="${_csrf.token}"/>
+
+              <select name="status"
+                      style="height:30px;border:1px solid #e5e7eb;border-radius:8px;padding:0 6px;background:#fff;">
+                <option value="PENDING"     th:selected="${r.status=='PENDING'}">대기</option>
+                <option value="IN_PROGRESS" th:selected="${r.status=='IN_PROGRESS'}">진행</option>
+                <option value="RESOLVED"    th:selected="${r.status=='RESOLVED'}">완료</option>
+              </select>
+
+              <button type="submit"
+                      style="padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;">
+                상태 변경
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(requests)}">
+          <td colspan="7" class="empty">최근 접수된 수정요청이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" 
-xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
-layout:decorate="~{layout/customer_layout}">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{layout/customer_layout}">
 
 <head>
   <meta charset="UTF-8" />
@@ -20,35 +20,56 @@ layout:decorate="~{layout/customer_layout}">
         <h2>라이선스 정보</h2>
 
         <div class="form">
+          <!-- 고객사 명 -->
           <label for="customerName">고객사 명</label>
           <input type="text" id="customerName" th:value="${customer.customerName}" readonly />
 
+          <!-- 서비스 명 -->
           <label for="serviceName">서비스 명</label>
-          <input type="text" id="serviceName" th:value="${service != null ? service.serviceName : '-'}" readonly />
+          <input type="text" id="serviceName"
+                 th:value="${service != null ? service.serviceName : '-'}"
+                 readonly />
 
+          <!-- 도메인 -->
           <label for="domain">도메인</label>
-          <input type="text" id="domain" th:value="${service != null ? service.domain : '-'}" readonly />
+          <input type="text" id="domain"
+                 th:value="${service != null ? service.domain : '-'}"
+                 readonly />
 
-          <!-- 라이선스 키 입력 및 다운로드 버튼 -->
-			<label for="licenseKey">라이선스 키</label>
-			<div class="input-group">
-			  <input type="text" id="licenseKey" th:value="${service != null ? service.licenseId : '발급 전입니다.'}" readonly />
-			  <button id="downloadKeyBtn" title="라이선스 파일 다운로드">⭳</button>
-			</div>
-			
-			<!-- 라이선스 만료일 -->
-			<label for="licenseExpiry">라이선스 만료일</label>
-			<div class="input-group">
-			  <input type="text" id="licenseExpiry" th:value="${service != null ? service.updateAt : '-'}" readonly />
-			  <button class="btn-green" id="extendBtn">연장요청</button>
-			</div>
-			
-			<!-- 최신 SDK -->
-			<label for="sdkVersion">최신 SDK</label>
-			<div class="input-group">
-			  <input type="text" id="sdkVersion" th:value="${service != null ? 'ver20250912_SDK_RB' : '-'}" readonly />
-			  <a class="btn-green" th:href="@{'/api/sdk/download/' + ${service != null ? service.serviceId : 0}}">다운로드</a>
-			</div>
+          <!-- 라이선스 키 -->
+          <label for="licenseKey">라이선스 키</label>
+          <div class="input-group" th:if="${service != null}">
+            <input type="text" id="licenseKey" th:value="${service.licenseId}" readonly />
+            <button id="downloadKeyBtn" title="라이선스 파일 다운로드">⭳</button>
+          </div>
+          <div class="input-group" th:if="${service == null}">
+            <input type="text" id="licenseKey" value="발급 전입니다." readonly />
+            <button id="downloadKeyBtn" disabled title="라이선스 파일 없음">⭳</button>
+          </div>
+
+          <!-- 라이선스 만료일 -->
+          <label for="licenseExpiry">라이선스 만료일</label>
+          <div class="input-group" th:if="${service != null}">
+            <input type="text" id="licenseExpiry"
+                   th:value="${#dates.format(service.updateAt, 'yyyy-MM-dd')}" readonly />
+            <button class="btn-green" id="extendBtn">연장요청</button>
+          </div>
+          <div class="input-group" th:if="${service == null}">
+            <input type="text" id="licenseExpiry" value="-" readonly />
+            <button class="btn-green" id="extendBtn" disabled>연장요청</button>
+          </div>
+
+          <!-- 최신 SDK -->
+          <label for="sdkVersion">최신 SDK</label>
+          <div class="input-group" th:if="${service != null}">
+            <input type="text" id="sdkVersion" value="ver20250912_SDK_RB" readonly />
+            <a class="btn-green"
+               th:href="@{'/api/sdk/download/' + ${service.serviceId}}">다운로드</a>
+          </div>
+          <div class="input-group" th:if="${service == null}">
+            <input type="text" id="sdkVersion" value="-" readonly />
+            <a class="btn-green disabled" href="javascript:void(0)">다운로드</a>
+          </div>
 
         </div>
       </section>
