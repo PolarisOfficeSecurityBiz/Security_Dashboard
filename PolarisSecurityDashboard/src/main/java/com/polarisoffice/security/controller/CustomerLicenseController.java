@@ -43,13 +43,24 @@ public class CustomerLicenseController {
     @GetMapping("/customer/license")
     public String licensePage(Model model, Authentication authentication) {
         String email = ((CustomUserDetails) authentication.getPrincipal()).getUsername();
-        ServiceContact contact = contactService.getByEmail(email);
 
-        // 고객사 정보 조회
+        // 담당자 조회
+        ServiceContact contact = contactService.getByEmail(email);
+        if (contact == null) {
+            logger.error("담당자 정보를 찾을 수 없습니다. email={}", email);
+            model.addAttribute("errorMessage", "담당자 정보를 찾을 수 없습니다.");
+            return "error/general_error"; // 별도 에러 페이지 or license.html로 안내 가능
+        }
+
+        // 고객사 조회
         Customer customer = contact.getCustomer();
         if (customer == null) {
-            logger.error("고객 정보를 찾을 수 없습니다. email=" + email);
-            throw new IllegalArgumentException("고객 정보를 찾을 수 없습니다. email=" + email);
+            logger.error("고객 정보를 찾을 수 없습니다. email={}", email);
+            model.addAttribute("customer", new Customer());
+            model.addAttribute("service", null);
+            model.addAttribute("contact", contact);
+            model.addAttribute("connectedCompanyName", "-");
+            return "customer/license";
         }
 
         // 주요 서비스 조회
@@ -61,7 +72,7 @@ public class CustomerLicenseController {
             connectedCompanyName = customer.getConnectedCompany().getCustomerName();
         }
 
-        // 라이선스 키 값 확인 로그 추가
+        // 로그
         if (service != null) {
             logger.info("License Key: {}", service.getLicenseId());
         } else {
@@ -73,7 +84,7 @@ public class CustomerLicenseController {
         model.addAttribute("contact", contact);
         model.addAttribute("connectedCompanyName", connectedCompanyName);
 
-        return "customer/license"; // "license.html"을 반환
+        return "customer/license";
     }
 
     @GetMapping("/customer/license/download")
@@ -87,16 +98,18 @@ public class CustomerLicenseController {
             email = authentication.getName();
         }
 
-        // 로그인한 담당자 이메일로 ServiceContact 조회
         ServiceContact contact = contactService.getByEmail(email);
-        // 고객사 정보 조회
+        if (contact == null || contact.getCustomer() == null) {
+            logger.error("다운로드 실패: contact 또는 customer 정보가 없습니다. email={}", email);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("라이선스 키 정보를 찾을 수 없습니다.".getBytes(StandardCharsets.UTF_8));
+        }
+
         Customer customer = customerInfoService.getCustomerById(contact.getCustomer().getCustomerId());
-        // 고객의 주요 서비스 조회
         Service service = serviceService.getPrimaryService(customer.getCustomerId());
 
-        // 라이선스 키가 비어있지 않으면 다운로드 제공
         String content = (service != null && service.getLicenseId() != null)
-                ? String.valueOf(service.getLicenseId())
+                ? service.getLicenseId()
                 : "라이선스 키 없음";
 
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
@@ -107,6 +120,7 @@ public class CustomerLicenseController {
 
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
+
 
     // 서비스가 발급되지 않은 리스트 가져오기
     public List<ServiceUnlessDto> getUnissuedServices() {
