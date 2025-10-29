@@ -5,9 +5,9 @@ import com.polarisoffice.security.dto.ServiceUnlessDto;
 import com.polarisoffice.security.model.Customer;
 import com.polarisoffice.security.model.Service;
 import com.polarisoffice.security.model.ServiceContact;
+import com.polarisoffice.security.repository.ServiceRepository;
 import com.polarisoffice.security.repository.CustomerRepository;
 import com.polarisoffice.security.repository.ServiceContactRepository;
-import com.polarisoffice.security.repository.ServiceRepository;
 import com.polarisoffice.security.service.CustomerInfoService;
 import com.polarisoffice.security.service.ServiceContactService;
 import com.polarisoffice.security.service.ServiceService;
@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,7 +37,7 @@ public class CustomerLicenseController {
     private final ServiceRepository serviceRepository;
     private final CustomerRepository customerRepository;
     private final ServiceContactRepository contactRepository;
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CustomerLicenseController.class);
 
     @GetMapping("/customer/license")
@@ -50,6 +48,7 @@ public class CustomerLicenseController {
         // 고객사 정보 조회
         Customer customer = contact.getCustomer();
         if (customer == null) {
+            logger.error("고객 정보를 찾을 수 없습니다. email=" + email);
             throw new IllegalArgumentException("고객 정보를 찾을 수 없습니다. email=" + email);
         }
 
@@ -60,6 +59,13 @@ public class CustomerLicenseController {
         String connectedCompanyName = "-";
         if (customer.getConnectedCompany() != null) {
             connectedCompanyName = customer.getConnectedCompany().getCustomerName();
+        }
+
+        // 라이선스 키 값 확인 로그 추가
+        if (service != null) {
+            logger.info("License Key: {}", service.getLicenseId());
+        } else {
+            logger.warn("No service found for customer: {}", customer.getCustomerId());
         }
 
         model.addAttribute("customer", customer);
@@ -88,8 +94,10 @@ public class CustomerLicenseController {
         // 고객의 주요 서비스 조회
         Service service = serviceService.getPrimaryService(customer.getCustomerId());
 
-        // 라이선스 키를 파일로 다운로드 (라이선스 키 숫자만)
-        String content = String.valueOf(service.getLicenseId());
+        // 라이선스 키가 비어있지 않으면 다운로드 제공
+        String content = (service != null && service.getLicenseId() != null)
+                ? String.valueOf(service.getLicenseId())
+                : "라이선스 키 없음";
 
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 
@@ -100,9 +108,10 @@ public class CustomerLicenseController {
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
+    // 서비스가 발급되지 않은 리스트 가져오기
     public List<ServiceUnlessDto> getUnissuedServices() {
         List<Object[]> results = serviceRepository.findUnissuedServices();
-        List<ServiceUnlessDto> serviceDTOs = new ArrayList<>();
+        List<ServiceUnlessDto> serviceDTOs = new ArrayList();
 
         // 결과 리스트를 ServiceUnlessDTO 객체로 변환
         for (Object[] result : results) {
@@ -125,10 +134,6 @@ public class CustomerLicenseController {
 
         return serviceDTOs;
     }
-
-
-
-
 
     @GetMapping("/admin/license")
     public String getUnissuedServices(Model model) {

@@ -1,0 +1,290 @@
+/* =========================================================
+   Polaris SecuOne - 로그 통계 페이지 스타일
+   ========================================================= */
+
+/* ====== 기본 레이아웃 ====== */
+.secuone-log-page {
+  padding: 30px;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  color: #222;
+  background-color: #f9fafc;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header a {
+  color: #5b8def;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.header a:hover {
+  color: #1a6df2;
+}
+
+.header strong {
+  color: #111;
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+/* ====== 필터 바 ====== */
+.filter-bar {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.filter-bar select,
+.filter-bar input[type="date"] {
+  padding: 6px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.filter-bar button {
+  background: #5b8def;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.filter-bar button:hover {
+  background: #3f6ee3;
+}
+
+/* ====== 요약 카드 ====== */
+.summary-cards {
+  display: flex;
+  gap: 16px;
+  margin-top: 35px;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.summary-cards .card {
+  flex: 1 1 200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  padding: 18px 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.summary-cards .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.summary-cards .card h4 {
+  color: #5b8def;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.summary-cards .card p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* ====== 차트 섹션 ====== */
+.chart-section {
+  margin-top: 35px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.chart-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chart-section:nth-of-type(3) h3::before {
+  content: "📈";
+  font-size: 20px;
+}
+
+.chart-section:nth-of-type(4) h3::before {
+  content: "⚙️";
+  font-size: 20px;
+}
+
+.chart-section canvas {
+  max-height: 280px;
+  margin-top: 10px;
+}
+
+.chart-desc {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ====== 로그 테이블 ====== */
+.table-section {
+  margin-top: 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.table-section.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.table-section h3 {
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  background-color: #f7f9fb;
+  font-size: 17px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-section h3::before {
+  content: "📋";
+}
+
+.table-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-section thead {
+  background-color: #f4f6f9;
+  border-bottom: 2px solid #e3e8ef;
+}
+
+.table-section th,
+.table-section td {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.table-section th {
+  font-weight: 600;
+  color: #333;
+}
+
+.table-section tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.table-section tbody tr:hover {
+  background-color: #eef4ff;
+  transition: 0.2s;
+}
+
+/* ====== 로딩 / 상태 ====== */
+.table-section td[colspan="7"] {
+  color: #555;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* ====== 반응형 ====== */
+@media (max-width: 1024px) {
+  .summary-cards {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .summary-cards .card {
+    flex: 1 1 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-bar select,
+  .filter-bar input[type="date"],
+  .filter-bar button {
+    width: 100%;
+  }
+
+  .chart-section canvas {
+    max-height: 200px;
+  }
+
+  .chart-section h3 {
+    font-size: 16px;
+  }
+
+  .summary-cards .card p {
+    font-size: 18px;
+  }
+
+  .table-section table {
+    font-size: 12px;
+  }
+
+  .table-section th,
+  .table-section td {
+    padding: 8px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards .card {
+    flex: 1 1 100%;
+  }
+
+  .chart-section {
+    padding: 18px;
+  }
+
+  .filter-bar {
+    padding: 10px 14px;
+  }
+}
