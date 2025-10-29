@@ -5,10 +5,17 @@ import com.polarisoffice.security.model.License;
 import com.polarisoffice.security.model.Service;
 import com.polarisoffice.security.repository.LicenseRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -27,11 +34,10 @@ public class LicenseService {
                 .orElseThrow(() -> new IllegalStateException("해당 서비스에 발급된 라이선스가 없습니다."));
     }
 
-    /** 발급 로직 예시 */
+    /** 라이선스 발급 로직 예시 */
     public License issueForService(Service svc,
                                    String expiryDate, Integer usageLimit,
                                    String licenseType, String licenseVersion) {
-        // 라이선스키 생성 예시
         String key = "LIC-" + UUID.randomUUID();
 
         License lic = License.builder()
@@ -43,9 +49,33 @@ public class LicenseService {
                 .createDate(LocalDateTime.now())
                 .build();
 
-        // licenseVersion은 컬럼이 없다면 저장 안 해도 되고,
-        // 별도 컬럼/테이블이 있으면 맞게 저장하세요.
-
         return licenseRepository.save(lic);
     }
+
+    // ✅ 최신 SDK 버전 조회 (파일 기반)
+    public String getLatestSdkVersion() {
+        try {
+            // SDK 파일이 저장된 디렉토리 경로 (환경에 맞게 수정)
+            Path sdkDir = Paths.get("/opt/sdk");
+
+            if (!Files.exists(sdkDir) || !Files.isDirectory(sdkDir)) {
+                return null; // SDK 폴더 없음
+            }
+
+            // 디렉토리 내 파일 중 최신 수정일 순으로 정렬 후 첫 번째 반환
+            try (Stream<Path> files = Files.list(sdkDir)) {
+                return files
+                        .filter(Files::isRegularFile)
+                        .sorted(Comparator.comparingLong((Path p) -> p.toFile().lastModified()).reversed())
+                        .map(p -> p.getFileName().toString())
+                        .findFirst()
+                        .orElse(null);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

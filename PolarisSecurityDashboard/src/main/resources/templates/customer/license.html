@@ -76,17 +76,18 @@
           <!-- 최신 SDK -->
           <label for="sdkVersion">최신 SDK</label>
 
-          <!-- 서비스 존재 -->
+          <!-- SDK가 존재하는 경우 -->
           <div class="input-group"
-               th:if="${service != null}">
-            <input type="text" id="sdkVersion" value="ver20250912_SDK_RB" readonly />
+               th:if="${service != null and sdkExists}">
+            <input type="text" id="sdkVersion"
+                   th:value="${latestSdkVersion}" readonly />
             <a class="btn-green"
                th:href="@{'/api/sdk/download/' + ${service.serviceId}}">다운로드</a>
           </div>
 
-          <!-- 서비스 없음 -->
+          <!-- SDK가 존재하지 않는 경우 -->
           <div class="input-group"
-               th:if="${service == null}">
+               th:if="${service == null or !sdkExists}">
             <input type="text" id="sdkVersion" value="-" readonly />
             <a class="btn-green disabled" href="javascript:void(0)">다운로드</a>
           </div>

@@ -9,6 +9,7 @@ import com.polarisoffice.security.repository.ServiceRepository;
 import com.polarisoffice.security.repository.CustomerRepository;
 import com.polarisoffice.security.repository.ServiceContactRepository;
 import com.polarisoffice.security.service.CustomerInfoService;
+import com.polarisoffice.security.service.LicenseService;
 import com.polarisoffice.security.service.ServiceContactService;
 import com.polarisoffice.security.service.ServiceService;
 import lombok.RequiredArgsConstructor;
@@ -37,52 +38,36 @@ public class CustomerLicenseController {
     private final ServiceRepository serviceRepository;
     private final CustomerRepository customerRepository;
     private final ServiceContactRepository contactRepository;
+    private final LicenseService licenseService;
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerLicenseController.class);
 
     @GetMapping("/customer/license")
     public String licensePage(Model model, Authentication authentication) {
         String email = ((CustomUserDetails) authentication.getPrincipal()).getUsername();
-
-        // 담당자 조회
         ServiceContact contact = contactService.getByEmail(email);
-        if (contact == null) {
-            logger.error("담당자 정보를 찾을 수 없습니다. email={}", email);
-            model.addAttribute("errorMessage", "담당자 정보를 찾을 수 없습니다.");
-            return "error/general_error"; // 별도 에러 페이지 or license.html로 안내 가능
-        }
 
-        // 고객사 조회
-        Customer customer = contact.getCustomer();
-        if (customer == null) {
-            logger.error("고객 정보를 찾을 수 없습니다. email={}", email);
-            model.addAttribute("customer", new Customer());
-            model.addAttribute("service", null);
-            model.addAttribute("contact", contact);
-            model.addAttribute("connectedCompanyName", "-");
-            return "customer/license";
-        }
+        Customer customer = contact != null ? contact.getCustomer() : null;
+        Service service = (customer != null)
+                ? serviceService.getPrimaryService(customer.getCustomerId())
+                : null;
 
-        // 주요 서비스 조회
-        Service service = serviceService.getPrimaryService(customer.getCustomerId());
+        // ✅ SDK 최신 버전 존재 여부 확인
+        boolean sdkExists = false;
+        String latestSdkVersion = null;
 
-        // 연결된 고객사 이름 (없으면 "-"로 설정)
-        String connectedCompanyName = "-";
-        if (customer.getConnectedCompany() != null) {
-            connectedCompanyName = customer.getConnectedCompany().getCustomerName();
-        }
-
-        // 로그
-        if (service != null) {
-            logger.info("License Key: {}", service.getLicenseId());
-        } else {
-            logger.warn("No service found for customer: {}", customer.getCustomerId());
+        try {
+            // 예: SDK 파일이나 레코드 존재 여부를 서비스에서 확인
+            latestSdkVersion = licenseService.getLatestSdkVersion(); // 또는 SDKService 등에서 가져오기
+            sdkExists = (latestSdkVersion != null && !latestSdkVersion.isEmpty());
+        } catch (Exception e) {
+            sdkExists = false;
         }
 
         model.addAttribute("customer", customer);
         model.addAttribute("service", service);
-        model.addAttribute("contact", contact);
-        model.addAttribute("connectedCompanyName", connectedCompanyName);
+        model.addAttribute("sdkExists", sdkExists);
+        model.addAttribute("latestSdkVersion", latestSdkVersion);
 
         return "customer/license";
     }
