@@ -1,38 +1,46 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/customer_layout}">
 
-<head>
+<head layout:fragment="head">
   <meta charset="UTF-8" />
   <title th:text="${domain} + ' 요약 리포트'">도메인 요약 리포트</title>
-  <link rel="stylesheet" th:href="@{/css/customer_logs.css}" />
+  <link rel="stylesheet" th:href="@{/css/domain_summary.css}" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 <div layout:fragment="content" class="layout">
   <main class="content">
+    <!-- 경로 표시 -->
     <header class="breadcrumb">
       <span>Dashboards</span> / <span> 도메인 요약 리포트</span>
     </header>
 
+    <!-- 본문 -->
     <section class="log-card">
       <h2 th:text="${domain} + ' 요약 리포트'">도메인 요약 리포트</h2>
 
       <!-- ✅ 요약 정보 -->
       <div class="summary-container">
         <h3>요약 정보</h3>
+
         <p>
           <strong th:text="${domain}"></strong> 으로 유입된 시큐원 사용자 수:
-          <span class="highlight" th:text="${userCount} + '명'"></span>
+          <span class="highlight"
+                th:text="${userCount != null ? userCount + '명' : '0명'}">0명</span>
         </p>
+
         <p th:if="${#lists.isEmpty(logEntries)}">
           해당 도메인에 수집된 보안 로그가 없습니다.
         </p>
+
         <p th:if="${!#lists.isEmpty(logEntries)}">
           수집된 보안 로그 수:
-          <span class="highlight" th:text="${#lists.size(logEntries)} + '건'"></span>
+          <span class="highlight"
+                th:text="${#lists.size(logEntries)} + '건'">0건</span>
         </p>
 
         <canvas id="chart" th:if="${!#lists.isEmpty(logEntries)}"></canvas>
@@ -40,6 +48,7 @@
 
       <!-- ✅ 보안 로그 목록 -->
       <h3>📋 보안 로그 상세 목록</h3>
+
       <table class="table-section">
         <thead>
         <tr>
@@ -51,15 +60,17 @@
           <th>추가 정보</th>
         </tr>
         </thead>
+
         <tbody>
         <tr th:each="log : ${logEntries}">
-          <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
-          <td th:text="${log.logType}"></td>
-          <td th:text="${log.domain}"></td>
-          <td th:text="${log.appVersion}"></td>
-          <td th:text="${log.osVersion}"></td>
-          <td th:text="${log.extra}"></td>
+          <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+          <td th:text="${log.logType}">-</td>
+          <td th:text="${log.domain}">-</td>
+          <td th:text="${log.appVersion}">-</td>
+          <td th:text="${log.osVersion}">-</td>
+          <td th:text="${log.extra}">-</td>
         </tr>
+
         <tr th:if="${#lists.isEmpty(logEntries)}">
           <td colspan="6" class="empty">해당 도메인에 대한 보안 로그가 없습니다.</td>
         </tr>
@@ -69,6 +80,6 @@
   </main>
 </div>
 
-<script th:src="@{/js/customer_logs.js}"></script>
+<script th:src="@{/js/domain_summary.js}"></script>
 </body>
 </html>

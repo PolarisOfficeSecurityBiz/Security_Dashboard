@@ -33,43 +33,37 @@ public class DomainLogSummaryController {
     private final CustomerInfoService customerInfoService;
 
     @GetMapping("/customer/domain-summary")
-    public String showDomainSummary(Authentication authentication, Model model) {
-        // ✅ 1️⃣ 로그인 사용자 정보 추출
-        String email = ((CustomUserDetails) authentication.getPrincipal()).getUsername();
-
-        // ✅ 2️⃣ 담당자 → 고객사 → 서비스 → 도메인
+    public String showDomainSummary(Model model, Authentication auth) {
+        // 로그인한 사용자 이메일 → 고객사 조회
+        String email = ((CustomUserDetails) auth.getPrincipal()).getUsername();
         ServiceContact contact = contactService.getByEmail(email);
         Customer customer = contact.getCustomer();
+
+        // 고객의 주요 서비스 조회
         Service service = serviceService.getPrimaryService(customer.getCustomerId());
+        String domain = (service != null) ? service.getDomain() : "-";
 
-        if (service == null || service.getDomain() == null) {
-            model.addAttribute("error", "서비스 도메인을 찾을 수 없습니다.");
-            return "customer/domain_summary";
-        }
+        // ✅ 시큐원 로그 수집 (utmSource 기준)
+        List<SecuOneLogEvent> secuLogs = secuOneLogRepository.findAll().stream()
+                .filter(e -> e.getUtmSource() != null && e.getUtmSource().equalsIgnoreCase(domain))
+                .toList();
 
-        String domain = service.getDomain();
+        // ✅ 보안 로그 수집 (domain 기준)
+        List<LogEntry> logEntries = logEntryRepository.findAll().stream()
+                .filter(l -> l.getDomain() != null && l.getDomain().equalsIgnoreCase(domain))
+                .toList();
 
-        // ✅ 3️⃣ SecuOne 유입 로그 (utm_source 기준)
-        List<SecuOneLogEvent> secuoneLogs = secuOneRepo.findAll().stream()
-                .filter(e -> e.getUtmSource() != null)
-                .filter(e -> e.getUtmSource().equalsIgnoreCase(domain))
-                .collect(Collectors.toList());
+        // ✅ userCount가 null이면 0 처리
+        int userCount = (secuLogs != null) ? secuLogs.size() : 0;
 
-        long userCount = secuoneLogs.size();
-
-        // ✅ 4️⃣ LogEntry (보안 로그)
-        List<LogListItem> logEntries = logService.getLogsByExactDomain(domain).stream()
-                .sorted(Comparator.comparing(LogListItem::createdAt).reversed())
-                .collect(Collectors.toList());
-
-        // ✅ 5️⃣ 모델 데이터
         model.addAttribute("domain", domain);
         model.addAttribute("userCount", userCount);
         model.addAttribute("logEntries", logEntries);
 
-        System.out.printf("✅ [도메인 요약] user=%s | domain=%s | 유입:%d | 로그:%d%n",
-                email, domain, userCount, logEntries.size());
+        System.out.printf("✅ [도메인 리포트] domain=%s, 유입=%d명, 로그=%d건%n",
+                domain, userCount, logEntries.size());
 
         return "customer/domain_summary";
     }
+
 }
