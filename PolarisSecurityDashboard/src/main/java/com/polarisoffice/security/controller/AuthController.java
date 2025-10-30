@@ -12,5 +12,5 @@ public class AuthController {
         return "login"; // templates/login.html
     }
 
-
+    
 }

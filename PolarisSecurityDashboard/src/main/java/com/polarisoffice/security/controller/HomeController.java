@@ -50,5 +50,7 @@ public class HomeController {
         model.addAttribute("username", auth != null ? auth.getName() : null);
         return "customer/dashboard";
     }
+    
+    
 
 }
