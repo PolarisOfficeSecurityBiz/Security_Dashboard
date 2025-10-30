@@ -1,29 +1,49 @@
-html, body { height: 100%; }
-* { box-sizing: border-box; }
+/* ------------------------------
+   기본 설정
+------------------------------ */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  background: #f6f7fb;
+}
+* {
+  box-sizing: border-box;
+}
 
+/* ------------------------------
+   레이아웃
+------------------------------ */
 .layout {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: #f6f7fb;
 }
 
+/* 사이드바를 제외한 메인 컨텐츠 부분을 가운데 정렬 */
+.page-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;   /* 가로 가운데 */
+  align-items: center;       /* 세로 가운데 */
+  padding: 40px 20px;
+  width: 100%;
+}
+
+/* 페이지 경로 표시 (breadcrumb) */
 .breadcrumb {
-  max-width: 1200px;
-  margin: 16px auto 0;
-  padding: 0 16px;
   color: #6b7280;
   font-size: 14px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+  width: 100%;
+  max-width: 1200px;
 }
 
-.page-center {
-  min-height: calc(100vh - 56px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 24px 16px 48px;
-}
-
+/* ------------------------------
+   알림 메시지
+------------------------------ */
 .flash-wrap {
   position: fixed;
   top: 64px;
@@ -39,26 +59,56 @@ html, body { height: 100%; }
   font-size: 14px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
-.alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-.alert-error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.alert-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
 
+/* ------------------------------
+   카드 디자인
+------------------------------ */
 .card {
-  width: min(560px, 92vw);
-  background: #fff;
+  width: 480px;
+  max-width: 90vw;
+  background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(17, 24, 39, 0.08);
-  padding: 20px 18px;
+  padding: 32px 24px;
+  margin: auto;
+  transition: all 0.25s ease;
+}
+.card:hover {
+  box-shadow: 0 14px 36px rgba(17, 24, 39, 0.12);
 }
 .card-title {
-  margin: 6px 4px 14px;
+  margin: 6px 4px 20px;
   font-size: 20px;
   font-weight: 700;
   color: #111827;
 }
 
-.form { display: grid; gap: 14px; }
-.form-row { display: grid; gap: 8px; }
-label { font-size: 14px; color: #374151; }
+/* ------------------------------
+   폼 스타일
+------------------------------ */
+.form {
+  display: grid;
+  gap: 16px;
+}
+.form-row {
+  display: grid;
+  gap: 8px;
+}
+label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
 
 input[type="text"],
 input[type="email"],
@@ -72,14 +122,22 @@ textarea {
   font-size: 14px;
   color: #111827;
   outline: none;
+  transition: all 0.15s ease;
 }
 input:focus, textarea:focus {
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
-textarea { resize: vertical; }
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
 
-.hint { margin: 4px 2px -4px; font-size: 12px; color: #6b7280; }
+.hint {
+  margin: 4px 2px -4px;
+  font-size: 12px;
+  color: #6b7280;
+}
 
 .input-with-btn {
   display: grid;
@@ -87,36 +145,68 @@ textarea { resize: vertical; }
   gap: 8px;
 }
 
+/* ------------------------------
+   버튼 디자인
+------------------------------ */
 .btn {
-  height: 40px; padding: 0 14px;
-  border-radius: 10px; border: 1px solid transparent;
-  font-weight: 600; cursor: pointer;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s ease;
 }
-.btn-primary { background: #6366f1; color: #fff; }
-.btn-primary:hover { background: #4f46e5; }
-.btn-ghost { background: #fff; color: #374151; border-color: #e5e7eb; }
-.btn-ghost:hover { background: #f9fafb; }
+
+.btn-primary {
+  background: #6366f1;
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: #4f46e5;
+}
+
+.btn-ghost {
+  background: #ffffff;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+.btn-ghost:hover {
+  background: #f9fafb;
+}
+
 .btn-minor {
-  height: 38px; padding: 0 12px;
-  background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;
-  border-radius: 10px; font-weight: 600;
+  height: 38px;
+  padding: 0 12px;
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  font-weight: 600;
 }
-.btn-minor:hover { background: #e0e7ff; }
+.btn-minor:hover {
+  background: #e0e7ff;
+}
 
 .actions {
-  display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-@media (min-width: 1120px) { .card { width: 520px; } }
-
-/* Dialog */
+/* ------------------------------
+   모달(Dialog)
+------------------------------ */
 dialog#pwdDialog {
-  width: min(560px, 92vw);
+  width: min(480px, 90vw);
   border: none;
   border-radius: 16px;
   padding: 0;
   box-shadow: 0 24px 64px rgba(17, 24, 39, 0.24);
-  background: #fff;
+  background: #ffffff;
+  animation: fadeIn 0.2s ease;
 }
 dialog#pwdDialog::backdrop {
   background: rgba(2, 6, 23, 0.45);
@@ -126,18 +216,53 @@ dialog#pwdDialog::backdrop {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
 }
 .dialog-header h3 {
-  margin: 0; font-size: 18px; font-weight: 700; color: #111827;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
 }
 .dialog-close {
-  background: transparent; border: none; font-size: 24px; line-height: 1;
-  padding: 4px 8px; cursor: pointer; color: #6b7280;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #6b7280;
 }
-.dialog-close:hover { color: #111827; }
+.dialog-close:hover {
+  color: #111827;
+}
 
-.dialog-body { padding: 16px; }
+.dialog-body {
+  padding: 20px;
+}
 
-@media (max-width: 380px) { dialog#pwdDialog { width: 96vw; } }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------
+   반응형
+------------------------------ */
+@media (max-width: 768px) {
+  .page-center {
+    padding: 20px 12px;
+  }
+  .card {
+    width: 100%;
+    max-width: 95vw;
+    padding: 24px 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  dialog#pwdDialog {
+    width: 96vw;
+  }
+}
