@@ -99,6 +99,21 @@
   word-break: break-all;
 }
 
+/* 마이페이지 CTA 버튼 */
+.btn-mypage {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 12px;
+  margin: 6px 0 10px;
+  border-radius: 8px;
+  background: #19a974;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.btn-mypage:hover { background: #13895e; }
+
 /* 로그아웃 버튼 */
 .logout-link {
   display: flex;
@@ -109,8 +124,10 @@
   text-decoration: none;
   margin-top: 8px;
   padding: 5px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
-
 .logout-link:hover {
   color: #fecaca;
   text-decoration: underline;
@@ -173,4 +190,3 @@
     font-size: 12px; /* 메뉴 글자 크기 줄이기 */
   }
 }
-

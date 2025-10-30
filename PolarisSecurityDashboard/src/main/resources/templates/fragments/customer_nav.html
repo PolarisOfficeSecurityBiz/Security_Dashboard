@@ -1,47 +1,67 @@
 <nav class="customer-nav" th:fragment="nav">
+  <!-- CSS / Icons -->
   <link rel="stylesheet" th:href="@{/css/customer_nav.css}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- 로고 -->
+  <!-- 브랜드 -->
   <div class="brand">
     <img th:src="@{/images/bi_logo.png}" alt="Polaris Customer" class="brand-logo">
     <span class="brand-name">Polaris Customer</span>
   </div>
 
-  <!-- 네비게이션 메뉴 -->
+  <!-- 네비 메뉴 -->
   <ul class="nav-menu">
     <li>
-      <a th:href="@{/customer/dashboard}" th:classappend="${#strings.startsWith(path, '/customer/dashboard')} ? 'active' : ''">
+      <a th:href="@{/customer/dashboard}"
+         th:classappend="${#strings.startsWith(path, '/customer/dashboard')} ? 'active' : ''">
         <i class="fa fa-home"></i> Overview
       </a>
     </li>
     <li>
-      <a th:href="@{/customer/company}" th:classappend="${#strings.startsWith(path, '/customer/company')} ? 'active' : ''">
+      <a th:href="@{/customer/company}"
+         th:classappend="${#strings.startsWith(path, '/customer/company')} ? 'active' : ''">
         <i class="fa fa-building"></i> 고객사 정보 관리
       </a>
     </li>
     <li>
-      <a th:href="@{/customer/license}" th:classappend="${#strings.startsWith(path, '/customer/license')} ? 'active' : ''">
+      <a th:href="@{/customer/license}"
+         th:classappend="${#strings.startsWith(path, '/customer/license')} ? 'active' : ''">
         <i class="fa fa-key"></i> 라이선스 관리
       </a>
     </li>
     <li>
-      <a th:href="@{/customer/logs}" th:classappend="${#strings.startsWith(path, '/customer/logs')} ? 'active' : ''">
+      <a th:href="@{/customer/logs}"
+         th:classappend="${#strings.startsWith(path, '/customer/logs')} ? 'active' : ''">
         <i class="fa fa-clipboard-list"></i> 사용 로그 확인
       </a>
     </li>
     <li>
-      <a th:href="@{/customer/settlement}" th:classappend="${#strings.startsWith(path, '/customer/settlement')} ? 'active' : ''">
+      <a th:href="@{/customer/settlement}"
+         th:classappend="${#strings.startsWith(path, '/customer/settlement')} ? 'active' : ''">
         <i class="fa fa-wallet"></i> 정산 내역
+      </a>
+    </li>
+
+    <!-- ✅ 마이페이지 (메뉴 항목) -->
+    <li>
+      <a th:href="@{/customer/customer_mypage}"
+         th:classappend="${#strings.startsWith(path, '/customer/customer_mypage')} ? 'active' : ''">
+        <i class="fa fa-user-circle"></i> 마이페이지
       </a>
     </li>
   </ul>
 
+  <!-- 하단 영역 -->
   <div class="customer-footer">
     <div class="user-info-box">
-      <p th:text="${#authentication.principal.username + '님'}"></p>
+      <p class="user-name" th:text="${#authentication.principal.username + '님'}">홍길동님</p>
       <p class="user-email" th:text="${#authentication.principal.username}">user@polarisoffice.com</p>
     </div>
+
+    <!-- ✅ 마이페이지 CTA (푸터 버튼) -->
+    <a class="btn-mypage" th:href="@{/customer/mypage}">
+      <i class="fa fa-user"></i> 마이페이지
+    </a>
 
     <!-- 로그아웃 -->
     <form th:action="@{/logout}" method="post" class="logout-form">
