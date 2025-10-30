@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Impl 분리 없이 단일 Service 클래스로 사용.
- * - 읽기 전용 기본 트랜잭션(@Transactional(readOnly = true))
- * - 변경 메서드만 @Transactional로 오버라이드
- * - 생성자 주입(@RequiredArgsConstructor)
+ * Impl 분리 없이 단일 Service 클래스.
+ * - 기존 코드 호환을 위해 과거 메서드명을 모두 유지(래퍼 형태) + 새 메서드명 병행 제공
+ * - 읽기 기본(readOnly=true), 변경 메서드만 @Transactional
  */
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class ServiceContactService {
     private final ServiceContactRepository serviceContactRepository;
 
     /* =========================
-       조회 계열
+       조회 계열 (새 이름)
        ========================= */
 
     /** 이메일 기준 Optional 조회 */
@@ -39,8 +38,7 @@ public class ServiceContactService {
 
     /** 고객 ID 기준 선행 1건 조회(없으면 null) */
     public ServiceContact getFirstByCustomerIdOrNull(String customerId) {
-        return serviceContactRepository.findFirstByCustomer_CustomerId(customerId)
-                .orElse(null);
+        return serviceContactRepository.findFirstByCustomer_CustomerId(customerId).orElse(null);
     }
 
     /** 고객 ID + username으로 담당자 목록 */
@@ -83,5 +81,34 @@ public class ServiceContactService {
     @Transactional
     public ServiceContact save(ServiceContact contact) {
         return serviceContactRepository.save(contact);
+    }
+
+    /* =====================================================================
+       🔁 아래부터는 "기존 코드 호환용" 메서드명 (구 이름 유지, 내부 위임)
+       ===================================================================== */
+
+    /** 과거: getByCustomerId */
+    public ServiceContact getByCustomerId(String customerId) {
+        return getFirstByCustomerIdOrNull(customerId);
+    }
+
+    /** 과거: getByEmail (예외 던지는 버전) */
+    public ServiceContact getByEmail(String email) {
+        return getByEmailOrThrow(email);
+    }
+
+    /** 과거: getServiceContactByCustomerAndUsername */
+    public List<ServiceContact> getServiceContactByCustomerAndUsername(String customerId, String username) {
+        return getByCustomerAndUsername(customerId, username);
+    }
+
+    /** 과거: getServiceContactByCustomerAndService */
+    public List<ServiceContact> getServiceContactByCustomerAndService(String customerId, Integer serviceId) {
+        return getByCustomerAndService(customerId, serviceId);
+    }
+
+    /** 과거: getServiceContactByServiceIdAndEmail */
+    public List<ServiceContact> getServiceContactByServiceIdAndEmail(Integer serviceId, String email) {
+        return getByServiceIdAndEmail(serviceId, email);
     }
 }
