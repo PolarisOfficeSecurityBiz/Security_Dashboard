@@ -26,24 +26,27 @@
     <!-- 내 정보 -->
     <section class="card" aria-labelledby="sec-profile">
       <h2 id="sec-profile" class="card-title">내 정보</h2>
-      <form th:action="@{/customer/mypage}" method="post" class="form" id="profileForm">
+
+      <!-- 프로필 폼: ProfileVM(email, username, memo)과 바인딩 -->
+      <form th:action="@{/customer/mypage}" method="post" class="form" id="profileForm" th:object="${profile}">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <div class="form-row">
           <label for="email">이메일</label>
-          <input id="email" name="email" type="email"
-                 th:value="${profile != null ? profile.email : #authentication.principal.username}"
-                 readonly />
+          <!-- 서버에서 profile.email 세팅, 없으면 인증정보로 대체 -->
+          <input id="email" type="email"
+                 th:value="*{email} != null ? *{email} : ${#authentication.principal.username}"
+                 name="email" readonly />
         </div>
 
         <div class="form-row">
-          <label for="name">이름</label>
-          <input id="name" name="name" type="text" th:value="${profile != null ? profile.name : ''}" placeholder="이름" />
+          <label for="username">이름</label>
+          <input id="username" type="text" th:field="*{username}" placeholder="이름" />
         </div>
 
         <div class="form-row">
-          <label for="phone">연락처</label>
-          <input id="phone" name="phone" type="text" th:value="${profile != null ? profile.phone : ''}" placeholder="010-1234-5678" />
+          <label for="memo">메모</label>
+          <textarea id="memo" th:field="*{memo}" rows="4" placeholder="메모를 입력하세요"></textarea>
         </div>
 
         <div class="btn-row">
