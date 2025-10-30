@@ -1,121 +1,169 @@
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 6px 0 16px;
+/* ------------------------------
+   레이아웃 & 중앙 정렬
+------------------------------ */
+html, body { height: 100%; }
+* { box-sizing: border-box; }
+
+.layout {
+  min-height: 100vh;
+  background: #f6f7fb;
 }
 
-.card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
-  margin-bottom: 20px;
-  max-width: 720px;
-}
-
-.card-title {
-  margin: 0 0 16px;
-  font-size: 18px;
-}
-
-.form {
-  width: 100%;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.form-row label {
-  font-weight: 600;
-}
-
-.form-row input[type="text"],
-.form-row input[type="email"],
-.form-row input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #f8fafc;
-  font-size: 14px;
-}
-
-.btn-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.btn {
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 0;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.btn-primary { background: #4f73ff; color: #fff; }
-.btn-primary:hover { background: #3e5fea; }
-.btn-muted { background: #e5e7eb; color: #111827; }
-
-.help {
+.breadcrumb {
+  max-width: 1200px;
+  margin: 16px auto 0;
+  padding: 0 16px;
   color: #6b7280;
-  font-size: 12px;
-  margin-top: 6px;
+  font-size: 14px;
 }
 
-/* 알림 */
+.page-center {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 16px 48px;
+}
+
+/* 서버 메시지 */
+.flash-wrap {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, 92vw);
+  z-index: 5;
+}
 .alert {
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
   font-size: 14px;
-  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
 .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-.alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 
-/* 비밀번호 토글 + 강도 표시 */
-.pw-field { position: relative; }
-.pw-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 0;
+/* 카드 */
+.card {
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.08);
+  padding: 20px 18px;
+}
+.card-title {
+  margin: 6px 4px 14px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 폼 */
+.form { display: grid; gap: 14px; }
+.form-row { display: grid; gap: 8px; }
+label { font-size: 14px; color: #374151; }
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+}
+input:focus, textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+textarea { resize: vertical; }
+
+.hint { margin: 4px 2px -4px; font-size: 12px; color: #6b7280; }
+
+.input-with-btn {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+/* 버튼 */
+.btn {
+  height: 40px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid transparent;
+  font-weight: 600; cursor: pointer;
+}
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover { background: #4f46e5; }
+.btn-ghost { background: #fff; color: #374151; border-color: #e5e7eb; }
+.btn-ghost:hover { background: #f9fafb; }
+.btn-minor {
+  height: 38px; padding: 0 12px;
+  background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;
+  border-radius: 10px; font-weight: 600;
+}
+.btn-minor:hover { background: #e0e7ff; }
+
+.actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;
+}
+
+/* 큰 화면에서 카드 폭 */
+@media (min-width: 1120px) { .card { width: 520px; } }
+
+/* ------------------------------
+   Dialog(모달) 스타일
+------------------------------ */
+dialog#pwdDialog {
+  width: min(560px, 92vw);
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.24);
+  background: #fff;
+}
+
+dialog#pwdDialog::backdrop {
+  background: rgba(2, 6, 23, 0.45); /* 진한 블러 백드롭 */
+}
+
+/* 헤더(닫기 버튼 포함) */
+.dialog-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.dialog-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+.dialog-close {
   background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  padding: 4px 8px;
   cursor: pointer;
-  color: #4b5563;
-  font-size: 12px;
+  color: #6b7280;
+}
+.dialog-close:hover { color: #111827; }
+
+/* 본문 */
+.dialog-body {
+  padding: 16px;
 }
 
-.strength {
-  height: 8px;
-  border-radius: 6px;
-  background: #e5e7eb;
-  overflow: hidden;
-  margin-top: 8px;
-}
-.strength > span {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: #ef4444;
-  transition: width .3s ease, background .3s ease;
-}
-.strength.good > span { background: #f59e0b; }
-.strength.strong > span { background: #22c55e; }
-
-/* 반응형 */
-@media (max-width: 600px) {
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-  .form-row label { margin-bottom: 2px; }
+/* 모바일 여백 최소화 */
+@media (max-width: 380px) {
+  dialog#pwdDialog { width: 96vw; }
 }
