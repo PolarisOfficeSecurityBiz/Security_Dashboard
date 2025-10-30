@@ -71,7 +71,11 @@
               <td th:text="${p.retainCount}"></td>
               <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}"></td>
               <td th:text="${p.days}"></td>
-              <td th:text="'₩' + ${#numbers.formatInteger(p.totalAmount, 3, 'COMMA')}"></td>
+              <!-- ✅ JS로 계산 -->
+              <td class="calc"
+                  th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
+                  ₩0
+              </td>
             </tr>
           </tbody>
         </table>
