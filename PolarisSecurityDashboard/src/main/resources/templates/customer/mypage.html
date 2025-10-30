@@ -11,6 +11,7 @@
 </head>
 
 <body>
+<!-- ✅ fragment 시작 -->
 <div layout:fragment="content" class="layout">
   <main class="content">
 
@@ -80,32 +81,11 @@
       </div>
     </dialog>
 
+    <!-- ✅ JS를 fragment 내부로 이동 -->
+    <script th:src="@{/js/mypage.js}"></script>
+
   </main>
 </div>
-
-<script th:src="@{/js/mypage.js}"></script>
-<script>
-  // ✅ 정보수정 모드 토글
-  document.addEventListener('DOMContentLoaded', () => {
-    const editBtn = document.getElementById('editBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const username = document.getElementById('username');
-    const form = document.getElementById('profileForm');
-
-    let editing = false;
-
-    editBtn.addEventListener('click', () => {
-      editing = !editing;
-
-      username.readOnly = !editing;
-      username.style.backgroundColor = editing ? '#fff' : '#f0f0f0';
-
-      editBtn.textContent = editing ? '저장하기' : '정보수정';
-      resetBtn.style.display = editing ? 'inline-flex' : 'none';
-
-      if (!editing) form.submit();
-    });
-  });
-</script>
+<!-- ✅ fragment 끝 -->
 </body>
 </html>
