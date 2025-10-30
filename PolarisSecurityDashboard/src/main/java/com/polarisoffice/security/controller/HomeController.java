@@ -3,6 +3,7 @@ package com.polarisoffice.security.controller;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Set;
@@ -44,7 +45,10 @@ public class HomeController {
     	return "admin/logs";
     }
     @GetMapping("/customer/dashboard")
-    public String customerDashboard() {
+    public String customerDashboard(Model model, Authentication auth) {
+        model.addAttribute("path", "/customer/dashboard");
+        model.addAttribute("username", auth != null ? auth.getName() : null);
         return "customer/dashboard";
     }
+
 }
