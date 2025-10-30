@@ -1,57 +1,56 @@
 /* =============================
-   기본 레이아웃 / 폰트 / 컬러
+   기본 구조 및 레이아웃
 ============================= */
-body {
+html, body {
+  height: 100%;
+  margin: 0;
   font-family: 'Pretendard', sans-serif;
   background-color: #fafafa;
-  margin: 0;
   color: #222;
 }
 
 .layout {
   display: flex;
-  height: 100vh;
-  background-color: #fafafa;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding: 40px 20px;
 }
 
 .content {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  position: relative;
+  max-width: 700px;
 }
 
 .breadcrumb {
-  position: absolute;
-  top: 20px;
-  left: 320px; /* 사이드바 폭에 맞게 조정 */
   font-size: 14px;
   color: #888;
+  margin-bottom: 24px;
 }
 
 /* =============================
-   카드 (정중앙)
+   카드 스타일
 ============================= */
 .card {
   background: white;
   padding: 30px;
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   width: 100%;
-  max-width: 480px;
-  text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .card h2 {
   font-size: 20px;
-  margin-bottom: 20px;
-  color: #111;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #111827;
 }
 
 /* =============================
-   폼
+   폼 스타일
 ============================= */
 .form {
   display: flex;
@@ -65,71 +64,96 @@ body {
 }
 
 label {
-  font-weight: 500;
   font-size: 14px;
-  margin-bottom: 4px;
-  color: #333;
+  color: #374151;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 
+/* 입력창 스타일 */
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: #f7f7f7;
   font-size: 14px;
+  color: #111827;
   transition: all 0.2s ease;
 }
-input:focus {
-  border-color: #6366f1;
+
+input:focus,
+textarea:focus {
   background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  outline: none;
 }
+
 input[readonly] {
   background-color: #f0f0f0;
   cursor: not-allowed;
 }
 
 /* =============================
-   버튼
+   버튼 스타일
 ============================= */
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   border: none;
   height: 38px;
-  padding: 0 14px;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  padding: 0 16px;
+  line-height: 1;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
 }
 
+/* ✅ 저장하기 (기본) */
 .btn-primary {
-  background-color: #6366f1;
+  background-color: #4f46e5;
   color: #fff;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
 }
 .btn-primary:hover {
-  background-color: #4f46e5;
+  background-color: #4338ca;
+  box-shadow: 0 3px 6px rgba(99, 102, 241, 0.3);
+}
+.btn-primary:active {
+  background-color: #3730a3;
+  transform: translateY(1px);
 }
 
+/* ✅ 초기화 */
 .btn-reset {
-  background-color: #eaeaea;
-  color: #333;
+  background-color: #f9fafb;
+  color: #374151;
+  border: 1px solid #e5e7eb;
 }
 .btn-reset:hover {
-  background-color: #ddd;
+  background-color: #f3f4f6;
+}
+.btn-reset:active {
+  background-color: #e5e7eb;
 }
 
+/* ✅ 비밀번호 변경 */
 .btn-minor {
   background-color: #eef2ff;
   color: #4338ca;
@@ -137,45 +161,71 @@ button {
 }
 .btn-minor:hover {
   background-color: #e0e7ff;
+  color: #3730a3;
+}
+.btn-minor:active {
+  background-color: #c7d2fe;
+}
+
+/* ✅ 포커스 / 비활성화 */
+button:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.35);
+  outline-offset: 2px;
+}
+button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  border: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.actions > button {
+  min-width: 90px;
 }
 
 /* =============================
-   비밀번호 변경 다이얼로그
+   다이얼로그 스타일
 ============================= */
 dialog#pwdDialog {
   width: min(480px, 90vw);
   border: none;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.2);
+  border-radius: 16px;
   padding: 0;
+  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.25);
+  background: #fff;
 }
 dialog#pwdDialog::backdrop {
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(2, 6, 23, 0.45);
 }
 
+/* 다이얼로그 헤더 */
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 14px 20px;
   border-bottom: 1px solid #f1f5f9;
 }
 .dialog-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
+  color: #111827;
 }
 .dialog-close {
   background: transparent;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
+  line-height: 1;
+  padding: 4px 8px;
   cursor: pointer;
-  color: #666;
+  color: #6b7280;
 }
 .dialog-close:hover {
-  color: #111;
+  color: #111827;
 }
+
+/* 다이얼로그 본문 */
 .dialog-body {
   padding: 20px;
 }
@@ -186,8 +236,30 @@ dialog#pwdDialog::backdrop {
   gap: 8px;
 }
 
+.input-with-btn button {
+  height: 38px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.input-with-btn button:hover {
+  background-color: #e5e7eb;
+}
+
 .hint {
+  margin: 4px 2px 0;
   font-size: 12px;
-  color: #777;
-  margin-top: 4px;
+  color: #6b7280;
+}
+
+/* 반응형 */
+@media (max-width: 600px) {
+  .card {
+    padding: 20px;
+  }
+  .dialog-body {
+    padding: 16px;
+  }
 }
