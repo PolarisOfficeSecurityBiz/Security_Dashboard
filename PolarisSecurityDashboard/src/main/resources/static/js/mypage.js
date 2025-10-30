@@ -1,6 +1,6 @@
 // /js/mypage.js
 (() => {
-  function qs(id) { return document.getElementById(id); }
+  const qs = (id) => document.getElementById(id);
 
   document.addEventListener('DOMContentLoaded', () => {
     const dlg = qs('pwdDialog');
@@ -14,13 +14,12 @@
       if (typeof dlg.showModal === 'function') dlg.showModal();
       else dlg.setAttribute('open', 'open');
       // 첫 포커스
-      const first = qs('curPwd');
-      setTimeout(() => first && first.focus(), 0);
+      setTimeout(() => qs('curPwd')?.focus(), 0);
       // 배경 스크롤 방지
       document.documentElement.style.overflow = 'hidden';
     });
 
-    // 모달 닫기
+    // 공통 닫기
     function closeDialog() {
       if (!dlg) return;
       try { dlg.close(); } catch (_) { dlg.removeAttribute('open'); }
@@ -33,23 +32,21 @@
     // 백드롭 클릭 닫기
     dlg && dlg.addEventListener('click', (e) => {
       const rect = dlg.getBoundingClientRect();
-      const inside =
-        rect.top <= e.clientY && e.clientY <= rect.bottom &&
-        rect.left <= e.clientX && e.clientX <= rect.right;
+      const inside = rect.top <= e.clientY && e.clientY <= rect.bottom &&
+                     rect.left <= e.clientX && e.clientX <= rect.right;
       if (!inside) closeDialog();
     });
 
-    // 다이얼로그가 닫힐 때 배경 스크롤 복구
+    // 다이얼로그 닫힐 때 스크롤 복구
     dlg && dlg.addEventListener('close', () => {
       document.documentElement.style.overflow = '';
     });
 
-    // 보기/숨기기 토글 (버튼 data-toggle 속성)
+    // 보기/숨기기 토글
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-toggle]');
       if (!btn) return;
-      const id = btn.getAttribute('data-toggle');
-      const input = qs(id);
+      const input = qs(btn.getAttribute('data-toggle'));
       if (!input) return;
       const isPw = input.type === 'password';
       input.type = isPw ? 'text' : 'password';

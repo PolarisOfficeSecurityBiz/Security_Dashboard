@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  * 마이페이지 (프로필 / 비밀번호 변경)
  *
  * - GET  /customer/mypage            : 화면 렌더링 (내 정보 표시)
- * - POST /customer/mypage            : 이름/메모 저장
+ * - POST /customer/mypage            : 이름 저장 (memo는 VM엔 있으나 화면 미표시)
  * - POST /customer/mypage/password   : 비밀번호 변경
  */
 @Controller
@@ -45,13 +45,12 @@ public class CustomerMyPageController {
         vm.setUsername(contact != null ? nvl(contact.getUsername()) : "");
         vm.setMemo(contact != null ? nvl(contact.getMemo()) : "");
 
-        // 좌측 네비 active용(선택)
-        model.addAttribute("path", "/customer/mypage");
+        model.addAttribute("path", "/customer/mypage"); // 좌측 네비 active용(선택)
         model.addAttribute("profile", vm);
         return "customer/mypage";
     }
 
-    /** 프로필 저장 (username + memo) */
+    /** 프로필 저장 (username) */
     @PostMapping
     public String saveProfile(@ModelAttribute("profile") ProfileVM form,
                               BindingResult binding,
@@ -69,6 +68,7 @@ public class CustomerMyPageController {
         }
 
         try {
+            // memo는 화면에 노출하지 않지만, 기존 값 유지/갱신 로직이 필요하면 서비스 레이어에서 보관하거나 빈 문자열 처리
             contactService.updateProfile(email, form.getUsername(), form.getMemo());
             ra.addFlashAttribute("successMsg", "프로필이 저장되었습니다.");
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class CustomerMyPageController {
         private String email;               // readonly
         @NotBlank @Size(max = 60)
         private String username;            // 이름(표시명)
-        private String memo;                // 메모
+        private String memo;                // 메모 (화면 미표시)
     }
 
     @Data

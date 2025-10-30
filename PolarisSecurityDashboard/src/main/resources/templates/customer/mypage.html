@@ -17,50 +17,49 @@
     <span>Dashboards</span> / <span> 마이페이지</span>
   </header>
 
-  <!-- 중앙 배치 래퍼 -->
   <main class="page-center" aria-label="마이페이지 폼 영역">
-
     <!-- 서버 메시지 -->
     <div class="flash-wrap" role="status" aria-live="polite">
       <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}">저장되었습니다.</div>
       <div th:if="${errorMsg}" class="alert alert-error" th:text="${errorMsg}">오류가 발생했습니다.</div>
     </div>
 
-    <!-- 내 정보 카드 -->
+    <!-- 내 정보 카드 (memo 미표시) -->
     <section class="card" aria-labelledby="sec-profile">
       <h2 id="sec-profile" class="card-title">내 정보</h2>
 
-      <form th:action="@{/mypage/profile}" method="post" class="form">
+      <form th:action="@{/customer/mypage}" th:object="${profile}" method="post" class="form">
         <div class="form-row">
           <label for="email">이메일</label>
-          <input id="email" name="email" type="email" th:value="${profile?.email}" placeholder="email@example.com" />
+          <input id="email" th:field="*{email}" type="email" placeholder="email@example.com" readonly />
         </div>
 
         <div class="form-row">
-          <label for="name">이름</label>
-          <input id="name" name="name" type="text" th:value="${profile?.name}" placeholder="홍길동" />
+          <label for="username">이름</label>
+          <input id="username" th:field="*{username}" type="text" placeholder="홍길동" />
         </div>
+
+        <!-- memo는 화면에 표시하지 않지만, 값 유지가 필요하면 hidden으로 보관 -->
+        <input type="hidden" th:field="*{memo}" />
 
         <div class="actions">
           <button type="submit" class="btn btn-primary">정보 저장</button>
           <button type="reset" class="btn btn-ghost">초기화</button>
-          <!-- 모달 열기 -->
           <button type="button" id="openPwdDialog" class="btn btn-minor">비밀번호 변경</button>
         </div>
       </form>
     </section>
-
   </main>
 </div>
 
-<!-- 비밀번호 변경 모달(Dialog) -->
+<!-- 비밀번호 변경 모달 -->
 <dialog id="pwdDialog" aria-labelledby="dlg-title" aria-modal="true">
   <form method="dialog" class="dialog-header">
     <h3 id="dlg-title">비밀번호 변경</h3>
     <button type="submit" class="dialog-close" aria-label="닫기">×</button>
   </form>
 
-  <form th:action="@{/mypage/password}" method="post" class="form dialog-body" id="pwdForm" novalidate>
+  <form th:action="@{/customer/mypage/password}" method="post" class="form dialog-body" id="pwdForm" novalidate>
     <div class="form-row">
       <label for="curPwd">현재 비밀번호</label>
       <div class="input-with-btn">
@@ -81,7 +80,7 @@
     <div class="form-row">
       <label for="newPwd2">새 비밀번호 확인</label>
       <div class="input-with-btn">
-        <input id="newPwd2" name="newPasswordConfirm" type="password" autocomplete="new-password" required />
+        <input id="newPwd2" name="confirmPassword" type="password" autocomplete="new-password" required />
         <button type="button" class="btn btn-minor" data-toggle="newPwd2">보기</button>
       </div>
     </div>
@@ -93,7 +92,7 @@
   </form>
 </dialog>
 
-<!-- 외부 JS (defer로 지연 로드) -->
+<!-- 외부 JS -->
 <script defer th:src="@{/js/mypage.js}"></script>
 </body>
 </html>
