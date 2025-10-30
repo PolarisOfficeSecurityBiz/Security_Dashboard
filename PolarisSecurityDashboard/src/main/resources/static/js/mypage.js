@@ -6,6 +6,7 @@
     const dlg = qs('pwdDialog');
     const openBtn = qs('openPwdDialog');
     const cancelBtn = qs('cancelPwdDialog');
+    const cancelBtn2 = qs('cancelPwdDialog2'); // ✅ 추가
     const pwdForm = qs('pwdForm');
 
     // 모달 열기
@@ -13,9 +14,7 @@
       if (!dlg) return;
       if (typeof dlg.showModal === 'function') dlg.showModal();
       else dlg.setAttribute('open', 'open');
-      // 첫 포커스
       setTimeout(() => qs('curPwd')?.focus(), 0);
-      // 배경 스크롤 방지
       document.documentElement.style.overflow = 'hidden';
     });
 
@@ -26,10 +25,9 @@
       document.documentElement.style.overflow = '';
     }
 
-    // 취소 버튼
     cancelBtn && cancelBtn.addEventListener('click', closeDialog);
+    cancelBtn2 && cancelBtn2.addEventListener('click', closeDialog); // ✅ 추가
 
-    // 백드롭 클릭 닫기
     dlg && dlg.addEventListener('click', (e) => {
       const rect = dlg.getBoundingClientRect();
       const inside = rect.top <= e.clientY && e.clientY <= rect.bottom &&
@@ -37,7 +35,6 @@
       if (!inside) closeDialog();
     });
 
-    // 다이얼로그 닫힐 때 스크롤 복구
     dlg && dlg.addEventListener('close', () => {
       document.documentElement.style.overflow = '';
     });

@@ -1,220 +1,162 @@
-/* ------------------------------
-   기본 설정
------------------------------- */
-html, body {
-  height: 100%;
+/* =============================
+   기본 레이아웃 / 폰트 / 컬러
+============================= */
+body {
+  font-family: 'Pretendard', sans-serif;
+  background-color: #fafafa;
   margin: 0;
-  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-  background: #f6f7fb;
-}
-* {
-  box-sizing: border-box;
+  color: #222;
 }
 
-/* ------------------------------
-   레이아웃
------------------------------- */
 .layout {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #f6f7fb;
+  height: 100vh;
+  background-color: #fafafa;
 }
 
-/* 사이드바를 제외한 메인 컨텐츠 부분을 가운데 정렬 */
-.page-center {
+.content {
   flex: 1;
   display: flex;
-  justify-content: center;   /* 가로 가운데 */
-  align-items: center;       /* 세로 가운데 */
-  padding: 40px 20px;
-  width: 100%;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  position: relative;
 }
 
-/* 페이지 경로 표시 (breadcrumb) */
 .breadcrumb {
-  color: #6b7280;
+  position: absolute;
+  top: 20px;
+  left: 320px; /* 사이드바 폭에 맞게 조정 */
   font-size: 14px;
-  margin: 24px auto 0;
-  padding: 0 24px;
-  width: 100%;
-  max-width: 1200px;
+  color: #888;
 }
 
-/* ------------------------------
-   알림 메시지
------------------------------- */
-.flash-wrap {
-  position: fixed;
-  top: 64px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(560px, 92vw);
-  z-index: 5;
-}
-.alert {
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  font-size: 14px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-}
-.alert-success {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-.alert-error {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-}
-
-/* ------------------------------
-   카드 디자인
------------------------------- */
+/* =============================
+   카드 (정중앙)
+============================= */
 .card {
-  width: 480px;
-  max-width: 90vw;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.08);
-  padding: 32px 24px;
-  margin: auto;
-  transition: all 0.25s ease;
-}
-.card:hover {
-  box-shadow: 0 14px 36px rgba(17, 24, 39, 0.12);
-}
-.card-title {
-  margin: 6px 4px 20px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 480px;
+  text-align: left;
 }
 
-/* ------------------------------
-   폼 스타일
------------------------------- */
+.card h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+/* =============================
+   폼
+============================= */
 .form {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
+
 .form-row {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
+
 label {
-  font-size: 14px;
-  color: #374151;
   font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #333;
 }
 
 input[type="text"],
 input[type="email"],
-input[type="password"],
-textarea {
+input[type="password"] {
   width: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 12px;
-  background: #fff;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f7f7f7;
   font-size: 14px;
-  color: #111827;
-  outline: none;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
-input:focus, textarea:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+input:focus {
+  border-color: #6366f1;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
 }
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.hint {
-  margin: 4px 2px -4px;
-  font-size: 12px;
-  color: #6b7280;
+input[readonly] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
 }
 
-.input-with-btn {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-
-/* ------------------------------
-   버튼 디자인
------------------------------- */
-.btn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.15s ease;
-}
-
-.btn-primary {
-  background: #6366f1;
-  color: #ffffff;
-}
-.btn-primary:hover {
-  background: #4f46e5;
-}
-
-.btn-ghost {
-  background: #ffffff;
-  color: #374151;
-  border-color: #e5e7eb;
-}
-.btn-ghost:hover {
-  background: #f9fafb;
-}
-
-.btn-minor {
-  height: 38px;
-  padding: 0 12px;
-  background: #eef2ff;
-  color: #4338ca;
-  border: 1px solid #c7d2fe;
-  border-radius: 10px;
-  font-weight: 600;
-}
-.btn-minor:hover {
-  background: #e0e7ff;
-}
-
+/* =============================
+   버튼
+============================= */
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-/* ------------------------------
-   모달(Dialog)
------------------------------- */
+button {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  height: 38px;
+  padding: 0 14px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #6366f1;
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #4f46e5;
+}
+
+.btn-reset {
+  background-color: #eaeaea;
+  color: #333;
+}
+.btn-reset:hover {
+  background-color: #ddd;
+}
+
+.btn-minor {
+  background-color: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+.btn-minor:hover {
+  background-color: #e0e7ff;
+}
+
+/* =============================
+   비밀번호 변경 다이얼로그
+============================= */
 dialog#pwdDialog {
   width: min(480px, 90vw);
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.2);
   padding: 0;
-  box-shadow: 0 24px 64px rgba(17, 24, 39, 0.24);
-  background: #ffffff;
-  animation: fadeIn 0.2s ease;
 }
 dialog#pwdDialog::backdrop {
-  background: rgba(2, 6, 23, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .dialog-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid #f1f5f9;
@@ -223,46 +165,29 @@ dialog#pwdDialog::backdrop {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
 }
 .dialog-close {
   background: transparent;
   border: none;
-  font-size: 24px;
-  line-height: 1;
-  padding: 4px 8px;
+  font-size: 22px;
   cursor: pointer;
-  color: #6b7280;
+  color: #666;
 }
 .dialog-close:hover {
-  color: #111827;
+  color: #111;
 }
-
 .dialog-body {
   padding: 20px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.input-with-btn {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
 }
 
-/* ------------------------------
-   반응형
------------------------------- */
-@media (max-width: 768px) {
-  .page-center {
-    padding: 20px 12px;
-  }
-  .card {
-    width: 100%;
-    max-width: 95vw;
-    padding: 24px 18px;
-  }
-}
-
-@media (max-width: 380px) {
-  dialog#pwdDialog {
-    width: 96vw;
-  }
+.hint {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
 }
