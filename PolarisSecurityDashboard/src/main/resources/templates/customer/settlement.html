@@ -31,20 +31,20 @@
 
         <table class="data-table">
           <thead>
-            <tr>
-              <th>구분</th>
-              <th>유입</th>
-              <th>이탈</th>
-              <th>유지</th>
-            </tr>
+          <tr>
+            <th>구분</th>
+            <th>유입</th>
+            <th>이탈</th>
+            <th>유지</th>
+          </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>전체 사용자</td>
-              <td th:text="${daily.join} + '명'">125명</td>
-              <td th:text="${daily.leave} + '명'">30명</td>
-              <td th:text="${daily.retain} + '명'">95명</td>
-            </tr>
+          <tr>
+            <td>전체 사용자</td>
+            <td th:text="${daily.join} + '명'">125명</td>
+            <td th:text="${daily.leave} + '명'">30명</td>
+            <td th:text="${daily.retain} + '명'">95명</td>
+          </tr>
           </tbody>
         </table>
       </section>
@@ -57,29 +57,29 @@
 
         <table class="data-table">
           <thead>
-            <tr>
-              <th>구분</th>
-              <th>유입 수</th>
-              <th>CPI (원)</th>
-              <th>유지 수</th>
-              <th>RS Rate</th>
-              <th>기간(일)</th>
-              <th>정산 금액</th>
-            </tr>
+          <tr>
+            <th>구분</th>
+            <th>유입 수</th>
+            <th>CPI (원)</th>
+            <th>유지 수</th>
+            <th>RS Rate</th>
+            <th>기간(일)</th>
+            <th>정산 금액</th>
+          </tr>
           </thead>
           <tbody>
-            <tr th:each="p : ${partners}">
-              <td th:text="${p.partnerName}">네이버</td>
-              <td th:text="${p.joinCount}">100</td>
-              <td th:text="'₩' + ${#numbers.formatInteger(p.cpi, 3, 'COMMA')}">₩500</td>
-              <td th:text="${p.retainCount}">80</td>
-              <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}">₩200</td>
-              <td th:text="${p.days}">30</td>
-              <td class="calc"
-                  th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
-                ₩0
-              </td>
-            </tr>
+          <tr th:each="p : ${partners}">
+            <td th:text="${p.partnerName}">네이버</td>
+            <td th:text="${p.joinCount}">100</td>
+            <td th:text="'₩' + ${#numbers.formatInteger(p.cpi, 3, 'COMMA')}">₩500</td>
+            <td th:text="${p.retainCount}">80</td>
+            <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}">₩200</td>
+            <td th:text="${p.days}">30</td>
+            <td class="calc"
+                th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
+              ₩0
+            </td>
+          </tr>
           </tbody>
         </table>
       </section>
@@ -88,7 +88,10 @@
   </main>
 </div>
 
-<!-- ✅ 분리된 JS 불러오기 -->
-<script th:src="@{/js/settlement.js}"></script>
+<!-- ✅ 반드시 body 맨 아래에 script, defer 필수 -->
+<th:block layout:fragment="scripts">
+  <script defer th:src="@{/js/settlement.js}"></script>
+</th:block>
+
 </body>
 </html>

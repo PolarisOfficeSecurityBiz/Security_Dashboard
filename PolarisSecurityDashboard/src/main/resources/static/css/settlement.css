@@ -1,16 +1,15 @@
-/* ====== 기본 레이아웃 ====== */
 html, body {
-  height: 100%;
   font-family: 'Pretendard', sans-serif;
-  background-color: #fafafa;
+  background-color: #f6f7fb;
   color: #111827;
+  margin: 0;
+  padding: 0;
 }
 
 .layout {
   display: flex;
   justify-content: center;
   padding: 40px 20px;
-  background: #f6f7fb;
 }
 
 .content {
@@ -18,24 +17,17 @@ html, body {
   max-width: 900px;
 }
 
-.breadcrumb {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 20px;
-}
-
-/* ====== 카드 ====== */
 .card {
   background: white;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
 }
 
-/* ====== 탭 네비게이션 ====== */
+/* ====== 탭 ====== */
 .tab-nav {
   display: flex;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid #e5e7eb;
   margin-bottom: 16px;
 }
 
@@ -49,13 +41,17 @@ html, body {
   transition: all 0.2s ease;
 }
 
+.tab-btn:hover {
+  background: #e0e7ff;
+}
+
 .tab-btn.active {
   background: #2563eb;
-  color: #fff;
+  color: white;
   font-weight: 600;
 }
 
-/* ====== 탭 콘텐츠 ====== */
+/* ====== 콘텐츠 ====== */
 .tab-content {
   display: none;
   animation: fadeIn 0.3s ease-in;
@@ -65,7 +61,7 @@ html, body {
   display: block;
 }
 
-/* ====== 표 스타일 ====== */
+/* ====== 표 ====== */
 .data-table {
   width: 100%;
   border-collapse: collapse;

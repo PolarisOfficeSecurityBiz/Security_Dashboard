@@ -6,18 +6,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const contents = document.querySelectorAll(".tab-content");
 
   if (!tabs.length) {
-    console.error("❌ No tabs found");
+    console.error("❌ 탭 버튼을 찾을 수 없습니다.");
     return;
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
+    tab.addEventListener("click", (e) => {
+      e.preventDefault();
+
       tabs.forEach((t) => t.classList.remove("active"));
       contents.forEach((c) => c.classList.remove("active"));
 
       tab.classList.add("active");
       const target = document.getElementById(tab.dataset.tab);
-      if (target) target.classList.add("active");
+      if (target) {
+        target.classList.add("active");
+        console.log(`✅ 전환됨: ${tab.dataset.tab}`);
+      }
     });
   });
 
@@ -29,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const join = parseInt(cell.dataset.join || 0);
     const retain = parseInt(cell.dataset.retain || 0);
     const days = parseInt(cell.dataset.days || 0);
-
     const amount = join * cpi + retain * rs * days;
     cell.textContent = `₩${amount.toLocaleString()}`;
   });
