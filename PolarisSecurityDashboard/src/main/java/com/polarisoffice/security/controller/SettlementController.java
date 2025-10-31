@@ -3,104 +3,129 @@ package com.polarisoffice.security.controller;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
 /**
- * 일별 정산 내역 Controller
- *
- * - GET /customer/settlement : 페이지 렌더링
- * - GET /customer/settlement/api?month=10 : 선택 월별 데이터 JSON 응답
+ * 월별 / 일별 정산 내역 + 엑셀 다운로드
  */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/customer/settlement")
 public class SettlementController {
 
-    /**
-     * ✅ 정산 내역 페이지 렌더링
-     */
     @GetMapping
-    public String settlement(Model model,
-                             @RequestParam(required = false) Integer month) {
+    public String settlement(Model model) {
+        YearMonth month = YearMonth.now();
 
-        LocalDate today = LocalDate.now();
-        int targetMonth = (month != null) ? month : today.getMonthValue();
-        YearMonth ym = YearMonth.of(today.getYear(), targetMonth);
-
-        // 1️⃣ 유입/이탈/유지 현황 (더미)
-        DailyStatus daily = new DailyStatus(
-                ym.getMonthValue(),
-                today.getDayOfMonth(),
-                125, 30, 95
-        );
-
-        // 2️⃣ 제휴사 정산 내역 (더미)
-        List<PartnerSettlement> partners = new ArrayList<>();
-        partners.add(new PartnerSettlement("제휴사 A", 210, 1000, 180, 200, ym.lengthOfMonth()));
-        partners.add(new PartnerSettlement("제휴사 B", 100, 1200, 70, 150, ym.lengthOfMonth()));
-
-        // 3️⃣ 모델에 데이터 주입
-        model.addAttribute("today", today);
-        model.addAttribute("daily", daily);
-        model.addAttribute("partners", partners);
-        model.addAttribute("month", ym);
-
+        model.addAttribute("month", month);
+        model.addAttribute("services", List.of("전체", "제휴사 A", "제휴사 B"));
         return "customer/settlement";
     }
 
-    /**
-     * ✅ Ajax 요청 처리 (월별 데이터 반환)
-     * URL 예: /customer/settlement/api?month=9
-     */
+    /** ✅ Ajax 요청 : 월/서비스별 일별 데이터 */
     @GetMapping("/api")
     @ResponseBody
-    public Map<String, Object> getSettlementData(@RequestParam int month) {
+    public Map<String, Object> getSettlementData(
+            @RequestParam int month,
+            @RequestParam String service
+    ) {
         YearMonth ym = YearMonth.of(LocalDate.now().getYear(), month);
+        int days = ym.lengthOfMonth();
 
-        // 더미 데이터 (DB 연동 시 여기서 서비스 호출)
-        List<PartnerSettlement> partners = new ArrayList<>();
-        partners.add(new PartnerSettlement("제휴사 A", 200 + month, 1000, 180, 200, ym.lengthOfMonth()));
-        partners.add(new PartnerSettlement("제휴사 B", 120 + month, 1200, 70, 150, ym.lengthOfMonth()));
+        List<DailyPartnerData> list = new ArrayList<>();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("month", month);
-        response.put("days", ym.lengthOfMonth());
-        response.put("partners", partners);
-        return response;
-    }
+        Random random = new Random();
+        for (int d = 1; d <= days; d++) {
+            int join = 100 + random.nextInt(100);
+            int retain = 50 + random.nextInt(50);
+            int leave = 30 + random.nextInt(30);
+            int cpi = service.equals("제휴사 B") ? 1200 : 1000;
+            int rs = service.equals("제휴사 B") ? 150 : 200;
 
-    /* ================================
-       내부 DTO 클래스
-    =================================*/
-
-    @Data
-    @AllArgsConstructor
-    public static class DailyStatus {
-        private int month;
-        private int day;
-        private int join;   // 유입
-        private int leave;  // 이탈
-        private int retain; // 유지
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class PartnerSettlement {
-        private String partnerName;
-        private int joinCount;
-        private int cpi;          // CPI 금액
-        private int retainCount;
-        private int rsRate;       // RS 금액
-        private int days;         // 기간(일수)
-
-        public long getTotalAmount() {
-            return (long) (joinCount * cpi + retainCount * rsRate * days);
+            list.add(new DailyPartnerData(d, join, retain, leave, cpi, rs));
         }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("month", month);
+        result.put("days", days);
+        result.put("service", service);
+        result.put("data", list);
+        return result;
+    }
+
+    /** ✅ 엑셀 다운로드 */
+    @GetMapping("/excel")
+    public ResponseEntity<byte[]> downloadExcel(
+            @RequestParam int month,
+            @RequestParam String service
+    ) throws Exception {
+        YearMonth ym = YearMonth.of(LocalDate.now().getYear(), month);
+        List<DailyPartnerData> list = new ArrayList<>();
+
+        for (int d = 1; d <= ym.lengthOfMonth(); d++) {
+            list.add(new DailyPartnerData(d, 120 + d, 80 + d / 2, 30 + d / 3, 1000, 200));
+        }
+
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet(service + " 정산내역");
+
+        // Header
+        Row header = sheet.createRow(0);
+        String[] headers = {"일자", "유입 수", "이탈 수", "유지 수", "CPI(원)", "RS(원)", "정산 금액"};
+        for (int i = 0; i < headers.length; i++) {
+            header.createCell(i).setCellValue(headers[i]);
+        }
+
+        // Data
+        int rowIdx = 1;
+        for (DailyPartnerData d : list) {
+            Row r = sheet.createRow(rowIdx++);
+            r.createCell(0).setCellValue(d.getDay() + "일");
+            r.createCell(1).setCellValue(d.getJoin());
+            r.createCell(2).setCellValue(d.getLeave());
+            r.createCell(3).setCellValue(d.getRetain());
+            r.createCell(4).setCellValue(d.getCpi());
+            r.createCell(5).setCellValue(d.getRsRate());
+            long total = d.getJoin() * d.getCpi() + d.getRetain() * d.getRsRate();
+            r.createCell(6).setCellValue(total);
+        }
+
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        wb.write(out);
+        wb.close();
+
+        String filename = month + "월_" + service + "_정산내역.xlsx";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(out.toByteArray());
+    }
+
+    /* 내부 DTO */
+    @Data
+    @AllArgsConstructor
+    public static class DailyPartnerData {
+        private int day;
+        private int join;
+        private int retain;
+        private int leave;
+        private int cpi;
+        private int rsRate;
     }
 }
