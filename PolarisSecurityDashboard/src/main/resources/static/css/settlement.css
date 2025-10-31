@@ -22,6 +22,7 @@ html, body {
   padding: 30px 36px;
 }
 
+/* 필터 영역 */
 .filter-row {
   display: flex;
   align-items: center;
@@ -45,6 +46,7 @@ html, body {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  transition: background-color 0.2s ease;
 }
 
 .btn:hover {
@@ -53,8 +55,10 @@ html, body {
 
 /* 표 */
 .table-wrapper {
-  max-height: 600px; /* 스크롤 가능하도록 */
+  max-height: 600px;
   overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
 }
 
 .data-table {
@@ -71,13 +75,16 @@ html, body {
 
 .data-table th {
   background-color: #f1f5f9;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .data-table tbody tr:hover {
   background-color: #f9fafb;
 }
 
-/* 합계 */
+/* 합계 행 */
 tfoot.summary, .summary td {
   background-color: #f1f5f9;
   font-weight: 700;
@@ -88,4 +95,8 @@ tfoot.summary, .summary td {
 tfoot td#sumTotal {
   color: #2563eb;
   font-weight: 800;
+}
+
+tfoot {
+  display: table-footer-group !important;
 }

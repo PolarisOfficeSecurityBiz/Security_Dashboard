@@ -13,9 +13,11 @@
 <body>
 <div layout:fragment="content" class="layout">
   <main class="content">
+
     <div class="breadcrumb">Dashboards / 제휴사 정산 내역</div>
 
     <div class="card">
+      <!-- 🔹 필터 영역 -->
       <div class="filter-row">
         <label>조회 월</label>
         <select id="monthSelect">
@@ -35,8 +37,12 @@
         <button id="excelBtn" class="btn">엑셀 다운로드</button>
       </div>
 
-      <h2 id="settlementTitle">10월 제휴사 정산 내역 (1일 ~ 31일)</h2>
+      <!-- 🔹 타이틀 -->
+      <h2 id="settlementTitle">
+        10월 제휴사 정산 내역 (1일 ~ 31일)
+      </h2>
 
+      <!-- 🔹 테이블 -->
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
@@ -50,9 +56,13 @@
               <th>정산 금액</th>
             </tr>
           </thead>
-          <tbody id="partnerBody"></tbody>
-          <tfoot id="summaryRow" style="display:none;">
-            <tr class="summary">
+          <tbody id="partnerBody">
+            <tr><td colspan="7" style="text-align:center;">데이터를 불러오는 중...</td></tr>
+          </tbody>
+
+          <!-- 🔹 합계 행 -->
+          <tfoot id="summaryRow" class="summary" style="display:none;">
+            <tr>
               <td>합계</td>
               <td id="sumJoin">0</td>
               <td id="sumLeave">0</td>
@@ -66,8 +76,8 @@
     </div>
   </main>
   <script th:src="@{/js/settlement.js}"></script>
-  
 </div>
+
 
 </body>
 </html>

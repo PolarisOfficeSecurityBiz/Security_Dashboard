@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const excelBtn = document.getElementById("excelBtn");
 
-  // ✅ 렌더링 함수
+  /** ✅ 랜덤 데이터 생성 후 렌더링 */
   function renderData() {
     const month = parseInt(monthSelect.value);
     const service = serviceSelect.value;
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let html = "";
 
     for (let d = 1; d <= days; d++) {
+      // 🔹 임시 랜덤 데이터
       const join = 100 + Math.floor(Math.random() * 100);
       const leave = 30 + Math.floor(Math.random() * 30);
       const retain = 50 + Math.floor(Math.random() * 50);
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
+    // 🔹 렌더링 + 합계 표시
     tableBody.innerHTML = html;
     summaryRow.style.display = "table-footer-group";
 
@@ -58,9 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 초기 실행
   renderData();
 
+  // 🔹 필터 변경 시 다시 렌더링
   monthSelect.addEventListener("change", renderData);
   serviceSelect.addEventListener("change", renderData);
 
+  // 🔹 엑셀 다운로드 버튼
   excelBtn.addEventListener("click", () => {
     const month = monthSelect.value;
     const service = serviceSelect.value;
