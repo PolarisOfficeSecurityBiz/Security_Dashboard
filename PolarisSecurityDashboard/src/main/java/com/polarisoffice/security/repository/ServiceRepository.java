@@ -29,6 +29,6 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
     	       "WHERE s.licenseId IS NULL")
     	List<Object[]> findUnissuedServices();
    
-
+        Optional<Service> findByDomain(String domain);
  
 }
