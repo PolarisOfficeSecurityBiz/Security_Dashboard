@@ -7,30 +7,10 @@
   <meta charset="UTF-8">
   <title>고객사 대시보드</title>
 
+  <!-- ✅ 스타일 / JS 분리 -->
   <link rel="stylesheet" th:href="@{/css/customer_overview.css}"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    /* 오버레이 (데이터 없음 표시) */
-    .chart-wrapper {
-      position: relative;
-      height: 320px;
-    }
-    .no-data-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 700;
-      color: #9ca3af;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(3px);
-      border-radius: 12px;
-      text-align: center;
-      pointer-events: none;
-    }
-  </style>
+  <script th:src="@{/js/customer_dashboard.js}"></script>
 </head>
 
 <body>
@@ -85,7 +65,9 @@
     <h3>월별 유저 유입 현황</h3>
     <div class="chart-wrapper">
       <canvas id="userChart"></canvas>
-      <div id="noDataOverlay" class="no-data-overlay" style="display:none;">데이터가 없습니다.</div>
+      <div id="noDataOverlay" class="no-data-overlay" style="display:none;">
+        📊 아직 집계된 데이터가 없습니다.
+      </div>
     </div>
   </section>
 
@@ -118,44 +100,14 @@
   </section>
 </main>
 
-<!-- ✅ Chart.js 스크립트 -->
+<!-- ✅ 차트 데이터 주입 -->
 <script th:inline="javascript">
   /*<![CDATA[*/
-  const defaultLabels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  const defaultData = Array(12).fill(0);
-
-  const rawLabels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
-  const rawData = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
-
-  const hasData = rawData && rawData.length > 0;
-  const labels = hasData ? rawLabels : defaultLabels;
-  const data = hasData ? rawData : defaultData;
-
-  const ctx = document.getElementById('userChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: '월별 유입 유저 수',
-        data: data,
-        backgroundColor: 'rgba(99, 102, 241, 0.7)',
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  // ✅ 데이터 없으면 오버레이 표시
-  if (!hasData || data.every(v => v === 0)) {
-    document.getElementById('noDataOverlay').style.display = 'flex';
-  }
+  window.chartLabels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
+  window.chartDataNew = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
+  window.chartDataReturn = [0, 0, 0, 0, 0, 0]; // 예시 (추후 재방문 추가)
   /*]]>*/
 </script>
+
 </body>
 </html>
