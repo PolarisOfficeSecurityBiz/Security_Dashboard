@@ -44,13 +44,13 @@ public class HomeController {
     public String adminLogs() {
     	return "admin/logs";
     }
-    @GetMapping("/customer/dashboard")
-    public String customerDashboard(Model model, Authentication auth) {
-        model.addAttribute("path", "/customer/dashboard");
-        model.addAttribute("username", auth != null ? auth.getName() : null);
-        return "customer/dashboard";
-    }
-    
+//    @GetMapping("/customer/dashboard")
+//    public String customerDashboard(Model model, Authentication auth) {
+//        model.addAttribute("path", "/customer/dashboard");
+//        model.addAttribute("username", auth != null ? auth.getName() : null);
+//        return "customer/dashboard";
+//    }
+//    
     
 
 }
