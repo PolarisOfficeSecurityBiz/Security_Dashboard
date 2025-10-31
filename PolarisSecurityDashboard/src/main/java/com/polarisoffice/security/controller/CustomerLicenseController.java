@@ -134,10 +134,4 @@ public class CustomerLicenseController {
         return serviceDTOs;
     }
 
-    @GetMapping("/admin/license")
-    public String getUnissuedServices(Model model) {
-        List<ServiceUnlessDto> services = getUnissuedServices();
-        model.addAttribute("services", services);  // 데이터를 Thymeleaf로 전달
-        return "admin/license/admin_license";
-    }
 }
