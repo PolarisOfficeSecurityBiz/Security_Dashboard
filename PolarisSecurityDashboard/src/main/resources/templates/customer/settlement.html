@@ -86,12 +86,9 @@
     </div>
 
   </main>
+  <script defer th:src="@{/js/settlement.js}"></script>
 </div>
 
-<!-- ✅ 반드시 body 맨 아래에 script, defer 필수 -->
-<th:block layout:fragment="scripts">
-  <script defer th:src="@{/js/settlement.js}"></script>
-</th:block>
 
 </body>
 </html>
