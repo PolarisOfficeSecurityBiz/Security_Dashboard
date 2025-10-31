@@ -126,6 +126,21 @@
 	    <groupId>org.springframework.boot</groupId>
 	    <artifactId>spring-boot-starter-logging</artifactId>
 	</dependency>
+	
+	
+	<!-- ✅ Apache POI (엑셀 생성용) -->
+	<dependency>
+	    <groupId>org.apache.poi</groupId>
+	    <artifactId>poi-ooxml</artifactId>
+	    <version>5.2.5</version>
+	</dependency>
+	
+	<!-- (선택) 날짜·서식·엑셀 스타일 등을 좀 더 다룰 때 필요 -->
+	<dependency>
+	    <groupId>org.apache.poi</groupId>
+	    <artifactId>poi</artifactId>
+	    <version>5.2.5</version>
+	</dependency>
   </dependencies>
 
   <build>

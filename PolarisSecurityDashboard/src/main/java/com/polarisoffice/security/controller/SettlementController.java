@@ -70,52 +70,113 @@ public class SettlementController {
     public ResponseEntity<byte[]> downloadExcel(
             @RequestParam int month,
             @RequestParam String service
-    ) throws Exception {
-        YearMonth ym = YearMonth.of(LocalDate.now().getYear(), month);
-        List<DailyPartnerData> list = new ArrayList<>();
-
-        for (int d = 1; d <= ym.lengthOfMonth(); d++) {
-            list.add(new DailyPartnerData(d, 120 + d, 80 + d / 2, 30 + d / 3, 1000, 200));
+    ) {
+        // 1) 파라미터 검증
+        if (month < 1 || month > 12) {
+            return ResponseEntity.badRequest().body(new byte[0]);
+        }
+        if (service == null || service.isBlank()) {
+            service = "전체";
         }
 
-        Workbook wb = new XSSFWorkbook();
-        Sheet sheet = wb.createSheet(service + " 정산내역");
+        try {
+            YearMonth ym = YearMonth.of(LocalDate.now().getYear(), month);
+            int daysInMonth = ym.lengthOfMonth();
 
-        // Header
-        Row header = sheet.createRow(0);
-        String[] headers = {"일자", "유입 수", "이탈 수", "유지 수", "CPI(원)", "RS(원)", "정산 금액"};
-        for (int i = 0; i < headers.length; i++) {
-            header.createCell(i).setCellValue(headers[i]);
+            // 데모 데이터 (실사용 시 DB/Service에서 가져오세요)
+            List<DailyPartnerData> list = new ArrayList<>();
+            for (int d = 1; d <= daysInMonth; d++) {
+                list.add(new DailyPartnerData(d, 120 + d, 80 + d / 2, 30 + d / 3,
+                        "제휴사 B".equals(service) ? 1200 : 1000,
+                        "제휴사 B".equals(service) ? 150 : 200));
+            }
+
+            // 2) 워크북 생성 (try-with-resources로 안전 종료)
+            byte[] bytes;
+            try (Workbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+                // 시트명은 31자 제한 + 금지문자 제거
+                String safeSheetName = sanitizeSheetName(service + " 정산내역");
+                Sheet sheet = wb.createSheet(safeSheetName);
+
+                // 간단한 스타일(굵은 헤더 + 천단위 포맷)
+                CellStyle headerStyle = wb.createCellStyle();
+                Font bold = wb.createFont(); bold.setBold(true);
+                headerStyle.setFont(bold);
+
+                DataFormat df = wb.createDataFormat();
+                CellStyle moneyStyle = wb.createCellStyle();
+                moneyStyle.setDataFormat(df.getFormat("#,##0"));
+
+                // Header
+                String[] headers = {"일자", "유입 수", "이탈 수", "유지 수", "CPI(원)", "RS(원)", "정산 금액"};
+                Row header = sheet.createRow(0);
+                for (int i = 0; i < headers.length; i++) {
+                    Cell c = header.createCell(i);
+                    c.setCellValue(headers[i]);
+                    c.setCellStyle(headerStyle);
+                }
+
+                // Data
+                int rowIdx = 1;
+                for (DailyPartnerData d : list) {
+                    Row r = sheet.createRow(rowIdx++);
+                    r.createCell(0).setCellValue(d.getDay() + "일");
+                    r.createCell(1).setCellValue(d.getJoin());
+                    r.createCell(2).setCellValue(d.getLeave());
+                    r.createCell(3).setCellValue(d.getRetain());
+
+                    Cell cpi = r.createCell(4);
+                    cpi.setCellValue(d.getCpi());
+                    cpi.setCellStyle(moneyStyle);
+
+                    Cell rs = r.createCell(5);
+                    rs.setCellValue(d.getRsRate());
+                    rs.setCellStyle(moneyStyle);
+
+                    long total = (long) d.getJoin() * d.getCpi() + (long) d.getRetain() * d.getRsRate();
+                    Cell totalCell = r.createCell(6);
+                    totalCell.setCellValue(total);
+                    totalCell.setCellStyle(moneyStyle);
+                }
+
+                for (int i = 0; i < headers.length; i++) sheet.autoSizeColumn(i);
+
+                wb.write(out);
+                bytes = out.toByteArray();
+            }
+
+            // 3) 응답 헤더 (한글 파일명 안전 인코딩)
+            String filename = month + "월_" + service.replace(' ', '_') + "_정산내역.xlsx";
+            String encoded = java.net.URLEncoder.encode(filename, java.nio.charset.StandardCharsets.UTF_8)
+                    .replaceAll("\\+", "%20");
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(
+                    org.springframework.http.MediaType.parseMediaType(
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            // filename* 사용으로 한글/공백 안전
+            headers.add(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename*=UTF-8''" + encoded);
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+
+            return ResponseEntity.ok().headers(headers).body(bytes);
+
+        } catch (Exception e) {
+            // 서버 로그에만 스택 출력하시고, 사용자에겐 500 코드만
+            return ResponseEntity.status(500).body(new byte[0]);
         }
-
-        // Data
-        int rowIdx = 1;
-        for (DailyPartnerData d : list) {
-            Row r = sheet.createRow(rowIdx++);
-            r.createCell(0).setCellValue(d.getDay() + "일");
-            r.createCell(1).setCellValue(d.getJoin());
-            r.createCell(2).setCellValue(d.getLeave());
-            r.createCell(3).setCellValue(d.getRetain());
-            r.createCell(4).setCellValue(d.getCpi());
-            r.createCell(5).setCellValue(d.getRsRate());
-            long total = d.getJoin() * d.getCpi() + d.getRetain() * d.getRsRate();
-            r.createCell(6).setCellValue(total);
-        }
-
-        for (int i = 0; i < headers.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        wb.write(out);
-        wb.close();
-
-        String filename = month + "월_" + service + "_정산내역.xlsx";
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(out.toByteArray());
     }
+
+    /** 엑셀 시트명 안전화 (금지문자 제거 + 31자 제한) */
+    private String sanitizeSheetName(String name) {
+        String n = name.replaceAll("[:\\\\/?*\\[\\]]", "_");
+        if (n.length() > 31) n = n.substring(0, 31);
+        // 시트명이 공백만 남는 경우 대비
+        if (n.isBlank()) n = "Sheet1";
+        return n;
+    }
+
 
     /* 내부 DTO */
     @Data
