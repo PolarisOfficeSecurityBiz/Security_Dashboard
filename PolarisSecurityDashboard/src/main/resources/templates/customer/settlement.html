@@ -13,7 +13,6 @@
 <body>
 <div layout:fragment="content" class="layout">
   <main class="content">
-
     <div class="breadcrumb">Dashboards / 제휴사 정산 내역</div>
 
     <div class="card">
@@ -28,48 +27,47 @@
 
         <label>서비스명</label>
         <select id="serviceSelect">
-          <option th:each="s : ${services}" th:text="${s}" th:value="${s}"></option>
+          <option>전체</option>
+          <option>제휴사 A</option>
+          <option>제휴사 B</option>
         </select>
 
         <button id="excelBtn" class="btn">엑셀 다운로드</button>
       </div>
 
-      <h2 id="settlementTitle" th:text="${month.monthValue + '월 제휴사 정산 내역 (1일 ~ ' + month.lengthOfMonth() + '일)'}">
-        10월 제휴사 정산 내역 (1일 ~ 31일)
-      </h2>
+      <h2 id="settlementTitle">10월 제휴사 정산 내역 (1일 ~ 31일)</h2>
 
-      <table class="data-table">
-        <thead>
-        <tr>
-          <th>일자</th>
-          <th>유입 수</th>
-          <th>이탈 수</th>
-          <th>유지 수</th>
-          <th>CPI (원)</th>
-          <th>RS Rate</th>
-          <th>정산 금액</th>
-        </tr>
-        </thead>
-        <tbody id="partnerBody">
-          <tr><td colspan="7" style="text-align:center;">데이터를 선택해주세요.</td></tr>
-        </tbody>
-        <tfoot id="summaryRow" style="display:none;">
-          <tr class="summary">
-            <td>합계</td>
-            <td id="sumJoin">0</td>
-            <td id="sumLeave">0</td>
-            <td id="sumRetain">0</td>
-            <td colspan="2"></td>
-            <td id="sumTotal">₩0</td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>일자</th>
+              <th>유입 수</th>
+              <th>이탈 수</th>
+              <th>유지 수</th>
+              <th>CPI (원)</th>
+              <th>RS Rate</th>
+              <th>정산 금액</th>
+            </tr>
+          </thead>
+          <tbody id="partnerBody"></tbody>
+          <tfoot id="summaryRow" style="display:none;">
+            <tr class="summary">
+              <td>합계</td>
+              <td id="sumJoin">0</td>
+              <td id="sumLeave">0</td>
+              <td id="sumRetain">0</td>
+              <td colspan="2"></td>
+              <td id="sumTotal">₩0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
-
   </main>
   <script th:src="@{/js/settlement.js}"></script>
+  
 </div>
-
 
 </body>
 </html>

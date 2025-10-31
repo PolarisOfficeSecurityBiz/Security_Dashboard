@@ -1,9 +1,7 @@
-/* ====== 공통 레이아웃 ====== */
 html, body {
-  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  font-family: 'Pretendard', sans-serif;
   background-color: #f8fafc;
   color: #1e293b;
-  line-height: 1.5;
 }
 
 .layout {
@@ -17,46 +15,19 @@ html, body {
   max-width: 1100px;
 }
 
-/* ====== 카드 스타일 ====== */
 .card {
-  background: #ffffff;
+  background: #fff;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   padding: 30px 36px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
-}
-
-/* ====== 제목 ====== */
-h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 16px;
-  border-left: 4px solid #2563eb;
-  padding-left: 10px;
-}
-
-/* ====== 필터 영역 ====== */
 .filter-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 14px;
   margin-bottom: 26px;
-  background: #f9fafb;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px 18px;
-}
-
-.filter-row label {
-  font-weight: 600;
-  color: #374151;
 }
 
 .filter-row select {
@@ -64,17 +35,8 @@ h2 {
   border-radius: 8px;
   border: 1px solid #cbd5e1;
   background: #fff;
-  font-size: 14px;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
-.filter-row select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-  outline: none;
-}
-
-/* ====== 버튼 ====== */
 .btn {
   background-color: #2563eb;
   color: white;
@@ -83,77 +45,44 @@ h2 {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
-  transition: all 0.2s ease;
 }
 
 .btn:hover {
   background-color: #1d4ed8;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(37, 99, 235, 0.25);
 }
 
-/* ====== 테이블 ====== */
+/* 표 */
+.table-wrapper {
+  max-height: 600px; /* 스크롤 가능하도록 */
+  overflow-y: auto;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
   font-size: 14px;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
+}
+
+.data-table th, .data-table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  text-align: center;
 }
 
 .data-table th {
-  background: #f1f5f9;
-  color: #334155;
-  font-weight: 700;
-  border-bottom: 2px solid #e2e8f0;
-  padding: 10px 14px;
-}
-
-.data-table td {
-  border-bottom: 1px solid #f1f5f9;
-  padding: 10px 14px;
-  text-align: center;
-  color: #1e293b;
+  background-color: #f1f5f9;
 }
 
 .data-table tbody tr:hover {
   background-color: #f9fafb;
-  transition: background 0.2s ease;
 }
 
-/* ====== 정산 금액 강조 ====== */
-.data-table td:last-child {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-/* ====== 브레드크럼 ====== */
-.breadcrumb {
-  font-size: 14px;
-  color: #94a3b8;
-  margin-bottom: 16px;
-}
-
-.breadcrumb span {
-  color: #64748b;
-}
-/* ... 기존 CSS 유지 ... */
-
-/* ====== 합계 행 ====== */
+/* 합계 */
 tfoot.summary, .summary td {
   background-color: #f1f5f9;
   font-weight: 700;
   color: #111827;
   border-top: 2px solid #94a3b8;
-}
-
-tfoot td {
-  padding: 10px 12px;
-  text-align: center;
-  font-size: 15px;
 }
 
 tfoot td#sumTotal {

@@ -11,19 +11,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const excelBtn = document.getElementById("excelBtn");
 
-  // ⚡ 데이터 렌더링 (mock 예시)
+  // ✅ 렌더링 함수
   function renderData() {
     const month = parseInt(monthSelect.value);
     const service = serviceSelect.value;
-    const days = 31; // 임시: 31일 기준
+    const days = 31;
 
     let totalJoin = 0, totalLeave = 0, totalRetain = 0, totalAmount = 0;
     let html = "";
 
     for (let d = 1; d <= days; d++) {
-      const join = 100 + d;
-      const leave = 20 + Math.floor(d / 2);
-      const retain = 60 + Math.floor(d / 3);
+      const join = 100 + Math.floor(Math.random() * 100);
+      const leave = 30 + Math.floor(Math.random() * 30);
+      const retain = 50 + Math.floor(Math.random() * 50);
       const cpi = service === "제휴사 B" ? 1200 : 1000;
       const rs = service === "제휴사 B" ? 150 : 200;
       const total = join * cpi + retain * rs;
@@ -54,6 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sumRetain.textContent = totalRetain.toLocaleString();
     sumTotal.textContent = "₩" + totalAmount.toLocaleString();
   }
+
+  // 초기 실행
+  renderData();
 
   monthSelect.addEventListener("change", renderData);
   serviceSelect.addEventListener("change", renderData);
