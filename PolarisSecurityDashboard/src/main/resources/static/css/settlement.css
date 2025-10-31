@@ -140,3 +140,23 @@ h2 {
 .breadcrumb span {
   color: #64748b;
 }
+/* ... 기존 CSS 유지 ... */
+
+/* ====== 합계 행 ====== */
+tfoot.summary, .summary td {
+  background-color: #f1f5f9;
+  font-weight: 700;
+  color: #111827;
+  border-top: 2px solid #94a3b8;
+}
+
+tfoot td {
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 15px;
+}
+
+tfoot td#sumTotal {
+  color: #2563eb;
+  font-weight: 800;
+}
