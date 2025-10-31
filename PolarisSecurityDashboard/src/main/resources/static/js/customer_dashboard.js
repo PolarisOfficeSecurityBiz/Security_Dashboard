@@ -2,16 +2,33 @@ document.addEventListener('DOMContentLoaded', function () {
   const el = document.getElementById('userChart');
   if (!el || !window.Chart) return;
 
-  // 🔹 데이터 가져오기 (thymeleaf 주입 변수)
-  const labels = window.chartLabels?.length ? window.chartLabels
+  // 🧩 안전한 데이터 파싱 함수
+  function parseSafeArray(value, length = 12) {
+    try {
+      if (!value) return Array(length).fill(0);
+      if (Array.isArray(value)) return value;
+      // 문자열로 넘어온 경우 (ex: "[1,2,3]")
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : Array(length).fill(0);
+    } catch (e) {
+      return Array(length).fill(0);
+    }
+  }
+
+  // ✅ 데이터 변환 (비었으면 기본값 0)
+  const labels = window.chartLabels?.length
+    ? window.chartLabels
     : ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-  const dataNew = window.chartDataNew?.length ? window.chartDataNew : Array(12).fill(0);
-  const dataReturn = window.chartDataReturn?.length ? window.chartDataReturn : Array(12).fill(0);
+  const dataNew = parseSafeArray(window.chartDataNew);
+  const dataReturn = parseSafeArray(window.chartDataReturn);
 
-  const hasData = dataNew.some(v => v > 0) || dataReturn.some(v => v > 0);
+  // ✅ 진짜 데이터가 있는지 판단
+  const hasData =
+    dataNew.some(v => Number(v) > 0) ||
+    dataReturn.some(v => Number(v) > 0);
 
-  // 🔹 차트 렌더링
+  // ✅ Chart.js 렌더링
   new Chart(el, {
     type: 'bar',
     data: {
@@ -39,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // 🔹 데이터 없을 시 오버레이 표시
+  // ✅ 데이터 없으면 오버레이 표시
   const overlay = document.getElementById('noDataOverlay');
-  if (overlay && !hasData) overlay.style.display = 'flex';
+  if (overlay) overlay.style.display = hasData ? 'none' : 'flex';
 });

@@ -103,9 +103,9 @@
 <!-- ✅ 차트 데이터 주입 -->
 <script th:inline="javascript">
   /*<![CDATA[*/
-  window.chartLabels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
-  window.chartDataNew = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
-  window.chartDataReturn = [0, 0, 0, 0, 0, 0]; // 예시 (추후 재방문 추가)
+  window.chartLabels = [[${monthlyJoin != null ? #lists.newArrayList(monthlyJoin.keySet()) : '[]'}]];
+  window.chartDataNew = [[${monthlyJoin != null ? #lists.newArrayList(monthlyJoin.values()) : '[]'}]];
+  window.chartDataReturn = [0,0,0,0,0,0,0,0,0,0,0,0]; // 예시
   /*]]>*/
 </script>
 
