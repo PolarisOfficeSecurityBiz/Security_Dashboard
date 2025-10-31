@@ -61,7 +61,9 @@
   <!-- ✅ 월별 유저 유입 현황 -->
   <section class="chart-section">
     <h3>월별 유저 유입 현황</h3>
-    <canvas id="userChart" width="400" height="200"></canvas>
+    <div style="height:320px;">
+      <canvas id="userChart" width="400" height="200"></canvas>
+    </div>
   </section>
 
   <!-- ✅ 올해 정산 현황 -->
@@ -96,23 +98,44 @@
 <!-- ✅ Chart.js 스크립트 -->
 <script th:inline="javascript">
   /*<![CDATA[*/
-  const labels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
-  const data = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
+  // 기본 12개월 라벨 & 데이터
+  const defaultLabels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const defaultData = Array(12).fill(0);
+
+  // 서버 데이터 (월별 유입 Map)
+  const rawLabels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
+  const rawData = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
+
+  // ✅ 데이터가 없으면 기본값으로 대체
+  const labels = (rawLabels && rawLabels.length > 0) ? rawLabels : defaultLabels;
+  const data = (rawData && rawData.length > 0) ? rawData : defaultData;
 
   const ctx = document.getElementById('userChart').getContext('2d');
   new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [{
         label: '월별 유입 유저 수',
         data: data,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2,
-        tension: 0.2
+        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+        borderRadius: 6
       }]
     },
-    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 10 }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      }
+    }
   });
   /*]]>*/
 </script>
