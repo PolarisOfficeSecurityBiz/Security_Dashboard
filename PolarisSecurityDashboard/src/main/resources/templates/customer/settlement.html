@@ -6,91 +6,78 @@
 
 <head layout:fragment="head">
   <meta charset="UTF-8" />
-  <title>월별 제휴사 정산 내역</title>
+  <title>일별 정산 내역</title>
   <link rel="stylesheet" th:href="@{/css/settlement.css}" />
 </head>
 
 <body>
 <div layout:fragment="content" class="layout">
   <main class="content">
-    <div class="breadcrumb">Dashboards / 제휴사 정산 내역</div>
+
+    <div class="breadcrumb">Dashboards / 일별 정산 내역</div>
 
     <div class="card">
-
-      <!-- ✅ 상단 탭 -->
+      <!-- 탭 -->
       <div class="tab-nav">
-        <button class="tab-btn" data-tab="daily">유입/이탈 현황</button>
-        <button class="tab-btn active" data-tab="partner">제휴사 정산 내역</button>
+        <button class="tab-btn active" data-tab="daily">유입/이탈 현황</button>
+        <button class="tab-btn" data-tab="partner">제휴사 정산 내역</button>
       </div>
 
-      <!-- ✅ 유입/이탈 현황 -->
-      <section id="daily" class="tab-content">
-        <h2 th:text="${month.monthValue} + '월 유입/이탈/유지 현황'">10월 유입/이탈/유지 현황</h2>
+      <!-- 유입/이탈 -->
+      <section id="daily" class="tab-content active">
+        <h2 th:text="${month.monthValue} + '월 ' + ${daily.day} + '일 유입/이탈/유지 현황'">유입/이탈/유지 현황</h2>
         <table class="data-table">
           <thead>
-          <tr><th>구분</th><th>유입</th><th>이탈</th><th>유지</th></tr>
+            <tr><th>구분</th><th>유입</th><th>이탈</th><th>유지</th></tr>
           </thead>
           <tbody>
-          <tr>
-            <td>전체 사용자</td>
-            <td th:text="${daily.join} + '명'">125명</td>
-            <td th:text="${daily.leave} + '명'">30명</td>
-            <td th:text="${daily.retain} + '명'">95명</td>
-          </tr>
+            <tr>
+              <td>전체 사용자</td>
+              <td th:text="${daily.join} + '명'">125명</td>
+              <td th:text="${daily.leave} + '명'">30명</td>
+              <td th:text="${daily.retain} + '명'">95명</td>
+            </tr>
           </tbody>
         </table>
       </section>
 
-      <!-- ✅ 제휴사 정산 내역 -->
-      <section id="partner" class="tab-content active">
-
-        <!-- ✅ 월 선택 -->
+      <!-- 제휴사 정산 -->
+      <section id="partner" class="tab-content">
         <div class="month-selector">
           <label for="monthSelect">조회 월 선택</label>
-          <select id="monthSelect" name="month">
-            <option value="1">1월</option>
-            <option value="2">2월</option>
-            <option value="3">3월</option>
-            <option value="4">4월</option>
-            <option value="5">5월</option>
-            <option value="6">6월</option>
-            <option value="7">7월</option>
-            <option value="8">8월</option>
-            <option value="9">9월</option>
-            <option value="10" selected>10월</option>
-            <option value="11">11월</option>
-            <option value="12">12월</option>
+          <select id="monthSelect">
+            <option th:each="m : ${#numbers.sequence(1, 12)}"
+                    th:value="${m}"
+                    th:selected="${m == month.monthValue}"
+                    th:text="${m + '월'}"></option>
           </select>
         </div>
 
-        <h2 id="settlementTitle">10월 제휴사 정산 내역 (1일 ~ 31일)</h2>
+        <h2 id="settlementTitle"
+            th:text="${month.monthValue} + '월 제휴사 정산 내역 (1일 ~ ' + ${month.lengthOfMonth()} + '일)'">
+          제휴사 정산 내역
+        </h2>
 
         <table class="data-table">
           <thead>
-          <tr>
-            <th>구분</th>
-            <th>유입 수</th>
-            <th>CPI (원)</th>
-            <th>유지 수</th>
-            <th>RS Rate</th>
-            <th>기간(일)</th>
-            <th>정산 금액</th>
-          </tr>
+            <tr>
+              <th>구분</th><th>유입 수</th><th>CPI (원)</th><th>유지 수</th>
+              <th>RS Rate</th><th>기간(일)</th><th>정산 금액</th>
+            </tr>
           </thead>
           <tbody id="partnerBody">
-          <!-- ✅ 데이터 예시 (백엔드에서 Thymeleaf로 반복 렌더링 가능) -->
-          <tr th:each="p : ${partners}">
-            <td th:text="${p.partnerName}">제휴사 A</td>
-            <td th:text="${p.joinCount}">210</td>
-            <td th:text="'₩' + ${#numbers.formatInteger(p.cpi, 3, 'COMMA')}">₩1,000</td>
-            <td th:text="${p.retainCount}">180</td>
-            <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}">₩200</td>
-            <td th:text="${p.days}">31</td>
-            <td class="calc"
-                th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
-              ₩0
-            </td>
-          </tr>
+            <tr th:each="p : ${partners}">
+              <td th:text="${p.partnerName}">제휴사 A</td>
+              <td th:text="${p.joinCount}">210</td>
+              <td th:text="'₩' + ${#numbers.formatInteger(p.cpi,3,'COMMA')}">₩1,000</td>
+              <td th:text="${p.retainCount}">180</td>
+              <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate,3,'COMMA')}">₩200</td>
+              <td th:text="${p.days}">31</td>
+              <td class="calc"
+                  th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
+                ₩0
+              </td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -99,7 +86,6 @@
   <script th:src="@{/js/settlement.js}"></script>
 </div>
 
-<!-- ✅ JS 로드 -->
 
 </body>
 </html>
