@@ -35,66 +35,6 @@ html, body {
 /* ====== 탭 네비게이션 ====== */
 .tab-nav {
   display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.tab-btn {
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
-  color: #4338ca;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-.tab-btn:hover {
-  background-color: #e0e7ff;
-}
-.tab-btn.active {
-  background-color: #4f46e5;
-  color: #fff;
-  border-color: #4f46e5;
-}
-
-/* ====== 탭 콘텐츠 ====== */
-.tab-content {
-  display: none;
-}
-.tab-content.active {
-  display: block;
-}
-
-/* ====== 표 ====== */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  margin-top: 12px;
-}
-
-.data-table th, .data-table td {
-  border: 1px solid #e5e7eb;
-  padding: 10px 12px;
-  text-align: center;
-}
-
-.data-table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-
-.data-table tbody tr:hover {
-  background-color: #f3f4f6;
-}
-
-.calc {
-  font-weight: 700;
-  color: #111827;
-}
-.tab-nav {
-  display: flex;
   border-bottom: 2px solid #ddd;
   margin-bottom: 16px;
 }
@@ -115,6 +55,7 @@ html, body {
   font-weight: 600;
 }
 
+/* ====== 탭 콘텐츠 ====== */
 .tab-content {
   display: none;
   animation: fadeIn 0.3s ease-in;
@@ -124,6 +65,7 @@ html, body {
   display: block;
 }
 
+/* ====== 표 스타일 ====== */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -134,6 +76,20 @@ html, body {
   border: 1px solid #e5e7eb;
   padding: 8px 12px;
   text-align: center;
+}
+
+.data-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.calc {
+  font-weight: 700;
+  color: #111827;
 }
 
 @keyframes fadeIn {

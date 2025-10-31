@@ -1,15 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 🔹 탭 전환
+  console.log("✅ settlement.js loaded");
+
+  // 🔹 탭 전환 기능
   const tabs = document.querySelectorAll(".tab-btn");
   const contents = document.querySelectorAll(".tab-content");
 
+  if (!tabs.length) {
+    console.error("❌ No tabs found");
+    return;
+  }
+
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
-      // 모든 탭 비활성화
       tabs.forEach((t) => t.classList.remove("active"));
       contents.forEach((c) => c.classList.remove("active"));
 
-      // 클릭된 탭과 연결된 콘텐츠 활성화
       tab.classList.add("active");
       const target = document.getElementById(tab.dataset.tab);
       if (target) target.classList.add("active");

@@ -25,7 +25,9 @@
 
       <!-- ✅ 유입/이탈 현황 -->
       <section id="daily" class="tab-content active">
-        <h2 th:text="${month.monthValue} + '월 ' + ${daily.day} + '일 유입/이탈/유지 현황'"></h2>
+        <h2 th:text="${month.monthValue} + '월 ' + ${daily.day} + '일 유입/이탈/유지 현황'">
+          10월 30일 유입/이탈/유지 현황
+        </h2>
 
         <table class="data-table">
           <thead>
@@ -39,9 +41,9 @@
           <tbody>
             <tr>
               <td>전체 사용자</td>
-              <td th:text="${daily.join} + '명'"></td>
-              <td th:text="${daily.leave} + '명'"></td>
-              <td th:text="${daily.retain} + '명'"></td>
+              <td th:text="${daily.join} + '명'">125명</td>
+              <td th:text="${daily.leave} + '명'">30명</td>
+              <td th:text="${daily.retain} + '명'">95명</td>
             </tr>
           </tbody>
         </table>
@@ -49,7 +51,9 @@
 
       <!-- ✅ 제휴사 정산 내역 -->
       <section id="partner" class="tab-content">
-        <h2 th:text="${month.monthValue} + '월 제휴사 정산 내역 (1일 ~ ' + ${month.lengthOfMonth()} + '일)'"></h2>
+        <h2 th:text="${month.monthValue} + '월 제휴사 정산 내역 (1일 ~ ' + ${month.lengthOfMonth()} + '일)'">
+          10월 제휴사 정산 내역
+        </h2>
 
         <table class="data-table">
           <thead>
@@ -65,16 +69,15 @@
           </thead>
           <tbody>
             <tr th:each="p : ${partners}">
-              <td th:text="${p.partnerName}"></td>
-              <td th:text="${p.joinCount}"></td>
-              <td th:text="'₩' + ${#numbers.formatInteger(p.cpi, 3, 'COMMA')}"></td>
-              <td th:text="${p.retainCount}"></td>
-              <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}"></td>
-              <td th:text="${p.days}"></td>
-              <!-- ✅ JS로 계산 -->
+              <td th:text="${p.partnerName}">네이버</td>
+              <td th:text="${p.joinCount}">100</td>
+              <td th:text="'₩' + ${#numbers.formatInteger(p.cpi, 3, 'COMMA')}">₩500</td>
+              <td th:text="${p.retainCount}">80</td>
+              <td th:text="'₩' + ${#numbers.formatInteger(p.rsRate, 3, 'COMMA')}">₩200</td>
+              <td th:text="${p.days}">30</td>
               <td class="calc"
                   th:attr="data-cpi=${p.cpi}, data-rs=${p.rsRate}, data-join=${p.joinCount}, data-retain=${p.retainCount}, data-days=${p.days}">
-                  ₩0
+                ₩0
               </td>
             </tr>
           </tbody>
@@ -85,7 +88,7 @@
   </main>
 </div>
 
-<!-- ✅ 스크립트 -->
+<!-- ✅ 분리된 JS 불러오기 -->
 <script th:src="@{/js/settlement.js}"></script>
 </body>
 </html>
