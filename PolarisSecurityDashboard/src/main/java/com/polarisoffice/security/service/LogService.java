@@ -1,4 +1,3 @@
-// com.polarisoffice.security.service.LogService.java
 package com.polarisoffice.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,10 +10,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.Year;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,9 @@ public class LogService {
 
     private final ObjectMapper om = new ObjectMapper();
 
+    /* -----------------------------
+       ✅ 로그 생성
+    ------------------------------ */
     @Transactional
     public Long createLogWithDetail(LogUpsertRequest req) {
         LogEntry entry = LogEntry.builder()
@@ -36,7 +39,7 @@ public class LogService {
                 .createdAt(LocalDateTime.now())
                 .osVersion(parseIntOrNull(req.osVersion()))
                 .appVersion(parseIntOrNull(req.appVersion()))
-                .extra(toJsonOrNull(req.extra()))   // Map → JSON 저장
+                .extra(toJsonOrNull(req.extra()))
                 .build();
         logEntryRepo.save(entry);
 
@@ -45,7 +48,7 @@ public class LogService {
                 var m = Objects.requireNonNull(req.malware(), "malware payload required");
                 MalwareLog ml = MalwareLog.builder()
                         .logEntry(entry)
-                        .malwareType(toJsonArray(m.malwareType())) // List<String> → JSON 문자열
+                        .malwareType(toJsonArray(m.malwareType()))
                         .packageName(m.packageName())
                         .path(m.path())
                         .androidId(m.androidId())
@@ -56,7 +59,7 @@ public class LogService {
                 var r = Objects.requireNonNull(req.remote(), "remote payload required");
                 RemoteLog rl = RemoteLog.builder()
                         .logEntry(entry)
-                        .remoteType(toJsonArray(r.remoteType()))   // List<String> → JSON 문자열
+                        .remoteType(toJsonArray(r.remoteType()))
                         .packageName(r.packageName())
                         .path(r.path())
                         .androidId(r.androidId())
@@ -79,25 +82,42 @@ public class LogService {
         return entry.getId();
     }
 
-    private Integer parseIntOrNull(String v) {
-        if (v == null || v.isBlank()) return null;
-        try { return Integer.parseInt(v.trim()); } catch (NumberFormatException e) { return null; }
+    /* -----------------------------
+       ✅ 대시보드용 데이터
+    ------------------------------ */
+
+    /** 이번 달 유입 유저 수 */
+    public int countMonthlyJoin(String domain) {
+        LocalDate now = LocalDate.now();
+        LocalDateTime start = now.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime end = now.plusMonths(1).withDayOfMonth(1).atStartOfDay();
+
+        return logEntryRepo.countByDomainAndCreatedAtBetween(domain, start, end);
     }
 
-    private String toJsonOrNull(Map<String, Object> m) {
-        if (m == null || m.isEmpty()) return null;
-        try { return om.writeValueAsString(m); }
-        catch (JsonProcessingException e) { throw new IllegalArgumentException("invalid extra json", e); }
+    /** 올해 월별 유입 현황 (차트용) */
+    public Map<String, Integer> getYearlyJoinCount(String domain) {
+        int year = Year.now().getValue();
+        List<Object[]> rows = logEntryRepo.countMonthlyJoinByYear(domain, year);
+
+        // {1월=200, 2월=150, ...} 형태로 변환
+        Map<String, Integer> map = new LinkedHashMap<>();
+        for (int m = 1; m <= 12; m++) {
+            map.put(m + "월", 0);
+        }
+        for (Object[] r : rows) {
+            int month = ((Number) r[0]).intValue();
+            int count = ((Number) r[1]).intValue();
+            map.put(month + "월", count);
+        }
+        return map;
     }
 
-    private String toJsonArray(List<String> list) {
-        if (list == null) return null;
-        try { return om.writeValueAsString(list); }
-        catch (JsonProcessingException e) { throw new IllegalArgumentException("invalid list json", e); }
-    }
-    
+    /* -----------------------------
+       ✅ 기존 로그 조회 기능
+    ------------------------------ */
     public List<LogListItem> getReport(Integer days, LogType type, String domain) {
-        int d = (days == null ? 7 : Math.max(1, Math.min(days, 30))); // 1~30일로 가드
+        int d = (days == null ? 7 : Math.max(1, Math.min(days, 30)));
         LocalDateTime from = LocalDateTime.now().minusDays(d);
 
         String domainLike = (domain == null || domain.isBlank()) ? null : domain;
@@ -115,12 +135,32 @@ public class LogService {
                 ))
                 .toList();
     }
-    /** 도메인 정확히 일치하는 로그만 조회 */
+
     public List<LogListItem> getLogsByExactDomain(String domain) {
         return logEntryRepo.findAll().stream()
                 .filter(log -> log.getDomain() != null &&
                                log.getDomain().equalsIgnoreCase(domain))
-                .map(LogListItem::fromEntity) // DTO 변환
+                .map(LogListItem::fromEntity)
                 .toList();
+    }
+
+    /* -----------------------------
+       ✅ 내부 유틸
+    ------------------------------ */
+    private Integer parseIntOrNull(String v) {
+        if (v == null || v.isBlank()) return null;
+        try { return Integer.parseInt(v.trim()); } catch (NumberFormatException e) { return null; }
+    }
+
+    private String toJsonOrNull(Map<String, Object> m) {
+        if (m == null || m.isEmpty()) return null;
+        try { return om.writeValueAsString(m); }
+        catch (JsonProcessingException e) { throw new IllegalArgumentException("invalid extra json", e); }
+    }
+
+    private String toJsonArray(List<String> list) {
+        if (list == null) return null;
+        try { return om.writeValueAsString(list); }
+        catch (JsonProcessingException e) { throw new IllegalArgumentException("invalid list json", e); }
     }
 }
