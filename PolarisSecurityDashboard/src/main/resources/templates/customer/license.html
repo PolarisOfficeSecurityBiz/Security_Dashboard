@@ -11,92 +11,77 @@
 </head>
 
 <body>
-  <div layout:fragment="content" class="layout">
-    <main class="content">
-      <header class="breadcrumb">
-        <span>Dashboards</span> / <span> 라이선스 관리</span>
-      </header>
+<div layout:fragment="content" class="layout">
+  <main class="content">
+    <header class="breadcrumb">
+      <span>Dashboards</span> / <span> 라이선스 관리</span>
+    </header>
 
-      <section class="license-card">
-        <h2>라이선스 정보</h2>
+    <section class="license-card">
+      <h2>라이선스 정보</h2>
 
-        <div class="form">
-          <!-- 고객사 명 -->
-          <label for="customerName">고객사 명</label>
-          <input type="text" id="customerName" th:value="${customer.customerName}" readonly />
+      <div class="form">
+        <!-- 고객사 명 -->
+        <label for="customerName">고객사 명</label>
+        <input type="text" id="customerName" th:value="${customer.customerName}" readonly />
 
-          <!-- 서비스 명 -->
-          <label for="serviceName">서비스 명</label>
-          <input type="text" id="serviceName"
-                 th:value="${service != null ? service.serviceName : '-'}"
-                 readonly />
+        <!-- 서비스 명 -->
+        <label for="serviceName">서비스 명</label>
+        <input type="text" id="serviceName"
+               th:value="${service != null ? service.serviceName : '-'}"
+               readonly />
 
-          <!-- 도메인 -->
-          <label for="domain">도메인</label>
-          <input type="text" id="domain"
-                 th:value="${service != null ? service.domain : '-'}"
-                 readonly />
+        <!-- 도메인 -->
+        <label for="domain">도메인</label>
+        <input type="text" id="domain"
+               th:value="${service != null ? service.domain : '-'}"
+               readonly />
 
-          <!-- 라이선스 키 -->
-          <label for="licenseKey">라이선스 키</label>
+        <!-- 라이선스 키 -->
+        <label for="licenseKey">라이선스 키</label>
 
-          <!-- 발급된 경우 -->
-          <div class="input-group"
-               th:if="${service != null and service.licenseId != null}">
-            <input type="text" id="licenseKey" th:value="${service.licenseId}" readonly />
-            <button id="downloadKeyBtn" title="라이선스 파일 다운로드">⭳</button>
-          </div>
-
-          <!-- 미발급인 경우 -->
-          <div class="input-group"
-               th:if="${service == null or service.licenseId == null}">
-            <input type="text" id="licenseKey" value="발급 전입니다." readonly />
-            <button id="downloadKeyBtn" disabled title="라이선스 파일 없음">⭳</button>
-          </div>
-
-          <!-- 라이선스 만료일 -->
-          <label for="licenseExpiry">라이선스 만료일</label>
-
-          <!-- 발급된 경우 -->
-          <div class="input-group"
-               th:if="${service != null and service.licenseId != null}">
-            <input type="text" id="licenseExpiry"
-                   th:value="${service.updateAt != null ? #temporals.format(service.updateAt, 'yyyy-MM-dd') : '-'}"
-                   readonly />
-            <button class="btn-green" id="extendBtn">연장요청</button>
-          </div>
-
-          <!-- 미발급인 경우 -->
-          <div class="input-group"
-               th:if="${service == null or service.licenseId == null}">
-            <input type="text" id="licenseExpiry" value="-" readonly />
-            <button class="btn-green" id="extendBtn" disabled>연장요청</button>
-          </div>
-
-          <!-- 최신 SDK -->
-          <label for="sdkVersion">최신 SDK</label>
-
-          <!-- SDK가 존재하는 경우 -->
-          <div class="input-group"
-               th:if="${service != null and sdkExists}">
-            <input type="text" id="sdkVersion"
-                   th:value="${latestSdkVersion}" readonly />
-            <a class="btn-green"
-               th:href="@{'/api/sdk/download/' + ${service.serviceId}}">다운로드</a>
-          </div>
-
-          <!-- SDK가 존재하지 않는 경우 -->
-          <div class="input-group"
-               th:if="${service == null or !sdkExists}">
-            <input type="text" id="sdkVersion" value="-" readonly />
-            <a class="btn-green disabled" href="javascript:void(0)">다운로드</a>
-          </div>
-
+        <!-- 발급된 경우 -->
+        <div class="input-group" th:if="${service != null and service.licenseId != null}">
+          <input type="text" id="licenseKey" th:value="${service.licenseId}" readonly />
+          <button id="copyKeyBtn" title="복사">📋</button>
+          <button id="downloadKeyBtn" title="다운로드">⭳</button>
         </div>
-      </section>
-    </main>
-  </div>
 
-  <script th:src="@{/js/license.js}"></script>
+        <!-- 미발급인 경우 -->
+        <div class="input-group" th:if="${service == null or service.licenseId == null}">
+          <input type="text" id="licenseKey" value="발급 전입니다." readonly />
+          <button id="issueBtn" class="btn-blue" title="발급 요청">발급요청</button>
+        </div>
+
+        <!-- 라이선스 만료일 -->
+        <label for="licenseExpiry">라이선스 만료일</label>
+        <div class="input-group" th:if="${service != null and service.licenseId != null}">
+          <input type="text" id="licenseExpiry"
+                 th:value="${service.updateAt != null ? #temporals.format(service.updateAt, 'yyyy-MM-dd') : '-'}"
+                 readonly />
+          <button class="btn-green" id="extendBtn">연장요청</button>
+        </div>
+        <div class="input-group" th:if="${service == null or service.licenseId == null}">
+          <input type="text" id="licenseExpiry" value="-" readonly />
+          <button class="btn-green" id="extendBtn" disabled>연장요청</button>
+        </div>
+
+        <!-- 최신 SDK -->
+        <label for="sdkVersion">최신 SDK</label>
+        <div class="input-group" th:if="${service != null and sdkExists}">
+          <input type="text" id="sdkVersion" th:value="${latestSdkVersion}" readonly />
+          <a class="btn-green" th:href="@{'/api/sdk/download/' + ${service.serviceId}}">다운로드</a>
+        </div>
+        <div class="input-group" th:if="${service == null or !sdkExists}">
+          <input type="text" id="sdkVersion" value="-" readonly />
+          <a class="btn-green disabled" href="javascript:void(0)">다운로드</a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+</div>
+
+<script th:src="@{/js/license.js}"></script>
 </body>
 </html>

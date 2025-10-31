@@ -1,4 +1,4 @@
-/* 전체 페이지의 기본 스타일 */
+/* ====== 기본 레이아웃 ====== */
 body {
   font-family: 'Pretendard', sans-serif;
   background-color: #fafafa;
@@ -22,7 +22,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* 카드 스타일 */
+/* ====== 카드 ====== */
 .license-card {
   background: white;
   padding: 30px;
@@ -36,14 +36,13 @@ body {
   margin-bottom: 20px;
 }
 
-/* 폼 스타일 */
+/* ====== 폼 ====== */
 .form label {
   display: block;
   margin: 10px 0 4px;
   font-weight: 500;
 }
 
-/* 텍스트 입력창 스타일 */
 input[type="text"] {
   width: 100%;
   padding: 10px;
@@ -53,12 +52,12 @@ input[type="text"] {
   font-size: 14px;
 }
 
-/* 입력창과 버튼을 감싸는 그룹 스타일 */
+/* ====== 입력 그룹 ====== */
 .input-group {
   display: flex;
-  gap: 10px; /* 항목 간격 */
-  align-items: center; /* 수평 정렬 */
-  margin-bottom: 15px; /* 아래 간격 */
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .input-group input {
@@ -70,7 +69,7 @@ input[type="text"] {
   font-size: 14px;
 }
 
-/* 기본 버튼 및 링크 스타일 */
+/* ====== 버튼 ====== */
 .input-group button,
 .input-group a {
   background-color: #eaeaea;
@@ -91,23 +90,25 @@ input[type="text"] {
   background-color: #ddd;
 }
 
-/* 연장요청 및 다운로드 버튼 스타일 */
 .btn-green {
   background-color: #19a974 !important;
   color: white;
-  padding: 0 12px;
-  font-size: 14px;
-  line-height: 36px;
-  text-align: center;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
 }
 
 .btn-green:hover {
   background-color: #13895e !important;
 }
 
-/* 비활성화 상태 */
+.btn-blue {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+.btn-blue:hover {
+  background-color: #1e40af !important;
+}
+
+/* ====== 비활성화 ====== */
 button[disabled],
 a.disabled {
   background-color: #ccc !important;
@@ -117,49 +118,27 @@ a.disabled {
   opacity: 0.7;
 }
 
-/* 전체 입력 폼 정렬 */
-.license-card .form {
-  display: flex;
-  flex-direction: column;
-}
-
-/* 읽기 전용 입력창 스타일 */
-input[readonly] {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
-}
-
-/* ✅ 토스트 메시지 스타일 */
+/* ====== 토스트 메시지 ====== */
 .toast {
   position: fixed;
   bottom: 40px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(20px);
   background: #333;
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
   opacity: 0;
-  animation: fadeInOut 3s ease forwards;
+  transition: all 0.3s ease;
   z-index: 9999;
 }
 
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-  10% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  90% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
+
+.toast.success { background: #22c55e; }
+.toast.warn { background: #f59e0b; }
+.toast.error { background: #ef4444; }

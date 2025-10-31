@@ -24,11 +24,11 @@
   <section class="top-stats">
     <div class="stat-card">
       <h4>이번달 유입 유저 수</h4>
-      <div class="stat-value" th:text="${#numbers.formatInteger(joinCount, 3, 'COMMA')}">000</div>
+      <div class="stat-value" th:text="${#numbers.formatInteger(joinCount, 3, 'COMMA')}">0</div>
     </div>
     <div class="stat-card">
       <h4>이번달 정산 금액</h4>
-      <div class="stat-value" th:text="${#numbers.formatInteger(totalSettlement, 3, 'COMMA')} + '원'">000원</div>
+      <div class="stat-value" th:text="${#numbers.formatInteger(totalSettlement, 3, 'COMMA')} + '원'">0원</div>
     </div>
     <div class="stat-card">
       <h4>활성 라이선스 수</h4>
