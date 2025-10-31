@@ -7,130 +7,114 @@
   <meta charset="UTF-8">
   <title>고객사 대시보드</title>
 
-  <!-- 페이지 전용 스타일 -->
   <link rel="stylesheet" th:href="@{/css/customer_overview.css}"/>
-
-  <!-- 차트 (필요 페이지에서만 로드) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>s
-  <script src="/js/customer_dashboard.js"></script> <!-- 이 부분은 경로를 확인하여 수정 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <!-- ✅ 레이아웃이 사이드바/메인 구조를 렌더링하므로,
-       여기서는 content 조각만 넘겨줍니다. -->
-  <main class="overview-container" layout:fragment="content">
+<main class="overview-container" layout:fragment="content">
 
-    <header class="dashboard-header">
-      <h1>고객사 대시보드</h1>
-    </header>
+  <header class="dashboard-header">
+    <h1 th:text="${customerName} ?: '고객사 대시보드'">고객사 대시보드</h1>
+  </header>
 
-    <!-- 상단 통계 카드 -->
-    <section class="top-stats">
-      <div class="stat-card">
-        <h4>이번달 유입 유저 수</h4>
-        <div class="stat-value">2,040</div>
-        <div class="stat-change">+10.3%</div>
-      </div>
-      <div class="stat-card">
-        <h4>이번달 정산 현황</h4>
-        <div class="stat-value">1,203</div>
-        <div class="stat-change">+10.3%</div>
-      </div>
-      <div class="stat-card">
-        <h4>활성 라이선스 수</h4>
-        <div class="stat-value">10</div>
-        <div class="stat-change">+10.3%</div>
-      </div>
-    </section>
+  <!-- ✅ 상단 통계 카드 -->
+  <section class="top-stats">
+    <div class="stat-card">
+      <h4>이번달 유입 유저 수</h4>
+      <div class="stat-value" th:text="${#numbers.formatInteger(joinCount, 3, 'COMMA')}">0</div>
+    </div>
+    <div class="stat-card">
+      <h4>이번달 정산 금액</h4>
+      <div class="stat-value" th:text="${#numbers.formatInteger(totalSettlement, 3, 'COMMA')} + '원'">0원</div>
+    </div>
+    <div class="stat-card">
+      <h4>활성 라이선스 수</h4>
+      <div class="stat-value" th:text="${activeLicenses}">0</div>
+    </div>
+  </section>
 
-    <!-- 라이선스 상태 -->
-    <section class="license-status">
-      <h3>라이선스 상태</h3>
-      <table>
-        <thead>
-        <tr>
-          <th>서비스 명</th>
-          <th>만료일</th>
-          <th>D-Day</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="license : ${licenses}">
-          <td th:text="${license.name}">이지로그</td>
-          <td th:text="${license.expireDate}">2025.09.24</td>
-          <td th:text="${license.dDay}">D-20</td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(licenses)}">
-          <td colspan="3" style="text-align:center; color:#94a3b8;">등록된 라이선스가 없습니다.</td>
-        </tr>
-        </tbody>
-      </table>
-    </section>
+  <!-- ✅ 라이선스 상태 -->
+  <section class="license-status">
+    <h3>라이선스 상태</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>서비스 명</th>
+        <th>만료일</th>
+        <th>D-Day</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="license : ${licenses}">
+        <td th:text="${license.name}">-</td>
+        <td th:text="${license.expireDate != null ? license.expireDate : '-'}">-</td>
+        <td th:text="${license.dDay}">D-0</td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(licenses)}">
+        <td colspan="3" style="text-align:center; color:#94a3b8;">등록된 라이선스가 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
 
-    <!-- 월별 유저 유입 현황 -->
-    <section class="chart-section">
-      <h3>월별 유저 유입 현황</h3>
-      <canvas id="userChart" width="400" height="200"></canvas>
-    </section>
+  <!-- ✅ 월별 유저 유입 현황 -->
+  <section class="chart-section">
+    <h3>월별 유저 유입 현황</h3>
+    <canvas id="userChart" width="400" height="200"></canvas>
+  </section>
 
-    <!-- 올해 정산 현황 -->
-    <section class="settlement-status">
-      <h3>올해 정산 현황</h3>
-      <table>
-        <thead>
-        <tr>
-          <th>월별</th>
-          <th>정산 금액</th>
-          <th>정산 파일</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="settlement : ${settlements}">
-          <td th:text="${settlement.month + '월'}">1월</td>
-          <td th:text="${#numbers.formatInteger(settlement.amount, 3, 'COMMA') + '원'}">210,900원</td>
-          <td>
-            <a th:href="@{/files/{id}(id=${settlement.fileId})}" target="_blank" aria-label="정산 파일 다운로드">
-              <i class="fa-solid fa-file-arrow-down"></i>
-            </a>
-          </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(settlements)}">
-          <td colspan="3" style="text-align:center; color:#94a3b8;">정산 내역이 없습니다.</td>
-        </tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
+  <!-- ✅ 올해 정산 현황 -->
+  <section class="settlement-status">
+    <h3>올해 정산 현황</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>월별</th>
+        <th>정산 금액</th>
+        <th>정산 파일</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="s : ${settlements}">
+        <td th:text="${s.month + '월'}">-</td>
+        <td th:text="${#numbers.formatInteger(s.amount, 3, 'COMMA')} + '원'">0원</td>
+        <td>
+          <a th:if="${s.fileId != null}" th:href="@{/files/{id}(id=${s.fileId})}" target="_blank">
+            <i class="fa-solid fa-file-arrow-down"></i>
+          </a>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(settlements)}">
+        <td colspan="3" style="text-align:center; color:#94a3b8;">정산 내역이 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // JavaScript가 로드된 후 실행할 코드 작성
-      const ctx = document.getElementById('userChart').getContext('2d');
-      const userChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['1월', '2월', '3월', '4월', '5월'],
-          datasets: [{
-            label: '유저 유입 현황',
-            data: [1200, 1300, 1100, 1600, 1450],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: { 
-              beginAtZero: true 
-            },
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    });
-  </script>
+<!-- ✅ Chart.js 스크립트 -->
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const labels = /*[[${#lists.newArrayList(monthlyJoin.keySet())}]]*/ [];
+  const data = /*[[${#lists.newArrayList(monthlyJoin.values())}]]*/ [];
+
+  const ctx = document.getElementById('userChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '월별 유입 유저 수',
+        data: data,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 2,
+        tension: 0.2
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+  /*]]>*/
+</script>
 </body>
 </html>
