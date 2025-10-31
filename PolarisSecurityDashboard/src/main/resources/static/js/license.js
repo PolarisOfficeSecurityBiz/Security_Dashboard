@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("downloadKeyBtn");
   const issueBtn = document.getElementById("issueBtn");
 
-  // 🧩 공통 토스트 메시지
+  // 🧩 공통 토스트 함수
   const showToast = (message, type = "info") => {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
@@ -60,6 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
     issueBtn.addEventListener("click", async () => {
       if (!confirm("라이선스 발급을 요청하시겠습니까?")) return;
 
+      issueBtn.disabled = true;
+      issueBtn.classList.add("loading");
+      issueBtn.innerHTML = `<span class="spinner"></span> 요청 중...`;
+
       try {
         const res = await fetch("/api/license/issue", {
           method: "POST",
@@ -71,11 +75,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (!res.ok) throw new Error("요청 실패");
-        showToast("✅ 라이선스 발급 요청이 완료되었습니다.", "success");
-        setTimeout(() => location.reload(), 1200);
+
+        // ✅ 요청 성공 시: 버튼 상태 변경
+        issueBtn.classList.remove("loading");
+        issueBtn.classList.add("waiting");
+        issueBtn.innerHTML = "승인 대기중";
+        issueBtn.disabled = true;
+
+        showToast("✅ 라이선스 발급 요청이 완료되었습니다. 승인 대기중입니다.", "success");
+
       } catch (err) {
         console.error(err);
         showToast("⚠️ 발급 요청 중 오류가 발생했습니다.", "error");
+
+        // 복귀
+        issueBtn.disabled = false;
+        issueBtn.classList.remove("loading");
+        issueBtn.innerText = "발급요청";
       }
     });
   }
